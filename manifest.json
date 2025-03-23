@@ -1,0 +1,30 @@
+{
+    "name": "LovePulse",
+    "short_name": "LovePulse",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#ff6f61",
+    "theme_color": "#ff6f61",
+    "scope": "/",
+    "icons": [
+        {"src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+        {"src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshots/wide-screenshot.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "LovePulse на десктопе"
+        },
+        {
+            "src": "/screenshots/narrow-screenshot.png",
+            "sizes": "720x1280",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "LovePulse на мобильном устройстве"
+        }
+    ],
+    "keywords": ["dating", "relationships", "love", "tracker", "pwa"]
+}
