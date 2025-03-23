@@ -23,10 +23,79 @@ let appState = {
     activitiesPage: 1
 };
 
+let hasSeenWelcomeGuide = localStorage.getItem('hasSeenWelcomeGuide') === 'true';
+
 // Пагинация
 const ITEMS_PER_PAGE = 5;
 let currentPartnersPage = 1;
 let currentActivitiesPage = 1;
+
+
+// Функции управления гайдом
+function showWelcomeGuide() {
+    console.log('showWelcomeGuide called'); // Для отладки
+    const guide = document.getElementById('welcome-guide');
+    const overlay = document.getElementById('overlay');
+    if (!guide || !overlay) {
+        console.error('Guide or overlay element not found');
+        return;
+    }
+    guide.classList.remove('hidden');
+    overlay.classList.remove('hidden');
+    overlay.style.zIndex = '999';
+    setTimeout(() => {
+        guide.classList.add('show');
+        overlay.classList.add('show');
+    }, 10);
+    updateGuideStep(1);
+    playSound(addSound);
+}
+
+function closeWelcomeGuide() {
+    console.log('closeWelcomeGuide called'); // Для отладки
+    const guide = document.getElementById('welcome-guide');
+    const overlay = document.getElementById('overlay');
+    guide.classList.remove('show');
+    overlay.classList.remove('show');
+    setTimeout(() => {
+        guide.classList.add('hidden');
+        overlay.classList.add('hidden');
+        overlay.style.zIndex = '-1';
+    }, 500);
+    if (!hasSeenWelcomeGuide) {
+        hasSeenWelcomeGuide = true;
+        localStorage.setItem('hasSeenWelcomeGuide', 'true');
+    }
+    playSound(toggleSound);
+}
+
+function nextGuideStep() {
+    console.log('nextGuideStep called'); // Для отладки
+    const currentStep = parseInt(document.querySelector('.guide-step:not(.hidden)').dataset.step);
+    if (currentStep < 3) {
+        updateGuideStep(currentStep + 1);
+        playSound(toggleSound);
+    }
+}
+
+function prevGuideStep() {
+    console.log('prevGuideStep called'); // Для отладки
+    const currentStep = parseInt(document.querySelector('.guide-step:not(.hidden)').dataset.step);
+    if (currentStep > 1) {
+        updateGuideStep(currentStep - 1);
+        playSound(toggleSound);
+    }
+}
+
+function updateGuideStep(step) {
+    console.log(`updateGuideStep called with step ${step}`); // Для отладки
+    const steps = document.querySelectorAll('.guide-step');
+    const dots = document.querySelectorAll('.guide-dot');
+    steps.forEach(stepEl => stepEl.classList.add('hidden'));
+    dots.forEach(dot => dot.classList.remove('active'));
+    document.querySelector(`.guide-step[data-step="${step}"]`).classList.remove('hidden');
+    document.querySelector(`.guide-dot[data-step="${step}"]`).classList.add('active');
+}
 
 // Звуковые элементы
 const addSound = document.getElementById('add-sound');
@@ -931,7 +1000,6 @@ function checkNetworkStatus() {
     }
 }
 
-// Инициализация приложения
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     setDateConstraints();
@@ -953,12 +1021,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('overlay').addEventListener('click', () => {
         const partnerForm = document.getElementById('add-partner-form');
         const logForm = document.getElementById('log-form');
+        const welcomeGuide = document.getElementById('welcome-guide');
         if (partnerForm.classList.contains('show')) hidePartnerForm();
         else if (logForm.classList.contains('show')) hideLogForm();
+        else if (welcomeGuide.classList.contains('show')) closeWelcomeGuide();
     });
 
     document.getElementById('add-partner-form').addEventListener('click', (e) => e.stopPropagation());
     document.getElementById('log-form').addEventListener('click', (e) => e.stopPropagation());
+    document.getElementById('welcome-guide').addEventListener('click', (e) => e.stopPropagation());
+
+    // Показываем гайд при первом запуске
+    if (!hasSeenWelcomeGuide) {
+        showWelcomeGuide();
+    }
 
     // Логика установки PWA
     let deferredPrompt;

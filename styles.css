@@ -1991,6 +1991,204 @@ body.dark .guide-card::before {
     );
 }
 
+
+
+/* Приветственный гайд */
+.welcome-guide {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    padding: 20px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 450px;
+    max-height: 80vh;
+    overflow-y: auto;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+body.light .welcome-guide {
+    background: var(--container-bg-light);
+}
+
+body.dark .welcome-guide {
+    background: var(--container-bg-dark);
+}
+
+.welcome-guide.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    animation: bounceIn 0.6s ease forwards;
+}
+
+.guide-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.guide-step.hidden {
+    display: none;
+}
+
+.guide-step h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5em;
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+}
+
+body.dark .guide-step h3 {
+    color: var(--accent-color-dark);
+}
+
+.guide-step p {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1em;
+    font-weight: 400;
+    color: var(--text-light);
+    margin-bottom: 20px;
+}
+
+body.dark .guide-step p {
+    color: var(--text-dark);
+}
+
+.guide-step ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.guide-step li {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.95em;
+    font-weight: 400;
+    color: var(--text-light);
+    margin-bottom: 10px;
+}
+
+body.dark .guide-step li {
+    color: var(--text-dark);
+}
+
+.guide-step li strong {
+    color: var(--accent-color);
+}
+
+body.dark .guide-step li strong {
+    color: var(--accent-color-dark);
+}
+
+/* Кнопки навигации */
+.guide-next-btn, .guide-prev-btn, .guide-close-btn {
+    background: linear-gradient(135deg, var(--accent-color), #e65b50);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    font-size: 0.95em;
+    cursor: pointer;
+    transition: background 0.4s ease, transform 0.4s ease;
+}
+
+.guide-prev-btn {
+    background: var(--button-bg-light);
+    color: var(--button-text-light);
+}
+
+body.dark .guide-prev-btn {
+    background: var(--button-bg-dark);
+    color: var(--button-text-dark);
+}
+
+.guide-next-btn:hover, .guide-close-btn:hover {
+    background: linear-gradient(135deg, #e65b50, #d35400);
+    transform: scale(1.05);
+}
+
+.guide-prev-btn:hover {
+    background: #e0e0e0;
+    transform: scale(1.05);
+}
+
+body.dark .guide-prev-btn:hover {
+    background: #666;
+}
+
+/* Индикаторы прогресса */
+.guide-progress {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.guide-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--border-light);
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+body.dark .guide-dot {
+    background: var(--border-dark);
+}
+
+.guide-dot.active {
+    background: var(--accent-color);
+}
+
+body.dark .guide-dot.active {
+    background: var(--accent-color-dark);
+}
+
+/* Кнопка открытия гайда */
+.welcome-guide-btn {
+    background: var(--button-bg-light);
+    color: var(--button-text-light);
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background 0.4s ease, transform 0.4s ease;
+}
+
+body.dark .welcome-guide-btn {
+    background: var(--button-bg-dark);
+    color: var(--button-text-dark);
+}
+
+.welcome-guide-btn:hover {
+    background: #e0e0e0;
+    transform: scale(1.05);
+}
+
+body.dark .welcome-guide-btn:hover {
+    background: #666;
+}
+
+/* Анимация появления */
+@keyframes bounceIn {
+    0% { transform: translate(-50%, -50%) scale(0.7); opacity: 0; }
+    60% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
 /* Корректировка для маленьких экранов по высоте */
 @media (max-height: 600px) {
     #add-partner-form, #log-form {

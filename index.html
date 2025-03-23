@@ -43,15 +43,18 @@
             <button class="tab" onclick="showTab('settings-tab')" aria-label="Перейти к настройкам">Настройки</button>
         </div>
 
-        <!-- Вкладка "Главная" -->
-        <div id="dashboard-tab" class="tab-content">
-            <div class="header">
-                <h1>Панель любви ❤️</h1>
-                <div class="header-actions">
-                    <button class="add-partner-btn" onclick="showPartnerForm()" aria-label="Добавить нового партнера">Добавить партнера</button>
-                    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"></button>
-                </div>
-            </div>
+<!-- Вкладка "Главная" -->
+<div id="dashboard-tab" class="tab-content">
+    <div class="header">
+        <h1>Панель любви ❤️</h1>
+        <div class="header-actions">
+            <button class="add-partner-btn" onclick="showPartnerForm()" aria-label="Добавить нового партнера">Добавить партнера</button>
+            <button id="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"></button>
+            <button id="welcome-guide-btn" class="welcome-guide-btn" onclick="showWelcomeGuide()" aria-label="Открыть приветственный гайд">
+                <i class="fas fa-book"></i>
+            </button>
+        </div>
+    </div>
             <p class="subtitle">Отслеживайте свою романтическую судьбу 💫</p>
 
             <!-- Панель прогресса -->
@@ -265,44 +268,48 @@
     </div>
 </div>
 
-        <!-- Вкладка "Настройки" -->
-        <div id="settings-tab" class="tab-content hidden">
-            <div class="header">
-                <h1>Настройки ⚙️</h1>
-            </div>
-            <p class="subtitle">Управляйте настройками приложения</p>
+<!-- Вкладка "Настройки" -->
+<div id="settings-tab" class="tab-content hidden">
+    <div class="header">
+        <h1>Настройки ⚙️</h1>
+    </div>
+    <p class="subtitle">Управляйте настройками приложения</p>
 
-            <!-- Секция настроек -->
-            <div class="section">
-                <h2><i class="fas fa-info-circle"></i> Информация о приложении</h2>
-                <p>Версия: 1.0.0 stable</p>
-                <p>Последнее обновление: 23.03.2025</p>
-            </div>
+    <!-- Секция настроек -->
+    <div class="section">
+        <h2><i class="fas fa-info-circle"></i> Информация о приложении</h2>
+        <p>Версия: 1.0 (Стабильная)</p>
+        <p>Последнее обновление: 23.03.2025</p>
+    </div>
 
-            <div class="section">
-                <h2><i class="fas fa-paint-brush"></i> Параметры оформления</h2>
-                <div class="form-group">
-                    <label for="theme-toggle-settings"><i class="fas fa-moon"></i> John Doe</label>
-                    <button id="theme-toggle-settings" onclick="toggleTheme()" aria-label="Переключить тему"></button>
-                </div>
-            </div>
+    <div class="section">
+        <h2><i class="fas fa-user"></i> Разработчик</h2>
+        <p>Имя: Dante Morrigan</p>
+        <p>Почта: <a href="mailto:kukispuki1209@gmail.com">kukispuki1209@gmail.com</a></p>
+    </div>
 
-            <div class="section">
-                <h2><i class="fab fa-github"></i> Техническая информация</h2>
-                <p>Языки: TypeScript, Tailwind CSS</p>
-                <p>Хранилище: LocalStorage</p>
-                <p>Анимация: Framer Motion</p>
-                <p>Скоро: Shadow DOM</p>
-            </div>
-
-            <div class="section">
-                <h2><i class="fas fa-code"></i> Посмотреть на GitHub</h2>
-                <a href="https://github.com/lovetracker" target="_blank" class="action-btn" aria-label="Перейти на GitHub проекта">
-                    <i class="fab fa-github"></i> GitHub.com/lovetracker
-                </a>
-            </div>
+    <div class="section">
+        <h2><i class="fas fa-paint-brush"></i> Параметры оформления</h2>
+        <div class="form-group">
+            <label for="theme-toggle-settings"><i class="fas fa-moon"></i> Тема</label>
+            <button id="theme-toggle-settings" onclick="toggleTheme()" aria-label="Переключить тему"></button>
         </div>
+    </div>
 
+    <div class="section">
+        <h2><i class="fab fa-github"></i> Техническая информация</h2>
+        <p>Языки: JavaScript, CSS, HTML</p>
+        <p>Хранилище: LocalStorage</p>
+        <p>Стили: Custom CSS с поддержкой тем</p>
+    </div>
+
+    <div class="section">
+        <h2><i class="fas fa-code"></i> Посмотреть на GitHub</h2>
+        <a href="https://github.com/dantemorrigan/lovepulse" target="_blank" class="action-btn" aria-label="Перейти на GitHub проекта">
+            <i class="fab fa-github"></i> github.com/dantemorrigan/lovepulse
+        </a>
+    </div>
+</div>
         <!-- Форма добавления партнера -->
         <div id="add-partner-form" class="hidden">
             <h3><i class="fas fa-heart"></i> <span id="partner-form-title">Добавить нового партнера</span></h3>
@@ -399,5 +406,40 @@
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'924e00e81ee46734',t:'MTc0MjczMzY5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'924e00e81ee46734',t:'MTc0MjczMzY5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+
+<!-- Модальное окно приветственного гайда -->
+<div id="welcome-guide" class="welcome-guide hidden">
+    <div class="guide-step" data-step="1">
+        <h3>Добро пожаловать в LovePulse! ❤️</h3>
+        <p>LovePulse — это ваше личное приложение для отслеживания романтических связей. Добавляйте партнеров, записывайте активности и следите за своей любовной статистикой!</p>
+        <button class="guide-next-btn" onclick="nextGuideStep()">Далее</button>
+    </div>
+    <div class="guide-step hidden" data-step="2">
+        <h3>Что здесь есть? 📖</h3>
+        <ul>
+            <li><strong>Главная:</strong> Обзор вашей статистики и активности.</li>
+            <li><strong>Партнеры:</strong> Управление списком ваших связей.</li>
+            <li><strong>Активности:</strong> Запись встреч и событий.</li>
+            <li><strong>Руководства:</strong> Полезные советы (скоро).</li>
+            <li><strong>Профиль:</strong> Ваша личная информация.</li>
+            <li><strong>Настройки:</strong> Темы и информация.</li>
+        </ul>
+        <button class="guide-prev-btn" onclick="prevGuideStep()">Назад</button>
+        <button class="guide-next-btn" onclick="nextGuideStep()">Далее</button>
+    </div>
+    <div class="guide-step hidden" data-step="3">
+        <h3>Удачи в любви! 🌟</h3>
+        <p>Пусть LovePulse поможет вам найти свою судьбу! Начните прямо сейчас и наслаждайтесь процессом! 😊</p>
+        <button class="guide-close-btn" onclick="closeWelcomeGuide()">Начать</button>
+    </div>
+    <div class="guide-progress">
+        <span class="guide-dot active" data-step="1"></span>
+        <span class="guide-dot" data-step="2"></span>
+        <span class="guide-dot" data-step="3"></span>
+    </div>
+</div>
+
+
+</body>
 </html>
