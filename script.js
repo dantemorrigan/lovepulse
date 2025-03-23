@@ -1048,6 +1048,8 @@ function checkNetworkStatus() {
     }
 }
 
+
+
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
     setDateConstraints();

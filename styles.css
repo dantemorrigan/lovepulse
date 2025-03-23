@@ -1424,19 +1424,21 @@ body.dark .cancel-btn:hover {
 .profile-section {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Уменьшаем отступ между элементами */
+    gap: 12px;
     background: var(--secondary-bg-light);
-    padding: 15px; /* Уменьшаем внутренние отступы */
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    max-width: 550px; /* Увеличиваем ширину */
-    margin: 0 auto;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    max-width: 600px;
+    max-height: 90vh; /* Ограничиваем высоту */
+    overflow-y: auto; /* Включаем прокрутку внутри блока */
+    margin: auto;
     box-sizing: border-box;
 }
 
 body.dark .profile-section {
     background: var(--secondary-bg-dark);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* Фото профиля */
@@ -1444,21 +1446,21 @@ body.dark .profile-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px; /* Уменьшаем отступ */
+    gap: 10px;
     margin-bottom: 10px;
 }
 
 .photo-container {
     position: relative;
-    width: 90px; /* Уменьшаем размер круга */
-    height: 90px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-    overflow: hidden; /* Убеждаемся, что фото не вылезает */
+    overflow: hidden;
     background: var(--button-bg-light);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid var(--border-light); /* Добавляем рамку для красоты */
+    border: 2px solid var(--border-light);
 }
 
 body.dark .photo-container {
@@ -1469,18 +1471,12 @@ body.dark .photo-container {
 #profile-photo-preview {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Масштабируем фото, чтобы оно заполнило круг */
+    object-fit: cover;
     object-position: center;
-    display: block; /* Убираем лишние отступы */
 }
 
 .photo-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    font-size: 1.8em; /* Уменьшаем иконку камеры */
+    font-size: 2em;
     color: var(--button-text-light);
 }
 
@@ -1491,14 +1487,14 @@ body.dark .photo-placeholder {
 .upload-photo-btn {
     background: var(--accent-color);
     color: #fff;
-    padding: 6px 12px; /* Уменьшаем размер кнопки */
+    padding: 8px 14px;
     border-radius: 15px;
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.85em; /* Уменьшаем шрифт */
+    font-size: 1em;
     font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
 }
 
 .upload-photo-btn:hover {
@@ -1514,21 +1510,14 @@ body.dark .upload-photo-btn {
 .profile-form {
     display: flex;
     flex-direction: column;
-    gap: 8px; /* Уменьшаем отступ между полями */
-}
-
-.profile-section .form-group {
-    margin-bottom: 0; /* Убираем лишний отступ снизу */
+    gap: 10px;
 }
 
 .profile-section .form-group label {
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.8em; /* Уменьшаем размер шрифта меток */
-    font-weight: 500;
+    font-size: 1em;
+    font-weight: 600;
     margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
     color: var(--button-text-light);
 }
 
@@ -1539,11 +1528,11 @@ body.dark .profile-section .form-group label {
 .profile-section .form-group input[type="text"],
 .profile-section .form-group input[type="date"],
 .profile-section .form-group textarea {
-    padding: 6px; /* Уменьшаем padding */
+    padding: 8px;
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.8em; /* Уменьшаем размер шрифта полей */
+    font-size: 1em;
     font-weight: 400;
-    border-radius: 5px;
+    border-radius: 6px;
     border: 1px solid var(--border-light);
     background: var(--container-bg-light);
     color: var(--text-light);
@@ -1559,16 +1548,8 @@ body.dark .profile-section .form-group textarea {
     color: var(--text-dark);
 }
 
-.profile-section .form-group input[type="date"] {
-    color: var(--button-text-light);
-}
-
-body.dark .profile-section .form-group input[type="date"] {
-    color: var(--button-text-dark);
-}
-
 .profile-section .form-group textarea {
-    min-height: 50px; /* Уменьшаем высоту textarea */
+    min-height: 60px;
     resize: none;
 }
 
@@ -1582,14 +1563,14 @@ body.dark .profile-section .form-group input[type="date"] {
 .profile-section .save-btn {
     background: linear-gradient(135deg, var(--accent-color), #e65b50);
     color: #fff;
-    padding: 8px 16px; /* Уменьшаем размер кнопки */
+    padding: 10px 20px;
     border-radius: 15px;
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.85em; /* Уменьшаем шрифт */
-    font-weight: 500;
+    font-size: 1em;
+    font-weight: 600;
     border: none;
     cursor: pointer;
-    transition: background 0.4s ease, transform 0.4s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .profile-section .save-btn:hover {
@@ -1600,36 +1581,37 @@ body.dark .profile-section .form-group input[type="date"] {
 /* Медиа-запрос для мобильных устройств */
 @media (max-width: 768px) {
     .profile-section {
-        max-width: 100%;
-        padding: 12px; /* Уменьшаем отступы на мобильных */
+        max-width: 90%;
+        padding: 15px;
     }
 
     .photo-container {
-        width: 80px; /* Ещё уменьшаем круг на мобильных */
+        width: 80px;
         height: 80px;
     }
 
     .photo-placeholder {
-        font-size: 1.5em;
+        font-size: 1.6em;
     }
 
     .profile-section .form-group label {
-        font-size: 0.75em;
+        font-size: 0.9em;
     }
 
     .profile-section .form-group input[type="text"],
     .profile-section .form-group input[type="date"],
     .profile-section .form-group textarea {
-        padding: 5px;
-        font-size: 0.75em;
+        padding: 6px;
+        font-size: 0.9em;
     }
 
     .upload-photo-btn,
     .profile-section .save-btn {
-        padding: 6px 12px;
-        font-size: 0.8em;
+        padding: 8px 16px;
+        font-size: 0.9em;
     }
 }
+
 
 /* Скрытые элементы */
 .hidden {
