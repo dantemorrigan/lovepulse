@@ -2,6 +2,7 @@
 let partners = [];
 let logs = [];
 let currentTheme = 'light';
+let currentLanguage = 'ru'; // Добавляем язык по умолчанию
 let editingLogIndex = null;
 let currentPartnerIndex = null;
 let currentFilter = 'all';
@@ -30,73 +31,6 @@ const ITEMS_PER_PAGE = 5;
 let currentPartnersPage = 1;
 let currentActivitiesPage = 1;
 
-
-// Функции управления гайдом
-function showWelcomeGuide() {
-    console.log('showWelcomeGuide called'); // Для отладки
-    const guide = document.getElementById('welcome-guide');
-    const overlay = document.getElementById('overlay');
-    if (!guide || !overlay) {
-        console.error('Guide or overlay element not found');
-        return;
-    }
-    guide.classList.remove('hidden');
-    overlay.classList.remove('hidden');
-    overlay.style.zIndex = '999';
-    setTimeout(() => {
-        guide.classList.add('show');
-        overlay.classList.add('show');
-    }, 10);
-    updateGuideStep(1);
-    playSound(addSound);
-}
-
-function closeWelcomeGuide() {
-    console.log('closeWelcomeGuide called'); // Для отладки
-    const guide = document.getElementById('welcome-guide');
-    const overlay = document.getElementById('overlay');
-    guide.classList.remove('show');
-    overlay.classList.remove('show');
-    setTimeout(() => {
-        guide.classList.add('hidden');
-        overlay.classList.add('hidden');
-        overlay.style.zIndex = '-1';
-    }, 500);
-    if (!hasSeenWelcomeGuide) {
-        hasSeenWelcomeGuide = true;
-        localStorage.setItem('hasSeenWelcomeGuide', 'true');
-    }
-    playSound(toggleSound);
-}
-
-function nextGuideStep() {
-    console.log('nextGuideStep called'); // Для отладки
-    const currentStep = parseInt(document.querySelector('.guide-step:not(.hidden)').dataset.step);
-    if (currentStep < 3) {
-        updateGuideStep(currentStep + 1);
-        playSound(toggleSound);
-    }
-}
-
-function prevGuideStep() {
-    console.log('prevGuideStep called'); // Для отладки
-    const currentStep = parseInt(document.querySelector('.guide-step:not(.hidden)').dataset.step);
-    if (currentStep > 1) {
-        updateGuideStep(currentStep - 1);
-        playSound(toggleSound);
-    }
-}
-
-function updateGuideStep(step) {
-    console.log(`updateGuideStep called with step ${step}`); // Для отладки
-    const steps = document.querySelectorAll('.guide-step');
-    const dots = document.querySelectorAll('.guide-dot');
-    steps.forEach(stepEl => stepEl.classList.add('hidden'));
-    dots.forEach(dot => dot.classList.remove('active'));
-    document.querySelector(`.guide-step[data-step="${step}"]`).classList.remove('hidden');
-    document.querySelector(`.guide-dot[data-step="${step}"]`).classList.add('active');
-}
-
 // Звуковые элементы
 const addSound = document.getElementById('add-sound');
 const deleteSound = document.getElementById('delete-sound');
@@ -109,6 +43,7 @@ let tempStorage = {
     logs: [],
     userProfile: null,
     theme: 'light',
+    language: 'ru', // Добавляем язык во временное хранилище
     appState: null
 };
 
@@ -123,10 +58,56 @@ function checkLocalStorage() {
         localStorage.removeItem(testKey);
         return true;
     } catch (error) {
-        console.error('LocalStorage недоступен:', error);
-        showToast('LocalStorage недоступен. Данные будут храниться временно в памяти.', 'error');
+        console.error('LocalStorage unavailable:', error);
+        showToast(currentLanguage === 'ru' ? 'LocalStorage недоступен. Данные будут храниться временно.' : 'LocalStorage unavailable. Data will be stored temporarily.', 'error');
         return false;
     }
+}
+
+// Переключение языка
+function toggleLanguage() {
+    currentLanguage = currentLanguage === 'ru' ? 'en' : 'ru';
+    localStorage.setItem('language', currentLanguage);
+    
+    const languageToggleBtn = document.getElementById('language-toggle');
+    languageToggleBtn.textContent = currentLanguage === 'ru' ? 'Switch to English' : 'Сменить на русский';
+    
+    updateLanguage();
+    playSound(toggleSound);
+    showToast(currentLanguage === 'ru' ? 'Язык изменен на русский!' : 'Language changed to English!', 'success');
+}
+
+// Обновление текста на странице в зависимости от языка
+function updateLanguage() {
+    document.querySelectorAll('[data-ru][data-en]').forEach(element => {
+        element.textContent = currentLanguage === 'ru' ? element.dataset.ru : element.dataset.en;
+    });
+
+    document.querySelectorAll('[data-ru-placeholder][data-en-placeholder]').forEach(element => {
+        element.placeholder = currentLanguage === 'ru' ? element.dataset.ruPlaceholder : element.dataset.enPlaceholder;
+    });
+
+    updateDynamicContent();
+}
+
+// Обновление динамического контента
+function updateDynamicContent() {
+    const statLabels = {
+        'potential': { ru: 'Потенциальные 💡', en: 'Potential 💡' },
+        'serious': { ru: 'Серьезно 💕', en: 'Serious 💕' },
+        'active': { ru: 'Активно 🔥', en: 'Active 🔥' },
+        'meetings': { ru: 'Встречи 📍', en: 'Meetings 📍' }
+    };
+    
+    ['potential', 'serious', 'active', 'meetings'].forEach(stat => {
+        const element = document.querySelector(`#${stat}-count`).parentElement.querySelector('p');
+        element.textContent = statLabels[stat][currentLanguage];
+    });
+
+    renderRecentActivity();
+    renderFavorites();
+    renderPartnersListTab();
+    renderActivitiesList();
 }
 
 // Инициализация данных
@@ -137,6 +118,7 @@ function loadData() {
             partners = JSON.parse(localStorage.getItem('partners')) || [];
             logs = JSON.parse(localStorage.getItem('logs')) || [];
             currentTheme = localStorage.getItem('theme') || 'light';
+            currentLanguage = localStorage.getItem('language') || 'ru';
             const savedProfile = JSON.parse(localStorage.getItem('userProfile'));
             if (savedProfile) userProfile = savedProfile;
             const savedState = JSON.parse(localStorage.getItem('appState'));
@@ -147,8 +129,8 @@ function loadData() {
                 currentActivitiesPage = appState.activitiesPage;
             }
         } catch (error) {
-            console.error('Ошибка загрузки данных из LocalStorage:', error);
-            showToast('Не удалось загрузить данные из LocalStorage. Используется временное хранилище.', 'error');
+            console.error('Error loading data from LocalStorage:', error);
+            showToast(currentLanguage === 'ru' ? 'Ошибка загрузки данных из LocalStorage.' : 'Error loading data from LocalStorage.', 'error');
             isLocalStorageAvailable = false;
         }
     }
@@ -158,10 +140,12 @@ function loadData() {
         logs = tempStorage.logs;
         userProfile = tempStorage.userProfile || userProfile;
         currentTheme = tempStorage.theme;
+        currentLanguage = tempStorage.language || 'ru';
         appState = tempStorage.appState || appState;
     }
 
     document.body.className = currentTheme;
+    updateLanguage();
 }
 
 // Сохранение данных
@@ -171,11 +155,12 @@ function saveData() {
             localStorage.setItem('partners', JSON.stringify(partners));
             localStorage.setItem('logs', JSON.stringify(logs));
             localStorage.setItem('theme', currentTheme);
+            localStorage.setItem('language', currentLanguage);
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
             localStorage.setItem('appState', JSON.stringify(appState));
         } catch (error) {
-            console.error('Ошибка сохранения данных в LocalStorage:', error);
-            showToast('Не удалось сохранить данные в LocalStorage. Данные сохранены временно в памяти.', 'error');
+            console.error('Error saving data to LocalStorage:', error);
+            showToast(currentLanguage === 'ru' ? 'Ошибка сохранения данных.' : 'Error saving data.', 'error');
             isLocalStorageAvailable = false;
         }
     }
@@ -184,6 +169,7 @@ function saveData() {
     tempStorage.logs = logs;
     tempStorage.userProfile = userProfile;
     tempStorage.theme = currentTheme;
+    tempStorage.language = currentLanguage;
     tempStorage.appState = appState;
 }
 
@@ -240,8 +226,66 @@ function setDateConstraints() {
 // Воспроизведение звука
 function playSound(sound) {
     if (sound && sound.src && !sound.src.endsWith('undefined')) {
-        sound.play().catch(error => console.error('Ошибка воспроизведения звука:', error));
+        sound.play().catch(error => console.error('Sound playback error:', error));
     }
+}
+
+// Функции управления гайдом
+function showWelcomeGuide() {
+    const guide = document.getElementById('welcome-guide');
+    const overlay = document.getElementById('overlay');
+    if (!guide || !overlay) return;
+    guide.classList.remove('hidden');
+    overlay.classList.remove('hidden');
+    overlay.style.zIndex = '999';
+    setTimeout(() => {
+        guide.classList.add('show');
+        overlay.classList.add('show');
+    }, 10);
+    updateGuideStep(1);
+    playSound(addSound);
+}
+
+function closeWelcomeGuide() {
+    const guide = document.getElementById('welcome-guide');
+    const overlay = document.getElementById('overlay');
+    guide.classList.remove('show');
+    overlay.classList.remove('show');
+    setTimeout(() => {
+        guide.classList.add('hidden');
+        overlay.classList.add('hidden');
+        overlay.style.zIndex = '-1';
+    }, 500);
+    if (!hasSeenWelcomeGuide) {
+        hasSeenWelcomeGuide = true;
+        localStorage.setItem('hasSeenWelcomeGuide', 'true');
+    }
+    playSound(toggleSound);
+}
+
+function nextGuideStep() {
+    const currentStep = parseInt(document.querySelector('.guide-step:not(.hidden)').dataset.step);
+    if (currentStep < 3) {
+        updateGuideStep(currentStep + 1);
+        playSound(toggleSound);
+    }
+}
+
+function prevGuideStep() {
+    const currentStep = parseInt(document.querySelector('.guide-step:not(.hidden)').dataset.step);
+    if (currentStep > 1) {
+        updateGuideStep(currentStep - 1);
+        playSound(toggleSound);
+    }
+}
+
+function updateGuideStep(step) {
+    const steps = document.querySelectorAll('.guide-step');
+    const dots = document.querySelectorAll('.guide-dot');
+    steps.forEach(stepEl => stepEl.classList.add('hidden'));
+    dots.forEach(dot => dot.classList.remove('active'));
+    document.querySelector(`.guide-step[data-step="${step}"]`).classList.remove('hidden');
+    document.querySelector(`.guide-dot[data-step="${step}"]`).classList.add('active');
 }
 
 // Показ вкладки
@@ -274,10 +318,7 @@ function updateStats() {
     document.getElementById('active-count').textContent = activeCount;
     document.getElementById('meetings-count').textContent = meetingsCount;
 
-    document.querySelector('#potential-count').parentElement.querySelector('p').textContent = `Потенциальные 💡`;
-    document.querySelector('#serious-count').parentElement.querySelector('p').textContent = `Серьезно 💕`;
-    document.querySelector('#active-count').parentElement.querySelector('p').textContent = `Активно 🔥`;
-    document.querySelector('#meetings-count').parentElement.querySelector('p').textContent = `Встречи 📍`;
+    updateDynamicContent();
 }
 
 // Создание карточки активности
@@ -300,14 +341,14 @@ function createActivityCard(log, index) {
     const editBtn = document.createElement('button');
     editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
     editBtn.className = 'action-btn edit';
-    editBtn.setAttribute('aria-label', 'Редактировать запись');
+    editBtn.setAttribute('aria-label', currentLanguage === 'ru' ? 'Редактировать запись' : 'Edit entry');
     editBtn.onclick = () => showLogForm('edit', index);
     actions.appendChild(editBtn);
 
     const deleteBtn = document.createElement('button');
     deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
     deleteBtn.className = 'action-btn delete';
-    deleteBtn.setAttribute('aria-label', 'Удалить запись');
+    deleteBtn.setAttribute('aria-label', currentLanguage === 'ru' ? 'Удалить запись' : 'Delete entry');
     deleteBtn.onclick = () => deleteLog(index);
     actions.appendChild(deleteBtn);
 
@@ -322,7 +363,7 @@ function createActivityCard(log, index) {
     if (log.isMeeting && log.partner !== null && partners[log.partner]) {
         const meetingInfo = document.createElement('div');
         meetingInfo.className = 'info-item';
-        meetingInfo.innerHTML = `<i class="fas fa-handshake"></i> Встреча с: ${partners[log.partner].name}`;
+        meetingInfo.innerHTML = `<i class="fas fa-handshake"></i> ${currentLanguage === 'ru' ? 'Встреча с:' : 'Meeting with:'} ${partners[log.partner].name}`;
         li.appendChild(meetingInfo);
     }
 
@@ -361,7 +402,7 @@ function renderRecentActivity() {
 
     if (logs.length === 0) {
         recentActivityText.style.display = 'block';
-        recentActivityText.textContent = 'Пока нет активностей 📝';
+        recentActivityText.textContent = currentLanguage === 'ru' ? 'Пока нет активностей 📝' : 'No activities yet 📝';
     } else {
         recentActivityText.style.display = 'none';
         const sortedLogs = logs.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 2);
@@ -400,7 +441,7 @@ function renderActivitiesList() {
 
     if (paginatedLogs.length === 0) {
         const li = document.createElement('li');
-        li.textContent = 'Активности не найдены 😔';
+        li.textContent = currentLanguage === 'ru' ? 'Активности не найдены 😔' : 'No activities found 😔';
         li.style.textAlign = 'center';
         li.style.padding = '20px';
         activitiesList.appendChild(li);
@@ -412,7 +453,7 @@ function renderActivitiesList() {
         });
     }
 
-    activitiesPageInfo.textContent = `Страница ${currentActivitiesPage} из ${totalPages || 1}`;
+    activitiesPageInfo.textContent = `${currentLanguage === 'ru' ? 'Страница' : 'Page'} ${currentActivitiesPage} ${currentLanguage === 'ru' ? 'из' : 'of'} ${totalPages || 1}`;
     prevPageBtn.disabled = currentActivitiesPage === 1;
     nextPageBtn.disabled = currentActivitiesPage === totalPages || totalPages === 0;
 
@@ -448,7 +489,7 @@ function renderFavorites() {
     const favorites = partners.filter(p => p.favorite);
     if (favorites.length === 0) {
         favoritesText.style.display = 'block';
-        favoritesText.textContent = 'Пока нет избранных 🌟';
+        favoritesText.textContent = currentLanguage === 'ru' ? 'Пока нет избранных 🌟' : 'No favorites yet 🌟';
     } else {
         favoritesText.style.display = 'none';
         favorites.forEach(partner => {
@@ -475,12 +516,13 @@ function createPartnerCard(partner, index) {
 
     const statusBadge = document.createElement('span');
     statusBadge.className = `status-badge ${partner.status}`;
-    statusBadge.textContent = {
-        potential: 'Потенциальные',
-        serious: 'Серьезные',
-        friend: 'Друзья',
-        past: 'В прошлом'
-    }[partner.status];
+    const statusText = {
+        potential: { ru: 'Потенциальные', en: 'Potential' },
+        serious: { ru: 'Серьезные', en: 'Serious' },
+        friend: { ru: 'Друзья', en: 'Friends' },
+        past: { ru: 'В прошлом', en: 'Past' }
+    };
+    statusBadge.textContent = statusText[partner.status][currentLanguage];
     header.appendChild(statusBadge);
 
     card.appendChild(header);
@@ -491,21 +533,21 @@ function createPartnerCard(partner, index) {
     if (partner.met) {
         const met = document.createElement('div');
         met.className = 'info-item';
-        met.innerHTML = `<i class="fas fa-map-marker-alt"></i> Познакомились: ${partner.met}`;
+        met.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${currentLanguage === 'ru' ? 'Познакомились:' : 'Met:'} ${partner.met}`;
         info.appendChild(met);
     }
 
     if (partner.metDate) {
         const metDate = document.createElement('div');
         metDate.className = 'info-item';
-        metDate.innerHTML = `<i class="fas fa-calendar-alt"></i> Дата встречи: ${partner.metDate}`;
+        metDate.innerHTML = `<i class="fas fa-calendar-alt"></i> ${currentLanguage === 'ru' ? 'Дата встречи:' : 'Meeting date:'} ${partner.metDate}`;
         info.appendChild(metDate);
     }
 
     if (partner.notes) {
         const notes = document.createElement('div');
         notes.className = 'info-item';
-        notes.innerHTML = `<i class="fas fa-sticky-note"></i> Заметки: ${partner.notes}`;
+        notes.innerHTML = `<i class="fas fa-sticky-note"></i> ${currentLanguage === 'ru' ? 'Заметки:' : 'Notes:'} ${partner.notes}`;
         info.appendChild(notes);
     }
 
@@ -517,21 +559,23 @@ function createPartnerCard(partner, index) {
     const favoriteBtn = document.createElement('button');
     favoriteBtn.className = 'action-btn';
     favoriteBtn.innerHTML = partner.favorite ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
-    favoriteBtn.setAttribute('aria-label', partner.favorite ? 'Удалить из избранного' : 'Добавить в избранное');
+    favoriteBtn.setAttribute('aria-label', partner.favorite ? 
+        (currentLanguage === 'ru' ? 'Удалить из избранного' : 'Remove from favorites') : 
+        (currentLanguage === 'ru' ? 'Добавить в избранное' : 'Add to favorites'));
     favoriteBtn.onclick = () => toggleFavorite(index);
     actions.appendChild(favoriteBtn);
 
     const editBtn = document.createElement('button');
     editBtn.className = 'action-btn';
     editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
-    editBtn.setAttribute('aria-label', 'Редактировать партнера');
+    editBtn.setAttribute('aria-label', currentLanguage === 'ru' ? 'Редактировать партнера' : 'Edit partner');
     editBtn.onclick = () => showPartnerForm(index);
     actions.appendChild(editBtn);
 
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'action-btn';
     deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-    deleteBtn.setAttribute('aria-label', 'Удалить партнера');
+    deleteBtn.setAttribute('aria-label', currentLanguage === 'ru' ? 'Удалить партнера' : 'Delete partner');
     deleteBtn.onclick = () => deletePartner(index);
     actions.appendChild(deleteBtn);
 
@@ -604,7 +648,7 @@ function renderPartnersListTab() {
         });
     }
 
-    partnersPageInfo.textContent = `Страница ${currentPartnersPage} из ${totalPages || 1}`;
+    partnersPageInfo.textContent = `${currentLanguage === 'ru' ? 'Страница' : 'Page'} ${currentPartnersPage} ${currentLanguage === 'ru' ? 'из' : 'of'} ${totalPages || 1}`;
     prevPageBtn.disabled = currentPartnersPage === 1;
     nextPageBtn.disabled = currentPartnersPage === totalPages || totalPages === 0;
 
@@ -644,8 +688,8 @@ function showPartnerForm(index = null) {
     currentPartnerIndex = index;
 
     if (index !== null) {
-        title.textContent = 'Редактировать партнера';
-        saveBtn.textContent = 'Сохранить изменения';
+        title.textContent = currentLanguage === 'ru' ? 'Редактировать партнера' : 'Edit Partner';
+        saveBtn.textContent = currentLanguage === 'ru' ? 'Сохранить изменения' : 'Save Changes';
         const partner = partners[index];
         document.getElementById('partner-name').value = partner.name;
         document.getElementById('partner-met').value = partner.met || '';
@@ -654,8 +698,8 @@ function showPartnerForm(index = null) {
         document.getElementById('partner-favorite').checked = partner.favorite;
         document.querySelector(`input[name="status"][value="${partner.status}"]`).checked = true;
     } else {
-        title.textContent = 'Добавить нового партнера';
-        saveBtn.textContent = 'Добавить партнера';
+        title.textContent = currentLanguage === 'ru' ? 'Добавить нового партнера' : 'Add New Partner';
+        saveBtn.textContent = currentLanguage === 'ru' ? 'Добавить партнера' : 'Add Partner';
         document.getElementById('partner-name').value = '';
         document.getElementById('partner-met').value = '';
         document.getElementById('partner-met-date').value = '';
@@ -704,7 +748,7 @@ function showLogForm(mode, index = null) {
 
     editingLogIndex = index;
 
-    partnerSelect.innerHTML = '<option value="" disabled selected>Выберите партнера</option>';
+    partnerSelect.innerHTML = `<option value="" disabled selected>${currentLanguage === 'ru' ? 'Выберите партнера' : 'Select a partner'}</option>`;
     partners.forEach((partner, idx) => {
         const option = document.createElement('option');
         option.value = idx;
@@ -717,8 +761,8 @@ function showLogForm(mode, index = null) {
     });
 
     if (mode === 'edit') {
-        title.textContent = 'Редактировать активность';
-        submitBtn.textContent = 'Сохранить изменения';
+        title.textContent = currentLanguage === 'ru' ? 'Редактировать активность' : 'Edit Activity';
+        submitBtn.textContent = currentLanguage === 'ru' ? 'Сохранить изменения' : 'Save Changes';
         const log = logs[index];
         document.getElementById('log-entry').value = log.entry;
         isMeetingCheckbox.checked = log.isMeeting || false;
@@ -726,8 +770,8 @@ function showLogForm(mode, index = null) {
         if (log.isMeeting && log.partner !== undefined) partnerSelect.value = log.partner;
         else partnerSelect.value = '';
     } else {
-        title.textContent = 'Записать новую активность';
-        submitBtn.textContent = 'Сохранить';
+        title.textContent = currentLanguage === 'ru' ? 'Записать новую активность' : 'Record New Activity';
+        submitBtn.textContent = currentLanguage === 'ru' ? 'Сохранить' : 'Save';
         document.getElementById('log-entry').value = '';
         isMeetingCheckbox.checked = false;
         partnerSelectGroup.style.display = 'none';
@@ -782,7 +826,7 @@ function savePartner() {
     const status = document.querySelector('input[name="status"]:checked').value;
 
     if (!name) {
-        showToast('Пожалуйста, введите имя партнера.', 'error');
+        showToast(currentLanguage === 'ru' ? 'Пожалуйста, введите имя партнера.' : 'Please enter partner\'s name.', 'error');
         return;
     }
 
@@ -791,10 +835,10 @@ function savePartner() {
     try {
         if (currentPartnerIndex !== null) {
             partners[currentPartnerIndex] = partner;
-            showToast('Партнер успешно обновлен!', 'success');
+            showToast(currentLanguage === 'ru' ? 'Партнер успешно обновлен!' : 'Partner successfully updated!', 'success');
         } else {
             partners.push(partner);
-            showToast('Партнер успешно добавлен!', 'success');
+            showToast(currentLanguage === 'ru' ? 'Партнер успешно добавлен!' : 'Partner successfully added!', 'success');
         }
 
         updateStats();
@@ -804,8 +848,8 @@ function savePartner() {
         hidePartnerForm();
         playSound(addSound);
     } catch (error) {
-        console.error('Ошибка при сохранении партнера:', error);
-        showToast('Произошла ошибка при сохранении партнера.', 'error');
+        console.error('Error saving partner:', error);
+        showToast(currentLanguage === 'ru' ? 'Ошибка при сохранении партнера.' : 'Error saving partner.', 'error');
     }
 }
 
@@ -817,11 +861,11 @@ function deletePartner(index) {
         renderFavorites();
         renderPartnersListTab();
         saveData();
-        showToast('Партнер удален.', 'success');
+        showToast(currentLanguage === 'ru' ? 'Партнер удален.' : 'Partner deleted.', 'success');
         playSound(deleteSound);
     } catch (error) {
-        console.error('Ошибка при удалении партнера:', error);
-        showToast('Произошла ошибка при удалении партнера.', 'error');
+        console.error('Error deleting partner:', error);
+        showToast(currentLanguage === 'ru' ? 'Ошибка при удалении партнера.' : 'Error deleting partner.', 'error');
     }
 }
 
@@ -832,11 +876,13 @@ function toggleFavorite(index) {
         renderFavorites();
         renderPartnersListTab();
         saveData();
-        showToast(partners[index].favorite ? 'Добавлено в избранное!' : 'Удалено из избранного.', 'success');
+        showToast(partners[index].favorite ? 
+            (currentLanguage === 'ru' ? 'Добавлено в избранное!' : 'Added to favorites!') : 
+            (currentLanguage === 'ru' ? 'Удалено из избранного.' : 'Removed from favorites.'), 'success');
         playSound(toggleSound);
     } catch (error) {
-        console.error('Ошибка при переключении избранного:', error);
-        showToast('Произошла ошибка при изменении статуса избранного.', 'error');
+        console.error('Error toggling favorite:', error);
+        showToast(currentLanguage === 'ru' ? 'Ошибка при изменении статуса избранного.' : 'Error toggling favorite status.', 'error');
     }
 }
 
@@ -847,12 +893,12 @@ function saveLog() {
     const partnerIndex = document.getElementById('partner-select').value;
 
     if (!entry) {
-        showToast('Пожалуйста, введите описание активности.', 'error');
+        showToast(currentLanguage === 'ru' ? 'Пожалуйста, введите описание активности.' : 'Please enter activity description.', 'error');
         return;
     }
 
     if (isMeeting && !partnerIndex) {
-        showToast('Пожалуйста, выберите партнера для встречи.', 'error');
+        showToast(currentLanguage === 'ru' ? 'Пожалуйста, выберите партнера для встречи.' : 'Please select a partner for the meeting.', 'error');
         return;
     }
 
@@ -862,10 +908,10 @@ function saveLog() {
     try {
         if (editingLogIndex !== null) {
             logs[editingLogIndex] = log;
-            showToast('Активность обновлена!', 'success');
+            showToast(currentLanguage === 'ru' ? 'Активность обновлена!' : 'Activity updated!', 'success');
         } else {
             logs.push(log);
-            showToast('Активность добавлена!', 'success');
+            showToast(currentLanguage === 'ru' ? 'Активность добавлена!' : 'Activity added!', 'success');
         }
 
         renderRecentActivity();
@@ -874,8 +920,8 @@ function saveLog() {
         hideLogForm();
         playSound(addSound);
     } catch (error) {
-        console.error('Ошибка при сохранении активности:', error);
-        showToast('Произошла ошибка при сохранении активности.', 'error');
+        console.error('Error saving activity:', error);
+        showToast(currentLanguage === 'ru' ? 'Ошибка при сохранении активности.' : 'Error saving activity.', 'error');
     }
 }
 
@@ -886,11 +932,11 @@ function deleteLog(index) {
         renderRecentActivity();
         renderActivitiesList();
         saveData();
-        showToast('Активность удалена.', 'success');
+        showToast(currentLanguage === 'ru' ? 'Активность удалена.' : 'Activity deleted.', 'success');
         playSound(deleteSound);
     } catch (error) {
-        console.error('Ошибка при удалении активности:', error);
-        showToast('Произошла ошибка при удалении активности.', 'error');
+        console.error('Error deleting activity:', error);
+        showToast(currentLanguage === 'ru' ? 'Ошибка при удалении активности.' : 'Error deleting activity.', 'error');
     }
 }
 
@@ -909,7 +955,9 @@ function initializeThemeButtons() {
             button.removeEventListener('click', toggleTheme);
             button.addEventListener('click', toggleTheme);
             button.innerHTML = currentTheme === 'light' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-            button.setAttribute('aria-label', currentTheme === 'light' ? 'Переключить на темную тему' : 'Переключить на светлую тему');
+            button.setAttribute('aria-label', currentTheme === 'light' ? 
+                (currentLanguage === 'ru' ? 'Переключить на темную тему' : 'Switch to dark theme') : 
+                (currentLanguage === 'ru' ? 'Переключить на светлую тему' : 'Switch to light theme'));
         }
     });
 }
@@ -949,7 +997,7 @@ function handlePhotoUpload(event) {
     const file = event.target.files[0];
     if (file) {
         if (!file.type.startsWith('image/')) {
-            showToast('Пожалуйста, выберите изображение.', 'error');
+            showToast(currentLanguage === 'ru' ? 'Пожалуйста, выберите изображение.' : 'Please select an image.', 'error');
             return;
         }
 
@@ -962,9 +1010,9 @@ function handlePhotoUpload(event) {
             photoPreview.classList.remove('hidden');
             photoPlaceholder.classList.add('hidden');
             saveData();
-            showToast('Фото профиля обновлено!', 'success');
+            showToast(currentLanguage === 'ru' ? 'Фото профиля обновлено!' : 'Profile photo updated!', 'success');
         };
-        reader.onerror = () => showToast('Ошибка при загрузке фото.', 'error');
+        reader.onerror = () => showToast(currentLanguage === 'ru' ? 'Ошибка при загрузке фото.' : 'Error uploading photo.', 'error');
         reader.readAsDataURL(file);
     }
 }
@@ -979,11 +1027,11 @@ function saveProfile() {
 
     try {
         saveData();
-        showToast('Профиль сохранен!', 'success');
+        showToast(currentLanguage === 'ru' ? 'Профиль сохранен!' : 'Profile saved!', 'success');
         playSound(addSound);
     } catch (error) {
-        console.error('Ошибка при сохранении профиля:', error);
-        showToast('Произошла ошибка при сохранении профиля.', 'error');
+        console.error('Error saving profile:', error);
+        showToast(currentLanguage === 'ru' ? 'Ошибка при сохранении профиля.' : 'Error saving profile.', 'error');
     }
 }
 
@@ -991,7 +1039,7 @@ function saveProfile() {
 function checkNetworkStatus() {
     const networkStatus = document.getElementById('network-status');
     if (!navigator.onLine) {
-        networkStatus.textContent = 'Нет подключения к интернету 🌐';
+        networkStatus.textContent = currentLanguage === 'ru' ? 'Нет подключения к интернету 🌐' : 'No internet connection 🌐';
         networkStatus.classList.remove('hidden');
         setTimeout(() => networkStatus.classList.add('show'), 10);
     } else {
@@ -1015,6 +1063,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderActivitiesList();
     checkNetworkStatus();
 
+    const languageToggleBtn = document.getElementById('language-toggle');
+    languageToggleBtn.textContent = currentLanguage === 'ru' ? 'Switch to English' : 'Сменить на русский';
+
     window.addEventListener('online', checkNetworkStatus);
     window.addEventListener('offline', checkNetworkStatus);
 
@@ -1031,19 +1082,17 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('log-form').addEventListener('click', (e) => e.stopPropagation());
     document.getElementById('welcome-guide').addEventListener('click', (e) => e.stopPropagation());
 
-    // Показываем гайд при первом запуске
     if (!hasSeenWelcomeGuide) {
         showWelcomeGuide();
     }
 
-    // Логика установки PWA
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
 
         const installBtn = document.createElement('button');
-        installBtn.textContent = 'Установить LovePulse';
+        installBtn.textContent = currentLanguage === 'ru' ? 'Установить LovePulse' : 'Install LovePulse';
         installBtn.className = 'action-btn install-btn';
         installBtn.style.position = 'fixed';
         installBtn.style.bottom = '20px';
@@ -1054,9 +1103,9 @@ document.addEventListener('DOMContentLoaded', () => {
             deferredPrompt.prompt();
             deferredPrompt.userChoice.then(choiceResult => {
                 if (choiceResult.outcome === 'accepted') {
-                    showToast('Приложение устанавливается! 🎉', 'success');
+                    showToast(currentLanguage === 'ru' ? 'Приложение устанавливается! 🎉' : 'App is being installed! 🎉', 'success');
                 } else {
-                    showToast('Установка отменена 😔', 'success');
+                    showToast(currentLanguage === 'ru' ? 'Установка отменена 😔' : 'Installation cancelled 😔', 'success');
                 }
                 deferredPrompt = null;
                 installBtn.remove();
@@ -1067,6 +1116,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('appinstalled', () => {
-        showToast('LovePulse успешно установлено! ❤️', 'success');
+        showToast(currentLanguage === 'ru' ? 'LovePulse успешно установлено! ❤️' : 'LovePulse successfully installed! ❤️', 'success');
     });
 });

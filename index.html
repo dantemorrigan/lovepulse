@@ -23,7 +23,7 @@
 <body>
     <div class="container">
         <!-- Уведомление о состоянии сети -->
-        <div id="network-status" class="network-status hidden"></div>
+        <div id="network-status" class="network-status hidden" data-ru="Нет подключения к интернету 🌐" data-en="No internet connection 🌐"></div>
 
         <!-- Затемнение фона -->
         <div id="overlay" class="overlay hidden"></div>
@@ -35,52 +35,52 @@
 
         <!-- Вкладки -->
         <div class="tabs">
-            <button class="tab active" onclick="showTab('dashboard-tab')" aria-label="Перейти на главную">Главная</button>
-            <button class="tab" onclick="showTab('partners-tab')" aria-label="Перейти к партнерам">Партнеры</button>
-            <button class="tab" onclick="showTab('activities-tab')" aria-label="Перейти к активностям">Активности</button>
-            <button class="tab" onclick="showTab('guides-tab')" aria-label="Перейти к руководствам">Руководства</button>
-            <button class="tab" onclick="showTab('profile-tab')" aria-label="Перейти к профилю">Профиль</button>
-            <button class="tab" onclick="showTab('settings-tab')" aria-label="Перейти к настройкам">Настройки</button>
+            <button class="tab active" onclick="showTab('dashboard-tab')" aria-label="Перейти на главную" data-ru="Главная" data-en="Dashboard">Главная</button>
+            <button class="tab" onclick="showTab('partners-tab')" aria-label="Перейти к партнерам" data-ru="Партнеры" data-en="Partners">Партнеры</button>
+            <button class="tab" onclick="showTab('activities-tab')" aria-label="Перейти к активностям" data-ru="Активности" data-en="Activities">Активности</button>
+            <button class="tab" onclick="showTab('guides-tab')" aria-label="Перейти к руководствам" data-ru="Руководства" data-en="Guides">Руководства</button>
+            <button class="tab" onclick="showTab('profile-tab')" aria-label="Перейти к профилю" data-ru="Профиль" data-en="Profile">Профиль</button>
+            <button class="tab" onclick="showTab('settings-tab')" aria-label="Перейти к настройкам" data-ru="Настройки" data-en="Settings">Настройки</button>
         </div>
 
-<!-- Вкладка "Главная" -->
-<div id="dashboard-tab" class="tab-content">
-    <div class="header">
-        <h1>Панель любви ❤️</h1>
-        <div class="header-actions">
-            <button class="add-partner-btn" onclick="showPartnerForm()" aria-label="Добавить нового партнера">Добавить партнера</button>
-            <button id="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"></button>
-            <button id="welcome-guide-btn" class="welcome-guide-btn" onclick="showWelcomeGuide()" aria-label="Открыть приветственный гайд">
-                <i class="fas fa-book"></i>
-            </button>
-        </div>
-    </div>
-            <p class="subtitle">Отслеживайте свою романтическую судьбу 💫</p>
+        <!-- Вкладка "Главная" -->
+        <div id="dashboard-tab" class="tab-content">
+            <div class="header">
+                <h1 data-ru="Панель любви ❤️" data-en="Love Dashboard ❤️">Панель любви ❤️</h1>
+                <div class="header-actions">
+                    <button class="add-partner-btn" onclick="showPartnerForm()" aria-label="Добавить нового партнера" data-ru="Добавить партнера" data-en="Add Partner">Добавить партнера</button>
+                    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"></button>
+                    <button id="welcome-guide-btn" class="welcome-guide-btn" onclick="showWelcomeGuide()" aria-label="Открыть приветственный гайд">
+                        <i class="fas fa-book"></i>
+                    </button>
+                </div>
+            </div>
+            <p class="subtitle" data-ru="Отслеживайте свою романтическую судьбу 💫" data-en="Track your romantic journey 💫">Отслеживайте свою романтическую судьбу 💫</p>
 
             <!-- Панель прогресса -->
             <div class="progress-panel">
-                <h2><i class="fas fa-heart"></i> Ваша статистика 📊</h2>
-                <p class="panel-subtitle">Здесь видно, как обстоят дела в вашей личной жизни</p>
+                <h2><i class="fas fa-heart"></i> <span data-ru="Ваша статистика 📊" data-en="Your Stats 📊">Ваша статистика 📊</span></h2>
+                <p class="panel-subtitle" data-ru="Здесь видно, как обстоят дела в вашей личной жизни" data-en="See how your love life is going">Здесь видно, как обстоят дела в вашей личной жизни</p>
                 <div class="stats">
                     <div class="stat">
                         <i class="fas fa-user"></i>
                         <span id="potential-count">0</span>
-                        <p>Потенциальные</p>
+                        <p data-ru="Потенциальные" data-en="Potential">Потенциальные</p>
                     </div>
                     <div class="stat">
                         <i class="fas fa-clock"></i>
                         <span id="meetings-count">0</span>
-                        <p>Встречи</p>
+                        <p data-ru="Встречи" data-en="Meetings">Встречи</p>
                     </div>
                     <div class="stat">
                         <i class="fas fa-heart"></i>
                         <span id="serious-count">0</span>
-                        <p>Серьезно</p>
+                        <p data-ru="Серьезно" data-en="Serious">Серьезно</p>
                     </div>
                     <div class="stat">
                         <i class="fas fa-bolt"></i>
                         <span id="active-count">0</span>
-                        <p>Активно</p>
+                        <p data-ru="Активно" data-en="Active">Активно</p>
                     </div>
                 </div>
             </div>
@@ -88,24 +88,24 @@
             <!-- Секции -->
             <div class="dashboard-sections">
                 <div class="section recent-activity">
-                    <h2>Недавние активности 📅</h2>
-                    <p id="recent-activity-text">Пока нет активностей</p>
+                    <h2 data-ru="Недавние активности 📅" data-en="Recent Activities 📅">Недавние активности 📅</h2>
+                    <p id="recent-activity-text" data-ru="Пока нет активностей" data-en="No activities yet">Пока нет активностей</p>
                     <div class="activity-wrapper">
                         <ul id="recent-activity-list"></ul>
                     </div>
-                    <button class="action-btn" onclick="showLogForm('add')" aria-label="Записать новую активность">Записать новую активность</button>
+                    <button class="action-btn" onclick="showLogForm('add')" aria-label="Записать новую активность" data-ru="Записать новую активность" data-en="Log New Activity">Записать новую активность</button>
                 </div>
 
                 <div class="section favorites">
-                    <h2>Избранное 🌟</h2>
-                    <p id="favorites-text">Пока нет избранных</p>
+                    <h2 data-ru="Избранное 🌟" data-en="Favorites 🌟">Избранное 🌟</h2>
+                    <p id="favorites-text" data-ru="Пока нет избранных" data-en="No favorites yet">Пока нет избранных</p>
                     <ul id="favorites-list"></ul>
-                    <button class="action-btn" onclick="showTab('partners-tab')" aria-label="Посмотреть всех партнеров">Посмотреть все</button>
+                    <button class="action-btn" onclick="showTab('partners-tab')" aria-label="Посмотреть всех партнеров" data-ru="Посмотреть все" data-en="View All">Посмотреть все</button>
                 </div>
 
                 <div class="section manage-partners">
-                    <h2>Список партнеров 👥</h2>
-                    <button class="action-btn" onclick="showTab('partners-tab')" aria-label="Посмотреть всех партнеров">Посмотреть все</button>
+                    <h2 data-ru="Список партнеров 👥" data-en="Partner List 👥">Список партнеров 👥</h2>
+                    <button class="action-btn" onclick="showTab('partners-tab')" aria-label="Посмотреть всех партнеров" data-ru="Посмотреть все" data-en="View All">Посмотреть все</button>
                 </div>
             </div>
         </div>
@@ -113,32 +113,32 @@
         <!-- Вкладка "Партнеры" -->
         <div id="partners-tab" class="tab-content hidden">
             <div class="header">
-                <h1>Партнеры 👥</h1>
+                <h1 data-ru="Партнеры 👥" data-en="Partners 👥">Партнеры 👥</h1>
                 <div class="header-actions">
-                    <button class="add-partner-btn" onclick="showPartnerForm()" aria-label="Добавить нового партнера">Добавить партнера</button>
+                    <button class="add-partner-btn" onclick="showPartnerForm()" aria-label="Добавить нового партнера" data-ru="Добавить партнера" data-en="Add Partner">Добавить партнера</button>
                     <button id="theme-toggle-partners" onclick="toggleTheme()" aria-label="Переключить тему"></button>
                 </div>
             </div>
-            <p class="subtitle">Управляйте вашими романтическими связями 💞</p>
+            <p class="subtitle" data-ru="Управляйте вашими романтическими связями 💞" data-en="Manage your romantic connections 💞">Управляйте вашими романтическими связями 💞</p>
 
             <!-- Фильтры -->
             <div class="partner-filters">
-                <button class="filter-btn active" onclick="filterPartners('all')">Все</button>
-                <button class="filter-btn" onclick="filterPartners('potential')">Потенциальные</button>
-                <button class="filter-btn" onclick="filterPartners('all-serious')">Все серьезно</button>
-                <button class="filter-btn" onclick="filterPartners('friend')">Друзья</button>
-                <button class="filter-btn" onclick="filterPartners('past')">В прошлом</button>
+                <button class="filter-btn active" onclick="filterPartners('all')" data-ru="Все" data-en="All">Все</button>
+                <button class="filter-btn" onclick="filterPartners('potential')" data-ru="Потенциальные" data-en="Potential">Потенциальные</button>
+                <button class="filter-btn" onclick="filterPartners('all-serious')" data-ru="Все серьезно" data-en="All Serious">Все серьезно</button>
+                <button class="filter-btn" onclick="filterPartners('friend')" data-ru="Друзья" data-en="Friends">Друзья</button>
+                <button class="filter-btn" onclick="filterPartners('past')" data-ru="В прошлом" data-en="Past">В прошлом</button>
             </div>
 
             <!-- Поле поиска -->
             <div class="search-bar">
                 <i class="fas fa-search"></i>
-                <input type="text" id="partner-search" placeholder="Поиск партнеров..." oninput="renderPartnersListTab()" aria-label="Поиск по партнерам">
+                <input type="text" id="partner-search" placeholder="Поиск партнеров..." oninput="renderPartnersListTab()" aria-label="Поиск по партнерам" data-ru-placeholder="Поиск партнеров..." data-en-placeholder="Search partners...">
             </div>
 
             <!-- Список партнеров -->
             <div id="partners-list-tab" class="partners-grid">
-                <!-- Карточки партнеров будут добавлены через JavaScript -->
+                <!-- Partner cards will be added via JavaScript -->
             </div>
 
             <!-- Пагинация -->
@@ -150,24 +150,24 @@
 
             <!-- Сообщение, если партнеров нет -->
             <div id="no-partners-message" class="no-partners hidden">
-                <h2>Партнеры не найдены 😔</h2>
-                <p>Добавьте своего первого партнера, чтобы начать</p>
+                <h2 data-ru="Партнеры не найдены 😔" data-en="No partners found 😔">Партнеры не найдены 😔</h2>
+                <p data-ru="Добавьте своего первого партнера, чтобы начать" data-en="Add your first partner to get started">Добавьте своего первого партнера, чтобы начать</p>
             </div>
         </div>
 
         <!-- Вкладка "Активности" -->
         <div id="activities-tab" class="tab-content hidden">
             <div class="header">
-                <h1>Активности 📅</h1>
+                <h1 data-ru="Активности 📅" data-en="Activities 📅">Активности 📅</h1>
                 <div class="header-actions">
-                    <button class="add-partner-btn" onclick="showLogForm('add')" aria-label="Добавить новую активность">Добавить активность</button>
+                    <button class="add-partner-btn" onclick="showLogForm('add')" aria-label="Добавить новую активность" data-ru="Добавить активность" data-en="Add Activity">Добавить активность</button>
                     <button id="theme-toggle-activities" onclick="toggleTheme()" aria-label="Переключить тему"></button>
                 </div>
             </div>
-            <p class="subtitle">Отслеживайте свои романтические активности 💬</p>
+            <p class="subtitle" data-ru="Отслеживайте свои романтические активности 💬" data-en="Track your romantic activities 💬">Отслеживайте свои романтические активности 💬</p>
             <div class="filters">
                 <div class="form-group">
-                    <input type="text" id="activity-search" placeholder="Поиск активностей..." oninput="filterActivities()" aria-label="Поиск по активностям">
+                    <input type="text" id="activity-search" placeholder="Поиск активностей..." oninput="filterActivities()" aria-label="Поиск по активностям" data-ru-placeholder="Поиск активностей..." data-en-placeholder="Search activities...">
                 </div>
                 <div class="form-group">
                     <input type="date" id="activity-date-filter" onchange="filterActivities()" aria-label="Фильтр по дате">
@@ -185,204 +185,202 @@
         <!-- Вкладка "Руководства" -->
         <div id="guides-tab" class="tab-content hidden">
             <div class="header">
-                <h1>Руководства</h1>
+                <h1 data-ru="Руководства" data-en="Guides">Руководства</h1>
                 <div class="header-actions">
                     <button id="theme-toggle-guides" aria-label="Переключить тему">
                         <i class="fas fa-moon"></i>
                     </button>
                 </div>
             </div>
-            <p class="subtitle">Полезные советы от психологов 💡</p>
+            <p class="subtitle" data-ru="Полезные советы от психологов 💡" data-en="Helpful tips from psychologists 💡">Полезные советы от психологов 💡</p>
             <div class="guides-grid">
                 <div class="guide-card">
                     <div class="guide-cover">
-                        <h3>Как полюбить себя?</h3>
-                        <p class="guide-placeholder">Скоро</p>
+                        <h3 data-ru="Как полюбить себя?" data-en="How to love yourself?">Как полюбить себя?</h3>
+                        <p class="guide-placeholder" data-ru="Скоро" data-en="Coming Soon">Скоро</p>
                     </div>
                 </div>
                 <div class="guide-card">
                     <div class="guide-cover">
-                        <h3>Как полюбить людей?</h3>
-                        <p class="guide-placeholder">Скоро</p>
+                        <h3 data-ru="Как полюбить людей?" data-en="How to love people?">Как полюбить людей?</h3>
+                        <p class="guide-placeholder" data-ru="Скоро" data-en="Coming Soon">Скоро</p>
                     </div>
                 </div>
                 <div class="guide-card">
                     <div class="guide-cover">
-                        <h3>Как найти партнера?</h3>
-                        <p class="guide-placeholder">Скоро</p>
+                        <h3 data-ru="Как найти партнера?" data-en="How to find a partner?">Как найти партнера?</h3>
+                        <p class="guide-placeholder" data-ru="Скоро" data-en="Coming Soon">Скоро</p>
                     </div>
                 </div>
             </div>
         </div>
 
-<!-- Вкладка "Профиль" -->
-<div id="profile-tab" class="tab-content hidden">
-    <div class="header">
-        <h1>Профиль 👤</h1>
-        <div class="header-actions">
-            <button id="theme-toggle-profile" onclick="toggleTheme()" aria-label="Переключить тему"></button>
-        </div>
-    </div>
-    <p class="subtitle">Управление личной информацией ✏️</p>
-
-    <!-- Форма профиля -->
-    <div class="profile-section">
-        <div class="profile-photo">
-            <div class="photo-container">
-                <img id="profile-photo-preview" src="" alt="Фото профиля" class="hidden">
-                <div id="photo-placeholder" class="photo-placeholder">
-                    <i class="fas fa-camera"></i>
+        <!-- Вкладка "Профиль" -->
+        <div id="profile-tab" class="tab-content hidden">
+            <div class="header">
+                <h1 data-ru="Профиль 👤" data-en="Profile 👤">Профиль 👤</h1>
+                <div class="header-actions">
+                    <button id="theme-toggle-profile" onclick="toggleTheme()" aria-label="Переключить тему"></button>
                 </div>
             </div>
-            <button class="action-btn upload-photo-btn" id="upload-photo-btn" onclick="document.getElementById('profile-photo').click()" aria-label="Загрузить фото">
-                <i class="fas fa-upload"></i> Загрузить фото
-            </button>
-            <input type="file" id="profile-photo" accept="image/*" onchange="handlePhotoUpload(event)" class="hidden">
+            <p class="subtitle" data-ru="Управление личной информацией ✏️" data-en="Manage personal information ✏️">Управление личной информацией ✏️</p>
+
+            <!-- Форма профиля -->
+            <div class="profile-section">
+                <div class="profile-photo">
+                    <div class="photo-container">
+                        <img id="profile-photo-preview" src="" alt="Profile photo" class="hidden">
+                        <div id="photo-placeholder" class="photo-placeholder">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <button class="action-btn upload-photo-btn" id="upload-photo-btn" onclick="document.getElementById('profile-photo').click()" aria-label="Загрузить фото" data-ru="Загрузить фото" data-en="Upload Photo">
+                        <i class="fas fa-upload"></i> <span data-ru="Загрузить фото" data-en="Upload Photo">Загрузить фото</span>
+                    </button>
+                    <input type="file" id="profile-photo" accept="image/*" onchange="handlePhotoUpload(event)" class="hidden">
+                </div>
+
+                <form class="profile-form">
+                    <div class="form-group">
+                        <label for="profile-name"><i class="fas fa-user"></i> <span data-ru="Имя" data-en="Name">Имя</span></label>
+                        <input type="text" id="profile-name" placeholder="Введите ваше имя" maxlength="100" aria-label="Введите ваше имя (максимум 100 символов)" data-ru-placeholder="Введите ваше имя" data-en-placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-status"><i class="fas fa-heart"></i> <span data-ru="Текущий статус" data-en="Current Status">Текущий статус</span></label>
+                        <input type="text" id="profile-status" placeholder="Как у вас дела?" maxlength="100" aria-label="Введите ваш статус (максимум 100 символов)" data-ru-placeholder="Как у вас дела?" data-en-placeholder="How are you?">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-location"><i class="fas fa-map-marker-alt"></i> <span data-ru="Местоположение" data-en="Location">Местоположение</span></label>
+                        <input type="text" id="profile-location" placeholder="Где вы находитесь?" maxlength="100" aria-label="Введите ваше местоположение (максимум 100 символов)" data-ru-placeholder="Где вы находитесь?" data-en-placeholder="Where are you?">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-birthdate"><i class="fas fa-calendar-alt"></i> <span data-ru="Дата рождения" data-en="Birthdate">Дата рождения</span></label>
+                        <input type="date" id="profile-birthdate" aria-label="Выберите дату рождения">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-bio"><i class="fas fa-sticky-note"></i> <span data-ru="Обо мне" data-en="About Me">Обо мне</span></label>
+                        <textarea id="profile-bio" placeholder="Расскажите немного о себе..." maxlength="100" aria-label="Введите информацию о себе (максимум 100 символов)" data-ru-placeholder="Расскажите немного о себе..." data-en-placeholder="Tell a bit about yourself..."></textarea>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="button" class="save-btn" onclick="saveProfile()" aria-label="Сохранить изменения профиля" data-ru="Сохранить изменения" data-en="Save Changes">Сохранить изменения</button>
+                    </div>
+                </form>
+            </div>
         </div>
 
-        <form class="profile-form">
-            <div class="form-group">
-                <label for="profile-name"><i class="fas fa-user"></i> Имя</label>
-                <input type="text" id="profile-name" placeholder="Введите ваше имя" maxlength="100" aria-label="Введите ваше имя (максимум 100 символов)">
+        <!-- Вкладка "Настройки" -->
+        <div id="settings-tab" class="tab-content hidden">
+            <div class="header">
+                <h1 data-ru="Настройки ⚙️" data-en="Settings ⚙️">Настройки ⚙️</h1>
             </div>
-            <div class="form-group">
-                <label for="profile-status"><i class="fas fa-heart"></i> Текущий статус</label>
-                <input type="text" id="profile-status" placeholder="Как у вас дела?" maxlength="100" aria-label="Введите ваш статус (максимум 100 символов)">
-            </div>
-            <div class="form-group">
-                <label for="profile-location"><i class="fas fa-map-marker-alt"></i> Местоположение</label>
-                <input type="text" id="profile-location" placeholder="Где вы находитесь?" maxlength="100" aria-label="Введите ваше местоположение (максимум 100 символов)">
-            </div>
-            <div class="form-group">
-                <label for="profile-birthdate"><i class="fas fa-calendar-alt"></i> Дата рождения</label>
-                <input type="date" id="profile-birthdate" aria-label="Выберите дату рождения">
-            </div>
-            <div class="form-group">
-                <label for="profile-bio"><i class="fas fa-sticky-note"></i> Обо мне</label>
-                <textarea id="profile-bio" placeholder="Расскажите немного о себе..." maxlength="100" aria-label="Введите информацию о себе (максимум 100 символов)"></textarea>
-            </div>
-            <div class="form-buttons">
-                <button type="button" class="save-btn" onclick="saveProfile()" aria-label="Сохранить изменения профиля">Сохранить изменения</button>
-            </div>
-        </form>
-    </div>
-</div>
+            <p class="subtitle" data-ru="Управляйте настройками приложения" data-en="Manage app settings">Управляйте настройками приложения</p>
 
-<!-- Вкладка "Настройки" -->
-<div id="settings-tab" class="tab-content hidden">
-    <div class="header">
-        <h1>Настройки ⚙️</h1>
-    </div>
-    <p class="subtitle">Управляйте настройками приложения</p>
+            <!-- Секция настроек -->
+            <div class="section">
+                <h2><i class="fas fa-info-circle"></i> <span data-ru="Информация о приложении" data-en="App Information">Информация о приложении</span></h2>
+                <p data-ru="Версия: 1.0 (Стабильная)" data-en="Version: 1.0 (Stable)">Версия: 1.0 (Стабильная)</p>
+                <p data-ru="Последнее обновление: 23.03.2025" data-en="Last Update: 03/23/2025">Последнее обновление: 23.03.2025</p>
+            </div>
 
-    <!-- Секция настроек -->
-    <div class="section">
-        <h2><i class="fas fa-info-circle"></i> Информация о приложении</h2>
-        <p>Версия: 1.0 (Стабильная)</p>
-        <p>Последнее обновление: 23.03.2025</p>
-    </div>
+            <div class="section">
+                <h2><i class="fas fa-user"></i> <span data-ru="Разработчик" data-en="Developer">Разработчик</span></h2>
+                <p data-ru="Имя: Dante Morrigan" data-en="Name: Dante Morrigan">Имя: Dante Morrigan</p>
+                <p data-ru="Почта: " data-en="Email: ">Почта: <a href="/cdn-cgi/l/email-protection#fbd0ced0d2c8cbced0d28a898b82fbdcd6dad2d795d8d4d6"><span class="__cf_email__" data-cfemail="517a647a786261647a782023212851767c70787d3f727e7c">[email&#160;protected]</span></a></p>
+            </div>
 
-    <div class="section">
-        <h2><i class="fas fa-user"></i> Разработчик</h2>
-        <p>Имя: Dante Morrigan</p>
-        <p>Почта: <a href="mailto:kukispuki1209@gmail.com">kukispuki1209@gmail.com</a></p>
-    </div>
+            <div class="section">
+                <h2><i class="fas fa-language"></i> <span data-ru="Язык" data-en="Language">Язык</span></h2>
+                <button id="language-toggle" class="action-btn" onclick="toggleLanguage()" aria-label="Сменить язык" data-ru="Сменить на английский" data-en="Switch to Russian">Сменить на английский</button>
+            </div>
 
-    <div class="section">
-        <h2><i class="fas fa-paint-brush"></i> Параметры оформления</h2>
-        <div class="form-group">
-            <label for="theme-toggle-settings"><i class="fas fa-moon"></i> Тема</label>
-            <button id="theme-toggle-settings" onclick="toggleTheme()" aria-label="Переключить тему"></button>
+            <div class="section">
+                <h2><i class="fab fa-github"></i> <span data-ru="Техническая информация" data-en="Technical Information">Техническая информация</span></h2>
+                <p data-ru="Языки: JavaScript, CSS, HTML" data-en="Languages: JavaScript, CSS, HTML">Языки: JavaScript, CSS, HTML</p>
+                <p data-ru="Хранилище: LocalStorage" data-en="Storage: LocalStorage">Хранилище: LocalStorage</p>
+                <p data-ru="Стили: Custom CSS с поддержкой тем" data-en="Styles: Custom CSS with theme support">Стили: Custom CSS с поддержкой тем</p>
+            </div>
+
+            <div class="section">
+                <h2><i class="fas fa-code"></i> <span data-ru="Посмотреть на GitHub" data-en="View on GitHub">Посмотреть на GitHub</span></h2>
+                <a href="https://github.com/dantemorrigan/lovepulse" target="_blank" class="action-btn" aria-label="Перейти на GitHub проекта" data-ru="github.com/dantemorrigan/lovepulse" data-en="github.com/dantemorrigan/lovepulse">
+                    <i class="fab fa-github"></i> github.com/dantemorrigan/lovepulse
+                </a>
+            </div>
         </div>
-    </div>
 
-    <div class="section">
-        <h2><i class="fab fa-github"></i> Техническая информация</h2>
-        <p>Языки: JavaScript, CSS, HTML</p>
-        <p>Хранилище: LocalStorage</p>
-        <p>Стили: Custom CSS с поддержкой тем</p>
-    </div>
-
-    <div class="section">
-        <h2><i class="fas fa-code"></i> Посмотреть на GitHub</h2>
-        <a href="https://github.com/dantemorrigan/lovepulse" target="_blank" class="action-btn" aria-label="Перейти на GitHub проекта">
-            <i class="fab fa-github"></i> github.com/dantemorrigan/lovepulse
-        </a>
-    </div>
-</div>
         <!-- Форма добавления партнера -->
         <div id="add-partner-form" class="hidden">
-            <h3><i class="fas fa-heart"></i> <span id="partner-form-title">Добавить нового партнера</span></h3>
+            <h3><i class="fas fa-heart"></i> <span id="partner-form-title" data-ru="Добавить нового партнера" data-en="Add a New Partner">Добавить нового партнера</span></h3>
             <div class="form-group">
-                <label for="partner-name"><i class="fas fa-user"></i> Имя</label>
-                <input type="text" id="partner-name" placeholder="Имя партнера" maxlength="50" title="Максимум 50 символов" aria-label="Введите имя партнера (максимум 50 символов)">
+                <label for="partner-name"><i class="fas fa-user"></i> <span data-ru="Имя" data-en="Name">Имя</span></label>
+                <input type="text" id="partner-name" placeholder="Имя партнера" maxlength="50" title="Максимум 50 символов" aria-label="Введите имя партнера (максимум 50 символов)" data-ru-placeholder="Имя партнера" data-en-placeholder="Partner's name">
             </div>
             <div class="form-group">
-                <label for="partner-met"><i class="fas fa-map-marker-alt"></i> Местоположение (необязательно)</label>
-                <input type="text" id="partner-met" placeholder="Город, страна" maxlength="100" title="Максимум 100 символов" aria-label="Введите место знакомства (максимум 100 символов)">
+                <label for="partner-met"><i class="fas fa-map-marker-alt"></i> <span data-ru="Местоположение (необязательно)" data-en="Location (optional)">Местоположение (необязательно)</span></label>
+                <input type="text" id="partner-met" placeholder="Город, страна" maxlength="100" title="Максимум 100 символов" aria-label="Введите место знакомства (максимум 100 символов)" data-ru-placeholder="Город, страна" data-en-placeholder="City, country">
             </div>
             <div class="form-group">
-                <label for="partner-met-date"><i class="fas fa-calendar-alt"></i> Дата встречи (необязательно)</label>
+                <label for="partner-met-date"><i class="fas fa-calendar-alt"></i> <span data-ru="Дата встречи (необязательно)" data-en="Meeting Date (optional)">Дата встречи (необязательно)</span></label>
                 <input type="date" id="partner-met-date" aria-label="Выберите дату встречи">
             </div>
             <div class="form-group">
-                <label>Статус отношений</label>
+                <label data-ru="Статус отношений" data-en="Relationship Status">Статус отношений</label>
                 <div class="status-options">
                     <label class="status-label">
                         <input type="radio" name="status" value="potential" checked aria-label="Потенциальный партнер">
-                        <span class="status-icon"><i class="fas fa-heartbeat"></i></span> Потенциальные
+                        <span class="status-icon"><i class="fas fa-heartbeat"></i></span> <span data-ru="Потенциальные" data-en="Potential">Потенциальные</span>
                     </label>
                     <label class="status-label">
                         <input type="radio" name="status" value="serious" aria-label="Серьезные отношения">
-                        <span class="status-icon"><i class="fas fa-heart"></i></span> Серьезные
+                        <span class="status-icon"><i class="fas fa-heart"></i></span> <span data-ru="Серьезные" data-en="Serious">Серьезные</span>
                     </label>
                     <label class="status-label">
                         <input type="radio" name="status" value="friend" aria-label="Друзья">
-                        <span class="status-icon"><i class="fas fa-handshake"></i></span> Друзья
+                        <span class="status-icon"><i class="fas fa-handshake"></i></span> <span data-ru="Друзья" data-en="Friends">Друзья</span>
                     </label>
                     <label class="status-label">
                         <input type="radio" name="status" value="past" aria-label="В прошлом">
-                        <span class="status-icon"><i class="fas fa-check-circle"></i></span> В прошлом
+                        <span class="status-icon"><i class="fas fa-check-circle"></i></span> <span data-ru="В прошлом" data-en="Past">В прошлом</span>
                     </label>
                 </div>
             </div>
             <div class="form-group">
                 <input type="checkbox" id="partner-favorite" aria-label="Добавить партнера в избранное">
-                <label for="partner-favorite"><i class="fas fa-star"></i> Добавить в избранное</label>
+                <label for="partner-favorite"><i class="fas fa-star"></i> <span data-ru="Добавить в избранное" data-en="Add to Favorites">Добавить в избранное</span></label>
             </div>
             <div class="form-group">
-                <label for="partner-notes"><i class="fas fa-sticky-note"></i> Заметки (необязательно)</label>
-                <textarea id="partner-notes" placeholder="Добавьте побольше деталей или мыслей об этом человеке..." maxlength="300" aria-label="Введите заметки о партнере (максимум 300 символов)"></textarea>
+                <label for="partner-notes"><i class="fas fa-sticky-note"></i> <span data-ru="Заметки (необязательно)" data-en="Notes (optional)">Заметки (необязательно)</span></label>
+                <textarea id="partner-notes" placeholder="Добавьте побольше деталей или мыслей об этом человеке..." maxlength="300" aria-label="Введите заметки о партнере (максимум 300 символов)" data-ru-placeholder="Добавьте побольше деталей или мыслей об этом человеке..." data-en-placeholder="Add more details or thoughts about this person..."></textarea>
             </div>
             <div class="form-buttons">
-                <button class="cancel-btn" onclick="hidePartnerForm()" aria-label="Отменить добавление партнера">Отмена</button>
-                <button class="save-btn" onclick="savePartner()" aria-label="Добавить нового партнера в список">Добавить партнера</button>
+                <button class="cancel-btn" onclick="hidePartnerForm()" aria-label="Отменить добавление партнера" data-ru="Отмена" data-en="Cancel">Отмена</button>
+                <button class="save-btn" onclick="savePartner()" aria-label="Добавить нового партнера в список" data-ru="Добавить партнера" data-en="Add Partner">Добавить партнера</button>
             </div>
         </div>
 
-<!-- Форма добавления активности -->
-<div id="log-form" class="hidden">
-    <h3><i class="fas fa-book"></i> <span id="log-form-title">Записать новую активность</span></h3>
-    <div class="form-group">
-        <label for="log-entry"><i class="fas fa-pen"></i> Активность</label>
-        <input type="text" id="log-entry" placeholder="Что вы сделали сегодня?" maxlength="200" title="Максимум 200 символов" aria-label="Введите, что вы сделали сегодня для поиска любви (максимум 200 символов)">
-    </div>
-    <div class="form-group">
-        <input type="checkbox" id="is-meeting" aria-label="Отметить как встречу">
-        <label for="is-meeting"><i class="fas fa-handshake"></i> Встреча</label>
-    </div>
-    <div class="form-group" id="partner-select-group" style="display: none;">
-        <label for="partner-select"><i class="fas fa-user"></i> С кем была встреча?</label>
-        <select id="partner-select" aria-label="Выберите партнера для встречи">
-            <option value="" disabled selected>Выберите партнера</option>
-            <!-- Опции будут добавлены через JavaScript -->
-        </select>
-    </div>
-    <div class="form-buttons">
-        <button class="cancel-btn" onclick="hideLogForm()" aria-label="Отменить добавление или редактирование активности">Отмена</button>
-        <button class="save-btn" id="log-form-submit" onclick="saveLog()" aria-label="Сохранить активность">Сохранить</button>
-    </div>
-</div>
+        <!-- Форма добавления активности -->
+        <div id="log-form" class="hidden">
+            <h3><i class="fas fa-book"></i> <span id="log-form-title" data-ru="Записать новую активность" data-en="Log a New Activity">Записать новую активность</span></h3>
+            <div class="form-group">
+                <label for="log-entry"><i class="fas fa-pen"></i> <span data-ru="Активность" data-en="Activity">Активность</span></label>
+                <input type="text" id="log-entry" placeholder="Что вы сделали сегодня?" maxlength="200" title="Максимум 200 символов" aria-label="Введите, что вы сделали сегодня для поиска любви (максимум 200 символов)" data-ru-placeholder="Что вы сделали сегодня?" data-en-placeholder="What did you do today?">
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="is-meeting" aria-label="Отметить как встречу">
+                <label for="is-meeting"><i class="fas fa-handshake"></i> <span data-ru="Встреча" data-en="Meeting">Встреча</span></label>
+            </div>
+            <div class="form-group" id="partner-select-group" style="display: none;">
+                <label for="partner-select"><i class="fas fa-user"></i> <span data-ru="С кем была встреча?" data-en="Who was the meeting with?">С кем была встреча?</span></label>
+                <select id="partner-select" aria-label="Выберите партнера для встречи">
+                    <option value="" disabled selected data-ru="Выберите партнера" data-en="Select a partner">Выберите партнера</option>
+                    <!-- Options will be added via JavaScript -->
+                </select>
+            </div>
+            <div class="form-buttons">
+                <button class="cancel-btn" onclick="hideLogForm()" aria-label="Отменить добавление или редактирование активности" data-ru="Отмена" data-en="Cancel">Отмена</button>
+                <button class="save-btn" id="log-form-submit" onclick="saveLog()" aria-label="Сохранить активность" data-ru="Сохранить" data-en="Save">Сохранить</button>
+            </div>
+        </div>
 
         <!-- Звуковые эффекты -->
         <audio id="add-sound" src="sounds/ding.mp3" preload="auto"></audio>
@@ -391,6 +389,7 @@
         <audio id="theme-sound" src="sounds/pop.mp3" preload="auto"></audio>
     </div>
 
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script src="script.js"></script>
     <!-- Регистрация Service Worker -->
     <script>
@@ -406,40 +405,42 @@
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'924e00e81ee46734',t:'MTc0MjczMzY5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'924e00e81ee46734',t:'MTc0MjczMzY5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 
-<!-- Модальное окно приветственного гайда -->
-<div id="welcome-guide" class="welcome-guide hidden">
-    <div class="guide-step" data-step="1">
-        <h3>Добро пожаловать в LovePulse! ❤️</h3>
-        <p>LovePulse — это ваше личное приложение для отслеживания романтических связей. Добавляйте партнеров, записывайте активности и следите за своей любовной статистикой!</p>
-        <button class="guide-next-btn" onclick="nextGuideStep()">Далее</button>
+    <!-- Модальное окно приветственного гайда -->
+    <div id="welcome-guide" class="welcome-guide hidden">
+        <div class="guide-step" data-step="1">
+            <h3 data-ru="Добро пожаловать в LovePulse! ❤️" data-en="Welcome to LovePulse! ❤️">Добро пожаловать в LovePulse! ❤️</h3>
+            <p data-ru="LovePulse — это ваше личное приложение для отслеживания романтических связей. Добавляйте партнеров, записывайте активности и следите за своей любовной статистикой!" data-en="LovePulse is your personal app for tracking romantic connections. Add partners, log activities, and monitor your love stats!">LovePulse — это ваше личное приложение для отслеживания романтических связей. Добавляйте партнеров, записывайте активности и следите за своей любовной статистикой!</p>
+            <button class="guide-next-btn" onclick="nextGuideStep()" data-ru="Далее" data-en="Next">Далее</button>
+        </div>
+        <div class="guide-step hidden" data-step="2">
+            <h3 data-ru="Что здесь есть? 📖" data-en="What's here? 📖">Что здесь есть? 📖</h3>
+            <ul>
+                <li><strong data-ru="Главная:" data-en="Dashboard:">Главная:</strong> <span data-ru="Обзор вашей статистики и активности." data-en="Overview of your stats and activities.">Обзор вашей статистики и активности.</span></li>
+                <li><strong data-ru="Партнеры:" data-en="Partners:">Партнеры:</strong> <span data-ru="Управление списком ваших связей." data-en="Manage your list of connections.">Управление списком ваших связей.</span></li>
+                <li><strong data-ru="Активности:" data-en="Activities:">Активности:</strong> <span data-ru="Запись встреч и событий." data-en="Log meetings and events.">Запись встреч и событий.</span></li>
+                <li><strong data-ru="Руководства:" data-en="Guides:">Руководства:</strong> <span data-ru="Полезные советы (скоро)." data-en="Helpful tips (coming soon).">Полезные советы (скоро).</span></li>
+                <li><strong data-ru="Профиль:" data-en="Profile:">Профиль:</strong> <span data-ru="Ваша личная информация." data-en="Your personal information.">Ваша личная информация.</span></li>
+                <li><strong data-ru="Настройки:" data-en="Settings:">Настройки:</strong> <span data-ru="Темы и информация." data-en="Themes and information.">Темы и информация.</span></li>
+            </ul>
+            <div class="guide-buttons">
+                <button class="guide-prev-btn" onclick="prevGuideStep()" data-ru="Назад" data-en="Back">Назад</button>
+                <button class="guide-next-btn" onclick="nextGuideStep()" data-ru="Далее" data-en="Next">Далее</button>
+            </div>
+        </div>
+        <div class="guide-step hidden" data-step="3">
+            <h3 data-ru="Удачи в любви! 🌟" data-en="Good luck in love! 🌟">Удачи в любви! 🌟</h3>
+            <p data-ru="Пусть LovePulse поможет вам найти свою судьбу! Начните прямо сейчас и наслаждайтесь процессом! 😊" data-en="May LovePulse help you find your destiny! Start now and enjoy the process! 😊">Пусть LovePulse поможет вам найти свою судьбу! Начните прямо сейчас и наслаждайтесь процессом! 😊</p>
+            <button class="guide-close-btn" onclick="closeWelcomeGuide()" data-ru="Начать" data-en="Start">Начать</button>
+        </div>
+        <div class="guide-progress">
+            <span class="guide-dot active" data-step="1"></span>
+            <span class="guide-dot" data-step="2"></span>
+            <span class="guide-dot" data-step="3"></span>
+        </div>
     </div>
-    <div class="guide-step hidden" data-step="2">
-        <h3>Что здесь есть? 📖</h3>
-        <ul>
-            <li><strong>Главная:</strong> Обзор вашей статистики и активности.</li>
-            <li><strong>Партнеры:</strong> Управление списком ваших связей.</li>
-            <li><strong>Активности:</strong> Запись встреч и событий.</li>
-            <li><strong>Руководства:</strong> Полезные советы (скоро).</li>
-            <li><strong>Профиль:</strong> Ваша личная информация.</li>
-            <li><strong>Настройки:</strong> Темы и информация.</li>
-        </ul>
-        <button class="guide-prev-btn" onclick="prevGuideStep()">Назад</button>
-        <button class="guide-next-btn" onclick="nextGuideStep()">Далее</button>
-    </div>
-    <div class="guide-step hidden" data-step="3">
-        <h3>Удачи в любви! 🌟</h3>
-        <p>Пусть LovePulse поможет вам найти свою судьбу! Начните прямо сейчас и наслаждайтесь процессом! 😊</p>
-        <button class="guide-close-btn" onclick="closeWelcomeGuide()">Начать</button>
-    </div>
-    <div class="guide-progress">
-        <span class="guide-dot active" data-step="1"></span>
-        <span class="guide-dot" data-step="2"></span>
-        <span class="guide-dot" data-step="3"></span>
-    </div>
-</div>
 
-
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92507df04e9e6734',t:'MTc0Mjc1OTc4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
