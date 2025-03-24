@@ -38,7 +38,6 @@
             <button class="tab active" onclick="showTab('dashboard-tab')" aria-label="Перейти на главную" data-ru="Главная" data-en="Dashboard">Главная</button>
             <button class="tab" onclick="showTab('partners-tab')" aria-label="Перейти к партнерам" data-ru="Партнеры" data-en="Partners">Партнеры</button>
             <button class="tab" onclick="showTab('activities-tab')" aria-label="Перейти к активностям" data-ru="Активности" data-en="Activities">Активности</button>
-            <button class="tab" onclick="showTab('guides-tab')" aria-label="Перейти к руководствам" data-ru="Руководства" data-en="Guides">Руководства</button>
             <button class="tab" onclick="showTab('profile-tab')" aria-label="Перейти к профилю" data-ru="Профиль" data-en="Profile">Профиль</button>
             <button class="tab" onclick="showTab('settings-tab')" aria-label="Перейти к настройкам" data-ru="Настройки" data-en="Settings">Настройки</button>
         </div>
@@ -111,50 +110,49 @@
         </div>
 
         <!-- Вкладка "Партнеры" -->
-        <div id="partners-tab" class="tab-content hidden">
-            <div class="header">
-                <h1 data-ru="Партнеры 👥" data-en="Partners 👥">Партнеры 👥</h1>
-                <div class="header-actions">
-                    <button class="add-partner-btn" onclick="showPartnerForm()" aria-label="Добавить нового партнера" data-ru="Добавить партнера" data-en="Add Partner">Добавить партнера</button>
-                    <button id="theme-toggle-partners" onclick="toggleTheme()" aria-label="Переключить тему"></button>
-                </div>
-            </div>
-            <p class="subtitle" data-ru="Управляйте вашими романтическими связями 💞" data-en="Manage your romantic connections 💞">Управляйте вашими романтическими связями 💞</p>
-
-            <!-- Фильтры -->
-            <div class="partner-filters">
-                <button class="filter-btn active" onclick="filterPartners('all')" data-ru="Все" data-en="All">Все</button>
-                <button class="filter-btn" onclick="filterPartners('potential')" data-ru="Потенциальные" data-en="Potential">Потенциальные</button>
-                <button class="filter-btn" onclick="filterPartners('all-serious')" data-ru="Все серьезно" data-en="All Serious">Все серьезно</button>
-                <button class="filter-btn" onclick="filterPartners('friend')" data-ru="Друзья" data-en="Friends">Друзья</button>
-                <button class="filter-btn" onclick="filterPartners('past')" data-ru="В прошлом" data-en="Past">В прошлом</button>
-            </div>
-
-            <!-- Поле поиска -->
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text" id="partner-search" placeholder="Поиск партнеров..." oninput="renderPartnersListTab()" aria-label="Поиск по партнерам" data-ru-placeholder="Поиск партнеров..." data-en-placeholder="Search partners...">
-            </div>
-
-            <!-- Список партнеров -->
-            <div id="partners-list-tab" class="partners-grid">
-                <!-- Partner cards will be added via JavaScript -->
-            </div>
-
-            <!-- Пагинация -->
-            <div class="pagination">
-                <button id="prev-partners-page" onclick="changePartnersPage(-1)" disabled aria-label="Предыдущая страница">«</button>
-                <span id="partners-page-info"></span>
-                <button id="next-partners-page" onclick="changePartnersPage(1)" disabled aria-label="Следующая страница">»</button>
-            </div>
-
-            <!-- Сообщение, если партнеров нет -->
-            <div id="no-partners-message" class="no-partners hidden">
-                <h2 data-ru="Партнеры не найдены 😔" data-en="No partners found 😔">Партнеры не найдены 😔</h2>
-                <p data-ru="Добавьте своего первого партнера, чтобы начать" data-en="Add your first partner to get started">Добавьте своего первого партнера, чтобы начать</p>
-            </div>
+<div id="partners-tab" class="tab-content hidden">
+    <div class="header">
+        <h1 data-ru="Партнеры 👥" data-en="Partners 👥">Партнеры 👥</h1>
+        <div class="header-actions">
+            <button class="add-partner-btn" onclick="showPartnerForm()" aria-label="Добавить нового партнера" data-ru="Добавить партнера" data-en="Add Partner">Добавить партнера</button>
+            <button id="theme-toggle-partners" onclick="toggleTheme()" aria-label="Переключить тему"></button>
         </div>
+    </div>
+    <p class="subtitle" data-ru="Управляйте вашими романтическими связями 💞" data-en="Manage your romantic connections 💞">Управляйте вашими романтическими связями 💞</p>
 
+    <!-- Фильтры -->
+    <div class="partner-filters">
+        <button class="filter-btn active" onclick="filterPartners('all')" data-ru="Все" data-en="All">Все</button>
+        <button class="filter-btn" onclick="filterPartners('potential')" data-ru="Потенциальные" data-en="Potential">Потенциальные</button>
+        <button class="filter-btn" onclick="filterPartners('all-serious')" data-ru="Все серьезно" data-en="All Serious">Все серьезно</button>
+        <button class="filter-btn" onclick="filterPartners('friend')" data-ru="Друзья" data-en="Friends">Друзья</button>
+        <button class="filter-btn" onclick="filterPartners('past')" data-ru="В прошлом" data-en="Past">В прошлом</button>
+    </div>
+
+    <!-- Поле поиска -->
+    <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" id="partner-search" placeholder="Поиск партнеров..." oninput="renderPartnersListTab()" aria-label="Поиск по партнерам" data-ru-placeholder="Поиск партнеров..." data-en-placeholder="Search partners...">
+    </div>
+
+    <!-- Список партнеров -->
+    <div id="partners-list-tab" class="partners-grid">
+        <!-- Partner cards will be added via JavaScript -->
+    </div>
+
+    <!-- Сообщение, если партнеров нет -->
+    <div id="no-partners-message" class="no-partners hidden">
+        <h2 data-ru="Партнеры не найдены 😔" data-en="No partners found 😔">Партнеры не найдены 😔</h2>
+        <p data-ru="Добавьте своего первого партнера, чтобы начать" data-en="Add your first partner to get started">Добавьте своего первого партнера, чтобы начать</p>
+    </div>
+
+    <!-- Пагинация -->
+    <div class="pagination">
+        <button id="prev-partners-page" onclick="changePartnersPage(-1)" disabled aria-label="Предыдущая страница">«</button>
+        <span id="partners-page-info"></span>
+        <button id="next-partners-page" onclick="changePartnersPage(1)" disabled aria-label="Следующая страница">»</button>
+    </div>
+</div>
         <!-- Вкладка "Активности" -->
         <div id="activities-tab" class="tab-content hidden">
             <div class="header">
@@ -179,39 +177,6 @@
                 <button id="prev-activities-page" onclick="changeActivitiesPage(-1)" disabled aria-label="Предыдущая страница">«</button>
                 <span id="activities-page-info"></span>
                 <button id="next-activities-page" onclick="changeActivitiesPage(1)" disabled aria-label="Следующая страница">»</button>
-            </div>
-        </div>
-
-        <!-- Вкладка "Руководства" -->
-        <div id="guides-tab" class="tab-content hidden">
-            <div class="header">
-                <h1 data-ru="Руководства" data-en="Guides">Руководства</h1>
-                <div class="header-actions">
-                    <button id="theme-toggle-guides" aria-label="Переключить тему">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                </div>
-            </div>
-            <p class="subtitle" data-ru="Полезные советы от психологов 💡" data-en="Helpful tips from psychologists 💡">Полезные советы от психологов 💡</p>
-            <div class="guides-grid">
-                <div class="guide-card">
-                    <div class="guide-cover">
-                        <h3 data-ru="Как полюбить себя?" data-en="How to love yourself?">Как полюбить себя?</h3>
-                        <p class="guide-placeholder" data-ru="Скоро" data-en="Coming Soon">Скоро</p>
-                    </div>
-                </div>
-                <div class="guide-card">
-                    <div class="guide-cover">
-                        <h3 data-ru="Как полюбить людей?" data-en="How to love people?">Как полюбить людей?</h3>
-                        <p class="guide-placeholder" data-ru="Скоро" data-en="Coming Soon">Скоро</p>
-                    </div>
-                </div>
-                <div class="guide-card">
-                    <div class="guide-cover">
-                        <h3 data-ru="Как найти партнера?" data-en="How to find a partner?">Как найти партнера?</h3>
-                        <p class="guide-placeholder" data-ru="Скоро" data-en="Coming Soon">Скоро</p>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -420,7 +385,6 @@
                 <li><strong data-ru="Главная:" data-en="Dashboard:">Главная:</strong> <span data-ru="Обзор вашей статистики и активности." data-en="Overview of your stats and activities.">Обзор вашей статистики и активности.</span></li>
                 <li><strong data-ru="Партнеры:" data-en="Partners:">Партнеры:</strong> <span data-ru="Управление списком ваших связей." data-en="Manage your list of connections.">Управление списком ваших связей.</span></li>
                 <li><strong data-ru="Активности:" data-en="Activities:">Активности:</strong> <span data-ru="Запись встреч и событий." data-en="Log meetings and events.">Запись встреч и событий.</span></li>
-                <li><strong data-ru="Руководства:" data-en="Guides:">Руководства:</strong> <span data-ru="Полезные советы (скоро)." data-en="Helpful tips (coming soon).">Полезные советы (скоро).</span></li>
                 <li><strong data-ru="Профиль:" data-en="Profile:">Профиль:</strong> <span data-ru="Ваша личная информация." data-en="Your personal information.">Ваша личная информация.</span></li>
                 <li><strong data-ru="Настройки:" data-en="Settings:">Настройки:</strong> <span data-ru="Темы и информация." data-en="Themes and information.">Темы и информация.</span></li>
             </ul>
@@ -440,6 +404,7 @@
             <span class="guide-dot" data-step="3"></span>
         </div>
     </div>
+	
 
     <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92507df04e9e6734',t:'MTc0Mjc1OTc4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>

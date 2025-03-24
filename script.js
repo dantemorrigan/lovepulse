@@ -946,7 +946,6 @@ function initializeThemeButtons() {
         document.getElementById('theme-toggle'),
         document.getElementById('theme-toggle-partners'),
         document.getElementById('theme-toggle-activities'),
-        document.getElementById('theme-toggle-guides'),
         document.getElementById('theme-toggle-profile')
     ];
 
@@ -1047,7 +1046,6 @@ function checkNetworkStatus() {
         setTimeout(() => networkStatus.classList.add('hidden'), 300);
     }
 }
-
 
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -447,13 +447,13 @@ body.dark #settings-tab .form-group label {
 #settings-tab .section a.action-btn {
     display: flex;
     align-items: center;
-    gap: 9.5px;
+    gap: 8px; /* Чуть меньше отступ между иконкой и текстом */
     text-decoration: none;
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.95em;
+    font-size: 0.9em; /* Уменьшаем шрифт */
     font-weight: 500;
-    padding: 9.5px 19px;
-    border-radius: 19px;
+    padding: 8px 16px; /* Уменьшаем внутренние отступы */
+    border-radius: 16px; /* Более компактные углы */
     background: var(--button-bg-light);
     color: var(--button-text-light);
     transition: background 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
@@ -466,8 +466,8 @@ body.dark #settings-tab .section a.action-btn {
 
 #settings-tab .section a.action-btn:hover {
     background: #e0e0e0;
-    transform: scale(1.00);
-    box-shadow: 0 3.8px 7.6px rgba(0,0,0,0.2);
+    transform: scale(1.03); /* Меньший масштаб для аккуратности */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* Легкая тень */
 }
 
 body.dark #settings-tab .section a.action-btn:hover {
@@ -506,7 +506,7 @@ body.dark .activity-wrapper::-webkit-scrollbar-thumb {
 }
 
 #recent-activity-text {
-    text-align: center;
+    text-align: left;
     font-family: 'Montserrat', sans-serif;
     font-size: 0.95em;
     font-style: italic;
@@ -517,6 +517,7 @@ body.dark .activity-wrapper::-webkit-scrollbar-thumb {
 body.dark #recent-activity-text {
     color: var(--button-text-dark);
 }
+
 
 .activity-card {
     background: var(--container-bg-light);
@@ -697,23 +698,27 @@ body.dark .search-bar i {
 
 #partner-search {
     width: 100%;
-    padding: 14.25px 14.25px 14.25px 42.75px;
+    max-width: 400px; /* Ограничиваем ширину для больших экранов */
+    padding: 12px 12px 12px 40px; /* Уменьшаем отступы для компактности */
     border: 1px solid var(--border-light);
-    border-radius: 23.75px;
+    border-radius: 25px; /* Более плавные углы */
     font-family: 'Montserrat', sans-serif;
     font-size: 0.95em;
     font-weight: 400;
-    transition: border-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Легкая тень для глубины */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 body.dark #partner-search {
     border: 1px solid var(--border-dark);
     background: var(--button-bg-dark);
     color: var(--text-dark);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Тень для темной темы */
 }
 
 #partner-search:focus {
     border-color: var(--accent-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Усиленная тень при фокусе */
 }
 
 /* Список партнеров */
@@ -1865,121 +1870,6 @@ body.dark .profile-section .form-group textarea {
         font-size: 0.85em;
     }
 }
-
-/* Сетка руководств */
-.guides-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 19px;
-    max-height: 570px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-}
-
-.guides-grid::-webkit-scrollbar {
-    width: 6px;
-}
-
-.guides-grid::-webkit-scrollbar-thumb {
-    background: var(--accent-color);
-    border-radius: 9.5px;
-}
-
-body.dark .guides-grid::-webkit-scrollbar-thumb {
-    background: var(--accent-color-dark);
-}
-
-/* Карточка руководства */
-.guide-card {
-    background: var(--container-bg-light);
-    border-radius: 14.25px;
-    box-shadow: 0 1.9px 3.8px rgba(0,0,0,0.05);
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
-    position: relative;
-    overflow: hidden;
-    animation: fadeIn 0.5s ease-in forwards;
-}
-
-body.dark .guide-card {
-    background: var(--button-bg-dark);
-}
-
-.guide-card:hover {
-    transform: translateY(-4.75px);
-    box-shadow: 0 5.7px 11.4px rgba(0,0,0,0.1);
-}
-
-.guide-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 15px; /* Отступ между кнопками */
-    margin-top: 20px;
-}
-
-/* Обложка книги */
-.guide-cover {
-    position: relative;
-    padding: 19px;
-    height: 200px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background: linear-gradient(135deg, #ff9a8b, #ff6f61);
-    border-radius: 14.25px;
-    color: #fff;
-    text-align: center;
-    transition: background 0.4s ease;
-}
-
-body.dark .guide-cover {
-    background: linear-gradient(135deg, #ff8780, #e65b50);
-}
-
-.guide-cover h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.5em;
-    font-weight: 600;
-    margin: 0;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-.guide-cover .guide-placeholder {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1.14em;
-    font-weight: 400;
-    font-style: italic;
-    margin: 0;
-    opacity: 0.8;
-}
-
-/* Эффект книжной обложки */
-.guide-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        to right,
-        rgba(255, 255, 255, 0.1) 0%,
-        rgba(255, 255, 255, 0) 10%,
-        rgba(255, 255, 255, 0) 90%,
-        rgba(255, 255, 255, 0.1) 100%
-    );
-    pointer-events: none;
-}
-
-body.dark .guide-card::before {
-    background: linear-gradient(
-        to right,
-        rgba(255, 255, 255, 0.05) 0%,
-        rgba(255, 255, 255, 0) 10%,
-        rgba(255, 255, 255, 0) 90%,
-        rgba(255, 255, 255, 0.05) 100%
-    );
-}
-
 
 
 /* Приветственный гайд */
