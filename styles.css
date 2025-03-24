@@ -443,6 +443,33 @@ body.dark #settings-tab .form-group label {
     color: var(--button-text-dark);
 }
 
+
+/* Стили для кнопки PulseHub */
+.pulsehub-btn {
+    background-color: #fff9db; /* Пастельный жёлтый цвет */
+    color: #ff6f61; /* Цвет текста в тон теме приложения (красный) */
+    font-weight: 600;
+    border-radius: 12px; /* Плавные скругленные углы */
+    padding: 8px 16px; /* Отступы внутри кнопки */
+    margin-bottom: 5px; /* Небольшой отступ снизу */
+    transition: all 0.3s ease; /* Плавный переход для эффектов */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Легкая тень для глубины */
+    animation: pulse 2s infinite ease-in-out; /* Пульсирующая анимация */
+    /* Выравнивание кнопки относительно других вкладок */
+    height: 40px; /* Фиксированная высота для выравнивания */
+    line-height: 24px; /* Центрирование текста по вертикали */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none; /* Убираем подчёркивание */
+}
+
+/* Эффект при наведении */
+.pulsehub-btn:hover {
+    background-color: #fff3b0; /* Чуть более насыщенный пастельный жёлтый при наведении */
+    transform: scale(1.05); /* Легкое увеличение при наведении */
+    text-decoration: none; /* Убедимся, что подчёркивание не появляется при наведении */
+}
 /* Стили для ссылки на GitHub */
 #settings-tab .section a.action-btn {
     display: flex;

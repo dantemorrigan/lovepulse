@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseHub - Скоро будет!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Основные стили */
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            text-align: center;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            color: #ff6f61;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        .icon {
+            font-size: 3em;
+            color: #ff6f61;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #ff6f61, #e65b50);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.4s ease, transform 0.4s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, #e65b50, #d35400);
+            transform: scale(1.05);
+        }
+
+        /* Анимация для иконки */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .icon {
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        /* Медиа-запрос для мобильных устройств */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            p {
+                font-size: 1em;
+            }
+
+            .icon {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">
+            <i class="fas fa-heart"></i>
+        </div>
+        <h1>PulseHub</h1>
+        <p>Скоро здесь появится новый сервис для ваших романтических приключений! <br> Следите за обновлениями! 💖</p>
+        <a href="file:///C:/Users/reich/Desktop/LovePulse/index.html" class="back-btn">Вернуться назад</a>
+    </div>
+</body>
+</html>
