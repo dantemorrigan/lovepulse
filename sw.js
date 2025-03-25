@@ -18,6 +18,7 @@ self.addEventListener('install', event => {
                 console.log('Service Worker: Кэширование файлов...');
                 return cache.addAll(urlsToCache);
             })
+            .then(() => self.skipWaiting()) // Пропускаем ожидание для немедленной активации
             .catch(error => {
                 console.error('Service Worker: Ошибка при кэшировании:', error);
             })
@@ -34,8 +35,20 @@ self.addEventListener('fetch', event => {
                 }
                 console.log('Service Worker: Запрос сети для:', event.request.url);
                 return fetch(event.request)
+                    .then(networkResponse => {
+                        // Кэшируем новые запросы динамически
+                        if (networkResponse && networkResponse.status === 200) {
+                            const responseToCache = networkResponse.clone();
+                            caches.open(CACHE_NAME).then(cache => {
+                                cache.put(event.request, responseToCache);
+                            });
+                        }
+                        return networkResponse;
+                    })
                     .catch(error => {
                         console.error('Service Worker: Ошибка при запросе:', error);
+                        // Fallback на главную страницу в случае ошибки
+                        return caches.match('/index.html');
                     });
             })
     );
@@ -55,5 +68,6 @@ self.addEventListener('activate', event => {
                 })
             );
         })
+        .then(() => self.clients.claim()) // Немедленно активируем новый Service Worker
     );
 });

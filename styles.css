@@ -144,6 +144,9 @@ body.dark .container {
     background: var(--container-bg-dark);
 }
 
+
+
+
 /* Затемнение фона */
 .overlay {
     position: fixed;
@@ -446,30 +449,51 @@ body.dark #settings-tab .form-group label {
 
 /* Стили для кнопки PulseHub */
 .pulsehub-btn {
-    background-color: #fff9db; /* Пастельный жёлтый цвет */
-    color: #ff6f61; /* Цвет текста в тон теме приложения (красный) */
+    background-color: #fff9db; /* Пастельный жёлтый для светлой темы */
+    color: #ff6f61; /* Акцентный красный цвет текста */
     font-weight: 600;
-    border-radius: 12px; /* Плавные скругленные углы */
-    padding: 8px 16px; /* Отступы внутри кнопки */
-    margin-bottom: 5px; /* Небольшой отступ снизу */
-    transition: all 0.3s ease; /* Плавный переход для эффектов */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Легкая тень для глубины */
-    animation: pulse 2s infinite ease-in-out; /* Пульсирующая анимация */
-    /* Выравнивание кнопки относительно других вкладок */
-    height: 40px; /* Фиксированная высота для выравнивания */
-    line-height: 24px; /* Центрирование текста по вертикали */
+    border-radius: 12px;
+    padding: 8px 16px;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    animation: pulse 2s infinite ease-in-out;
+    height: 40px;
+    line-height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-decoration: none; /* Убираем подчёркивание */
+    text-decoration: none;
 }
 
-/* Эффект при наведении */
+/* Эффект при наведении для светлой темы */
 .pulsehub-btn:hover {
-    background-color: #fff3b0; /* Чуть более насыщенный пастельный жёлтый при наведении */
-    transform: scale(1.05); /* Легкое увеличение при наведении */
-    text-decoration: none; /* Убедимся, что подчёркивание не появляется при наведении */
+    background-color: #fff3b0; /* Чуть более насыщенный жёлтый */
+    transform: scale(1.05);
+    text-decoration: none;
 }
+
+/* Стили для темной темы */
+body.dark .pulsehub-btn {
+    background-color: #4a3f1f; /* Тёмный приглушённый жёлтый для темной темы */
+    color: #ff8780; /* Более мягкий красный для контраста в темной теме */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Усиленная тень для темной темы */
+}
+
+/* Эффект при наведении для темной темы */
+body.dark .pulsehub-btn:hover {
+    background-color: #5e5025; /* Чуть светлее при наведении */
+    transform: scale(1.05);
+    text-decoration: none;
+}
+
+/* Анимация пульсации (оставляем без изменений, так как она универсальна) */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
 /* Стили для ссылки на GitHub */
 #settings-tab .section a.action-btn {
     display: flex;

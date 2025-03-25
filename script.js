@@ -1,8 +1,8 @@
-// Загрузка данных и темы из LocalStorage
+// Глобальные переменные
 let partners = [];
 let logs = [];
 let currentTheme = 'light';
-let currentLanguage = 'ru'; // Добавляем язык по умолчанию
+let currentLanguage = 'ru';
 let editingLogIndex = null;
 let currentPartnerIndex = null;
 let currentFilter = 'all';
@@ -24,9 +24,7 @@ let appState = {
     activitiesPage: 1
 };
 
-let hasSeenWelcomeGuide = localStorage.getItem('hasSeenWelcomeGuide') === 'true';
-
-// Пагинация
+let hasSeenWelcomeGuide = false;
 const ITEMS_PER_PAGE = 5;
 let currentPartnersPage = 1;
 let currentActivitiesPage = 1;
@@ -37,47 +35,131 @@ const deleteSound = document.getElementById('delete-sound');
 const toggleSound = document.getElementById('toggle-sound');
 const themeSound = document.getElementById('theme-sound');
 
-// Временное хранилище данных в случае проблем с LocalStorage
+// Временное хранилище
 let tempStorage = {
     partners: [],
     logs: [],
     userProfile: null,
     theme: 'light',
-    language: 'ru', // Добавляем язык во временное хранилище
+    language: 'ru',
     appState: null
 };
 
-// Флаг доступности LocalStorage
-let isLocalStorageAvailable = true;
+// IndexedDB
+const DB_NAME = 'LovePulseDB';
+const DB_VERSION = 1;
+let db;
 
-// Проверка доступности LocalStorage
-function checkLocalStorage() {
+function initIndexedDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            db.createObjectStore('data', { keyPath: 'key' });
+        };
+
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            resolve(db);
+        };
+
+        request.onerror = (event) => {
+            console.error('IndexedDB initialization failed:', event.target.error);
+            reject(event.target.error);
+        };
+    });
+}
+
+async function loadDataFromIndexedDB() {
     try {
-        const testKey = '__test__';
-        localStorage.setItem(testKey, testKey);
-        localStorage.removeItem(testKey);
-        return true;
+        if (!db) await initIndexedDB();
+        const transaction = db.transaction(['data'], 'readonly');
+        const store = transaction.objectStore('data');
+
+        const keys = ['partners', 'logs', 'theme', 'language', 'userProfile', 'appState', 'hasSeenWelcomeGuide'];
+        const promises = keys.map(key => 
+            new Promise((resolve) => {
+                const request = store.get(key);
+                request.onsuccess = () => resolve({ key, value: request.result?.value });
+                request.onerror = () => resolve({ key, value: null });
+            })
+        );
+
+        const results = await Promise.all(promises);
+        const data = Object.fromEntries(results.map(r => [r.key, r.value]));
+
+        partners = data.partners || [];
+        logs = data.logs || [];
+        currentTheme = data.theme || 'light';
+        currentLanguage = data.language || 'ru';
+        userProfile = data.userProfile || userProfile;
+        appState = data.appState || appState;
+        hasSeenWelcomeGuide = data.hasSeenWelcomeGuide || false;
+
+        document.body.className = currentTheme;
+        updateLanguage();
     } catch (error) {
-        console.error('LocalStorage unavailable:', error);
-        showToast(currentLanguage === 'ru' ? 'LocalStorage недоступен. Данные будут храниться временно.' : 'LocalStorage unavailable. Data will be stored temporarily.', 'error');
-        return false;
+        console.error('Error loading from IndexedDB:', error);
+        showToast(currentLanguage === 'ru' ? 'Ошибка загрузки данных.' : 'Error loading data.', 'error');
+        loadFromTempStorage();
     }
+}
+
+async function saveDataToIndexedDB() {
+    try {
+        if (!db) await initIndexedDB();
+        const transaction = db.transaction(['data'], 'readwrite');
+        const store = transaction.objectStore('data');
+
+        const data = [
+            { key: 'partners', value: partners },
+            { key: 'logs', value: logs },
+            { key: 'theme', value: currentTheme },
+            { key: 'language', value: currentLanguage },
+            { key: 'userProfile', value: userProfile },
+            { key: 'appState', value: appState },
+            { key: 'hasSeenWelcomeGuide', value: hasSeenWelcomeGuide }
+        ];
+
+        data.forEach(item => store.put(item));
+        await new Promise((resolve) => transaction.oncomplete = resolve);
+    } catch (error) {
+        console.error('Error saving to IndexedDB:', error);
+        showToast(currentLanguage === 'ru' ? 'Ошибка сохранения данных.' : 'Error saving data.', 'error');
+        saveToTempStorage();
+    }
+}
+
+function loadFromTempStorage() {
+    partners = tempStorage.partners || [];
+    logs = tempStorage.logs || [];
+    currentTheme = tempStorage.theme || 'light';
+    currentLanguage = tempStorage.language || 'ru';
+    userProfile = tempStorage.userProfile || userProfile;
+    appState = tempStorage.appState || appState;
+}
+
+function saveToTempStorage() {
+    tempStorage.partners = partners;
+    tempStorage.logs = logs;
+    tempStorage.theme = currentTheme;
+    tempStorage.language = currentLanguage;
+    tempStorage.userProfile = userProfile;
+    tempStorage.appState = appState;
 }
 
 // Переключение языка
 function toggleLanguage() {
     currentLanguage = currentLanguage === 'ru' ? 'en' : 'ru';
-    localStorage.setItem('language', currentLanguage);
-    
     const languageToggleBtn = document.getElementById('language-toggle');
     languageToggleBtn.textContent = currentLanguage === 'ru' ? 'Switch to English' : 'Сменить на русский';
-    
     updateLanguage();
     playSound(toggleSound);
     showToast(currentLanguage === 'ru' ? 'Язык изменен на русский!' : 'Language changed to English!', 'success');
+    saveDataToIndexedDB();
 }
 
-// Обновление текста на странице в зависимости от языка
 function updateLanguage() {
     document.querySelectorAll('[data-ru][data-en]').forEach(element => {
         element.textContent = currentLanguage === 'ru' ? element.dataset.ru : element.dataset.en;
@@ -90,7 +172,6 @@ function updateLanguage() {
     updateDynamicContent();
 }
 
-// Обновление динамического контента
 function updateDynamicContent() {
     const statLabels = {
         'potential': { ru: 'Потенциальные 💡', en: 'Potential 💡' },
@@ -100,8 +181,8 @@ function updateDynamicContent() {
     };
     
     ['potential', 'serious', 'active', 'meetings'].forEach(stat => {
-        const element = document.querySelector(`#${stat}-count`).parentElement.querySelector('p');
-        element.textContent = statLabels[stat][currentLanguage];
+        const element = document.querySelector(`#${stat}-count`)?.parentElement.querySelector('p');
+        if (element) element.textContent = statLabels[stat][currentLanguage];
     });
 
     renderRecentActivity();
@@ -110,70 +191,7 @@ function updateDynamicContent() {
     renderActivitiesList();
 }
 
-// Инициализация данных
-function loadData() {
-    isLocalStorageAvailable = checkLocalStorage();
-    if (isLocalStorageAvailable) {
-        try {
-            partners = JSON.parse(localStorage.getItem('partners')) || [];
-            logs = JSON.parse(localStorage.getItem('logs')) || [];
-            currentTheme = localStorage.getItem('theme') || 'light';
-            currentLanguage = localStorage.getItem('language') || 'ru';
-            const savedProfile = JSON.parse(localStorage.getItem('userProfile'));
-            if (savedProfile) userProfile = savedProfile;
-            const savedState = JSON.parse(localStorage.getItem('appState'));
-            if (savedState) {
-                appState = savedState;
-                currentFilter = appState.partnerFilter;
-                currentPartnersPage = appState.partnersPage;
-                currentActivitiesPage = appState.activitiesPage;
-            }
-        } catch (error) {
-            console.error('Error loading data from LocalStorage:', error);
-            showToast(currentLanguage === 'ru' ? 'Ошибка загрузки данных из LocalStorage.' : 'Error loading data from LocalStorage.', 'error');
-            isLocalStorageAvailable = false;
-        }
-    }
-
-    if (!isLocalStorageAvailable) {
-        partners = tempStorage.partners;
-        logs = tempStorage.logs;
-        userProfile = tempStorage.userProfile || userProfile;
-        currentTheme = tempStorage.theme;
-        currentLanguage = tempStorage.language || 'ru';
-        appState = tempStorage.appState || appState;
-    }
-
-    document.body.className = currentTheme;
-    updateLanguage();
-}
-
-// Сохранение данных
-function saveData() {
-    if (isLocalStorageAvailable) {
-        try {
-            localStorage.setItem('partners', JSON.stringify(partners));
-            localStorage.setItem('logs', JSON.stringify(logs));
-            localStorage.setItem('theme', currentTheme);
-            localStorage.setItem('language', currentLanguage);
-            localStorage.setItem('userProfile', JSON.stringify(userProfile));
-            localStorage.setItem('appState', JSON.stringify(appState));
-        } catch (error) {
-            console.error('Error saving data to LocalStorage:', error);
-            showToast(currentLanguage === 'ru' ? 'Ошибка сохранения данных.' : 'Error saving data.', 'error');
-            isLocalStorageAvailable = false;
-        }
-    }
-
-    tempStorage.partners = partners;
-    tempStorage.logs = logs;
-    tempStorage.userProfile = userProfile;
-    tempStorage.theme = currentTheme;
-    tempStorage.language = currentLanguage;
-    tempStorage.appState = appState;
-}
-
-// Показ уведомления
+// Уведомления
 function showToast(message, type) {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -206,7 +224,7 @@ function showToast(message, type) {
     }, 5000);
 }
 
-// Установка ограничений для полей даты
+// Ограничения даты
 function setDateConstraints() {
     const dateInputs = [
         document.getElementById('partner-met-date'),
@@ -225,12 +243,12 @@ function setDateConstraints() {
 
 // Воспроизведение звука
 function playSound(sound) {
-    if (sound && sound.src && !sound.src.endsWith('undefined')) {
+    if (sound && sound.play) {
         sound.play().catch(error => console.error('Sound playback error:', error));
     }
 }
 
-// Функции управления гайдом
+// Гайд
 function showWelcomeGuide() {
     const guide = document.getElementById('welcome-guide');
     const overlay = document.getElementById('overlay');
@@ -258,13 +276,13 @@ function closeWelcomeGuide() {
     }, 500);
     if (!hasSeenWelcomeGuide) {
         hasSeenWelcomeGuide = true;
-        localStorage.setItem('hasSeenWelcomeGuide', 'true');
+        saveDataToIndexedDB();
     }
     playSound(toggleSound);
 }
 
 function nextGuideStep() {
-    const currentStep = parseInt(document.querySelector('.guide-step:not(.hidden)').dataset.step);
+    const currentStep = parseInt(document.querySelector('.guide-step:not(.hidden)')?.dataset.step);
     if (currentStep < 3) {
         updateGuideStep(currentStep + 1);
         playSound(toggleSound);
@@ -272,7 +290,7 @@ function nextGuideStep() {
 }
 
 function prevGuideStep() {
-    const currentStep = parseInt(document.querySelector('.guide-step:not(.hidden)').dataset.step);
+    const currentStep = parseInt(document.querySelector('.guide-step:not(.hidden)')?.dataset.step);
     if (currentStep > 1) {
         updateGuideStep(currentStep - 1);
         playSound(toggleSound);
@@ -284,20 +302,20 @@ function updateGuideStep(step) {
     const dots = document.querySelectorAll('.guide-dot');
     steps.forEach(stepEl => stepEl.classList.add('hidden'));
     dots.forEach(dot => dot.classList.remove('active'));
-    document.querySelector(`.guide-step[data-step="${step}"]`).classList.remove('hidden');
-    document.querySelector(`.guide-dot[data-step="${step}"]`).classList.add('active');
+    document.querySelector(`.guide-step[data-step="${step}"]`)?.classList.remove('hidden');
+    document.querySelector(`.guide-dot[data-step="${step}"]`)?.classList.add('active');
 }
 
-// Показ вкладки
+// Вкладки
 function showTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-    document.getElementById(tabId).classList.remove('hidden');
+    document.getElementById(tabId)?.classList.remove('hidden');
 
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
+    document.querySelector(`.tab[onclick="showTab('${tabId}')"]`)?.classList.add('active');
 
     appState.activeTab = tabId;
-    saveData();
+    saveDataToIndexedDB();
 
     if (tabId === 'partners-tab') renderPartnersListTab();
     else if (tabId === 'activities-tab') renderActivitiesList();
@@ -306,7 +324,7 @@ function showTab(tabId) {
     initializeThemeButtons();
 }
 
-// Обновление статистики
+// Статистика
 function updateStats() {
     const potentialCount = partners.filter(p => p.status === 'potential').length;
     const seriousCount = partners.filter(p => p.status === 'serious').length;
@@ -321,7 +339,7 @@ function updateStats() {
     updateDynamicContent();
 }
 
-// Создание карточки активности
+// Карточка активности
 function createActivityCard(log, index) {
     const li = document.createElement('li');
     li.className = 'activity-card';
@@ -394,12 +412,13 @@ function createActivityCard(log, index) {
     return li;
 }
 
-// Рендеринг недавних активностей
+// Недавние активности
 function renderRecentActivity() {
     const recentActivityList = document.getElementById('recent-activity-list');
     const recentActivityText = document.getElementById('recent-activity-text');
-    recentActivityList.innerHTML = '';
+    if (!recentActivityList || !recentActivityText) return;
 
+    recentActivityList.innerHTML = '';
     if (logs.length === 0) {
         recentActivityText.style.display = 'block';
         recentActivityText.textContent = currentLanguage === 'ru' ? 'Пока нет активностей 📝' : 'No activities yet 📝';
@@ -414,78 +433,74 @@ function renderRecentActivity() {
     }
 }
 
-// Рендеринг списка активностей с пагинацией
-function renderActivitiesList() {
+// Список активностей с виртуализацией
+async function renderActivitiesList() {
     const activitiesList = document.getElementById('activities-list');
     const activitiesPageInfo = document.getElementById('activities-page-info');
     const prevPageBtn = document.getElementById('prev-activities-page');
     const nextPageBtn = document.getElementById('next-activities-page');
-    activitiesList.innerHTML = '';
+    if (!activitiesList || !activitiesPageInfo || !prevPageBtn || !nextPageBtn) return;
 
-    let filteredLogs = logs;
-    const searchQuery = document.getElementById('activity-search').value.toLowerCase();
-    const dateFilter = document.getElementById('activity-date-filter').value;
+    try {
+        activitiesList.innerHTML = ''; // Очищаем список
 
-    if (searchQuery) filteredLogs = filteredLogs.filter(log => log.entry.toLowerCase().includes(searchQuery));
-    if (dateFilter) filteredLogs = filteredLogs.filter(log => log.date === dateFilter);
+        let filteredLogs = [...logs];
+        const searchQuery = document.getElementById('activity-search')?.value.toLowerCase() || '';
+        const dateFilter = document.getElementById('activity-date-filter')?.value || '';
 
-    filteredLogs = filteredLogs.slice().reverse();
+        if (searchQuery) filteredLogs = filteredLogs.filter(log => log.entry.toLowerCase().includes(searchQuery));
+        if (dateFilter) filteredLogs = filteredLogs.filter(log => log.date === dateFilter);
+        filteredLogs = filteredLogs.slice().reverse();
 
-    const totalItems = filteredLogs.length;
-    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-    currentActivitiesPage = Math.min(currentActivitiesPage, totalPages || 1);
+        const totalItems = filteredLogs.length;
+        const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+        currentActivitiesPage = Math.min(currentActivitiesPage, totalPages || 1);
 
-    const startIndex = (currentActivitiesPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const paginatedLogs = filteredLogs.slice(startIndex, endIndex);
+        const startIndex = (currentActivitiesPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
 
-    if (paginatedLogs.length === 0) {
-        const li = document.createElement('li');
-        li.textContent = currentLanguage === 'ru' ? 'Активности не найдены 😔' : 'No activities found 😔';
-        li.style.textAlign = 'center';
-        li.style.padding = '20px';
-        activitiesList.appendChild(li);
-    } else {
-        paginatedLogs.forEach((log, index) => {
-            const globalIndex = logs.length - 1 - (startIndex + index);
-            const card = createActivityCard(log, globalIndex);
-            activitiesList.appendChild(card);
-        });
+        if (totalItems === 0) {
+            const li = document.createElement('li');
+            li.textContent = currentLanguage === 'ru' ? 'Активности не найдены 😔' : 'No activities found 😔';
+            li.style.textAlign = 'center';
+            li.style.padding = '20px';
+            activitiesList.appendChild(li);
+        } else {
+            // Убираем фиксированную высоту и абсолютное позиционирование
+            activitiesList.style.height = 'auto';
+            activitiesList.style.position = 'static';
+
+            // Добавляем карточки для текущей страницы
+            for (let i = startIndex; i < endIndex; i++) {
+                const log = filteredLogs[i];
+                const globalIndex = logs.length - 1 - i;
+                const card = createActivityCard(log, globalIndex);
+                activitiesList.appendChild(card);
+            }
+
+            // Убираем обработчик скролла
+            activitiesList.onscroll = null;
+        }
+
+        activitiesPageInfo.textContent = `${currentLanguage === 'ru' ? 'Страница' : 'Page'} ${currentActivitiesPage} ${currentLanguage === 'ru' ? 'из' : 'of'} ${totalPages || 1}`;
+        prevPageBtn.disabled = currentActivitiesPage === 1;
+        nextPageBtn.disabled = currentActivitiesPage === totalPages || totalPages === 0;
+
+        appState.activitiesPage = currentActivitiesPage;
+        await saveDataToIndexedDB();
+    } catch (error) {
+        console.error('Error rendering activities:', error);
+        showToast(currentLanguage === 'ru' ? 'Ошибка отображения активностей.' : 'Error rendering activities.', 'error');
     }
-
-    activitiesPageInfo.textContent = `${currentLanguage === 'ru' ? 'Страница' : 'Page'} ${currentActivitiesPage} ${currentLanguage === 'ru' ? 'из' : 'of'} ${totalPages || 1}`;
-    prevPageBtn.disabled = currentActivitiesPage === 1;
-    nextPageBtn.disabled = currentActivitiesPage === totalPages || totalPages === 0;
-
-    appState.activitiesPage = currentActivitiesPage;
-    saveData();
 }
 
-// Фильтрация активностей
-function filterActivities() {
-    currentActivitiesPage = 1;
-    appState.activitiesPage = 1;
-    appState.activitySearch = document.getElementById('activity-search').value;
-    appState.activityDateFilter = document.getElementById('activity-date-filter').value;
-    saveData();
-    renderActivitiesList();
-}
-
-// Переключение страницы активностей
-function changeActivitiesPage(direction) {
-    currentActivitiesPage += direction;
-    appState.activitiesPage = currentActivitiesPage;
-    saveData();
-    renderActivitiesList();
-    playSound(toggleSound);
-}
-
-// Рендеринг избранных партнеров
+// Избранные партнеры
 function renderFavorites() {
     const favoritesList = document.getElementById('favorites-list');
     const favoritesText = document.getElementById('favorites-text');
-    favoritesList.innerHTML = '';
+    if (!favoritesList || !favoritesText) return;
 
+    favoritesList.innerHTML = '';
     const favorites = partners.filter(p => p.favorite);
     if (favorites.length === 0) {
         favoritesText.style.display = 'block';
@@ -500,7 +515,76 @@ function renderFavorites() {
     }
 }
 
-// Создание карточки партнера
+
+function changePartnersPage(direction) {
+    let filteredPartners = [...partners];
+    const searchQuery = document.getElementById('partner-search')?.value.toLowerCase() || '';
+    if (currentFilter !== 'all') {
+        filteredPartners = filteredPartners.filter(p => currentFilter === 'all-serious' ? p.status === 'serious' : p.status === currentFilter);
+    }
+    if (searchQuery) filteredPartners = filteredPartners.filter(p => p.name.toLowerCase().includes(searchQuery));
+
+    const totalPages = Math.ceil(filteredPartners.length / ITEMS_PER_PAGE);
+    const newPage = currentPartnersPage + direction;
+
+    if (newPage >= 1 && newPage <= totalPages) {
+        currentPartnersPage = newPage;
+        appState.partnersPage = currentPartnersPage;
+        saveDataToIndexedDB();
+        renderPartnersListTab();
+        playSound(toggleSound);
+    } else {
+        console.log(`Cannot change page: newPage=${newPage}, totalPages=${totalPages}`);
+    }
+}
+
+function changeActivitiesPage(direction) {
+    let filteredLogs = [...logs];
+    const searchQuery = document.getElementById('activity-search')?.value.toLowerCase() || '';
+    const dateFilter = document.getElementById('activity-date-filter')?.value || '';
+    if (searchQuery) filteredLogs = filteredLogs.filter(log => log.entry.toLowerCase().includes(searchQuery));
+    if (dateFilter) filteredLogs = filteredLogs.filter(log => log.date === dateFilter);
+    filteredLogs = filteredLogs.slice().reverse();
+
+    const totalPages = Math.ceil(filteredLogs.length / ITEMS_PER_PAGE);
+    const newPage = currentActivitiesPage + direction;
+
+    if (newPage >= 1 && newPage <= totalPages) {
+        currentActivitiesPage = newPage;
+        appState.activitiesPage = currentActivitiesPage;
+        saveDataToIndexedDB();
+        renderActivitiesList();
+        playSound(toggleSound);
+    } else {
+        console.log(`Cannot change page: newPage=${newPage}, totalPages=${totalPages}`);
+    }
+}
+
+
+function changeActivitiesPage(direction) {
+    let filteredLogs = [...logs];
+    const searchQuery = document.getElementById('activity-search')?.value.toLowerCase() || '';
+    const dateFilter = document.getElementById('activity-date-filter')?.value || '';
+    if (searchQuery) filteredLogs = filteredLogs.filter(log => log.entry.toLowerCase().includes(searchQuery));
+    if (dateFilter) filteredLogs = filteredLogs.filter(log => log.date === dateFilter);
+    filteredLogs = filteredLogs.slice().reverse();
+
+    const totalPages = Math.ceil(filteredLogs.length / ITEMS_PER_PAGE);
+    const newPage = currentActivitiesPage + direction;
+
+    if (newPage >= 1 && newPage <= totalPages) {
+        currentActivitiesPage = newPage;
+        appState.activitiesPage = currentActivitiesPage;
+        saveDataToIndexedDB();
+        renderActivitiesList();
+        playSound(toggleSound);
+    } else {
+        console.log(`Cannot change page: newPage=${newPage}, totalPages=${totalPages}`);
+    }
+}
+
+
+// Карточка партнера
 function createPartnerCard(partner, index) {
     const card = document.createElement('div');
     card.className = 'partner-card';
@@ -608,82 +692,77 @@ function createPartnerCard(partner, index) {
     return card;
 }
 
-// Рендеринг списка партнеров с пагинацией
-function renderPartnersListTab() {
+async function renderPartnersListTab() {
     const partnersList = document.getElementById('partners-list-tab');
     const noPartnersMessage = document.getElementById('no-partners-message');
     const partnersPageInfo = document.getElementById('partners-page-info');
     const prevPageBtn = document.getElementById('prev-partners-page');
     const nextPageBtn = document.getElementById('next-partners-page');
-    partnersList.innerHTML = '';
+    if (!partnersList || !noPartnersMessage || !partnersPageInfo || !prevPageBtn || !nextPageBtn) return;
 
-    let filteredPartners = partners;
-    const searchQuery = document.getElementById('partner-search').value.toLowerCase();
+    try {
+        partnersList.innerHTML = ''; // Очищаем список
 
-    if (currentFilter !== 'all') {
-        if (currentFilter === 'all-serious') filteredPartners = partners.filter(p => p.status === 'serious');
-        else filteredPartners = partners.filter(p => p.status === currentFilter);
+        let filteredPartners = [...partners];
+        const searchQuery = document.getElementById('partner-search')?.value.toLowerCase() || '';
+
+        if (currentFilter !== 'all') {
+            filteredPartners = filteredPartners.filter(p => currentFilter === 'all-serious' ? p.status === 'serious' : p.status === currentFilter);
+        }
+        if (searchQuery) filteredPartners = filteredPartners.filter(p => p.name.toLowerCase().includes(searchQuery));
+
+        const totalItems = filteredPartners.length;
+        const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+        currentPartnersPage = Math.min(currentPartnersPage, totalPages || 1);
+
+        const startIndex = (currentPartnersPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+
+        if (totalItems === 0) {
+            noPartnersMessage.classList.remove('hidden');
+            partnersList.classList.add('hidden');
+        } else {
+            noPartnersMessage.classList.add('hidden');
+            partnersList.classList.remove('hidden');
+
+            // Убираем фиксированную высоту и абсолютное позиционирование
+            partnersList.style.height = 'auto';
+            partnersList.style.position = 'static';
+
+            // Добавляем карточки для текущей страницы
+            for (let i = startIndex; i < endIndex; i++) {
+                const partner = filteredPartners[i];
+                const globalIndex = partners.indexOf(partner);
+                if (globalIndex !== -1) {
+                    const card = createPartnerCard(partner, globalIndex);
+                    partnersList.appendChild(card);
+                }
+            }
+
+            // Убираем обработчик скролла, так как он нужен только для вертикальной виртуализации
+            partnersList.onscroll = null;
+        }
+
+        partnersPageInfo.textContent = `${currentLanguage === 'ru' ? 'Страница' : 'Page'} ${currentPartnersPage} ${currentLanguage === 'ru' ? 'из' : 'of'} ${totalPages || 1}`;
+        prevPageBtn.disabled = currentPartnersPage === 1;
+        nextPageBtn.disabled = currentPartnersPage === totalPages || totalPages === 0;
+
+        appState.partnersPage = currentPartnersPage;
+        appState.partnerSearch = searchQuery;
+        await saveDataToIndexedDB();
+    } catch (error) {
+        console.error('Error rendering partners:', error);
+        showToast(currentLanguage === 'ru' ? 'Ошибка отображения партнеров.' : 'Error rendering partners.', 'error');
     }
-
-    if (searchQuery) filteredPartners = filteredPartners.filter(p => p.name.toLowerCase().includes(searchQuery));
-
-    const totalItems = filteredPartners.length;
-    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-    currentPartnersPage = Math.min(currentPartnersPage, totalPages || 1);
-
-    const startIndex = (currentPartnersPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const paginatedPartners = filteredPartners.slice(startIndex, endIndex);
-
-    if (paginatedPartners.length === 0) {
-        noPartnersMessage.classList.remove('hidden');
-        partnersList.classList.add('hidden');
-    } else {
-        noPartnersMessage.classList.add('hidden');
-        partnersList.classList.remove('hidden');
-        paginatedPartners.forEach(partner => {
-            const globalIndex = partners.indexOf(partner);
-            const card = createPartnerCard(partner, globalIndex);
-            partnersList.appendChild(card);
-        });
-    }
-
-    partnersPageInfo.textContent = `${currentLanguage === 'ru' ? 'Страница' : 'Page'} ${currentPartnersPage} ${currentLanguage === 'ru' ? 'из' : 'of'} ${totalPages || 1}`;
-    prevPageBtn.disabled = currentPartnersPage === 1;
-    nextPageBtn.disabled = currentPartnersPage === totalPages || totalPages === 0;
-
-    appState.partnersPage = currentPartnersPage;
-    appState.partnerSearch = searchQuery;
-    saveData();
 }
 
-// Фильтрация партнеров
-function filterPartners(filter) {
-    currentFilter = filter;
-    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelector(`.filter-btn[onclick="filterPartners('${filter}')"]`).classList.add('active');
-    currentPartnersPage = 1;
-    appState.partnerFilter = filter;
-    appState.partnersPage = 1;
-    saveData();
-    renderPartnersListTab();
-}
-
-// Переключение страницы партнеров
-function changePartnersPage(direction) {
-    currentPartnersPage += direction;
-    appState.partnersPage = currentPartnersPage;
-    saveData();
-    renderPartnersListTab();
-    playSound(toggleSound);
-}
-
-// Показ формы добавления/редактирования партнера
+// Форма партнера
 function showPartnerForm(index = null) {
     const form = document.getElementById('add-partner-form');
     const title = document.getElementById('partner-form-title');
-    const saveBtn = form.querySelector('.save-btn');
+    const saveBtn = form?.querySelector('.save-btn');
     const overlay = document.getElementById('overlay');
+    if (!form || !title || !saveBtn || !overlay) return;
 
     currentPartnerIndex = index;
 
@@ -717,16 +796,16 @@ function showPartnerForm(index = null) {
     }, 10);
 }
 
-// Скрытие формы партнера
 function hidePartnerForm() {
     const form = document.getElementById('add-partner-form');
     const overlay = document.getElementById('overlay');
     const logForm = document.getElementById('log-form');
+    if (!form || !overlay) return;
 
     form.classList.remove('show');
     setTimeout(() => form.classList.add('hidden'), 500);
 
-    if (!logForm.classList.contains('show')) {
+    if (!logForm?.classList.contains('show')) {
         overlay.classList.remove('show');
         setTimeout(() => {
             overlay.classList.add('hidden');
@@ -736,7 +815,7 @@ function hidePartnerForm() {
     }
 }
 
-// Показ формы добавления/редактирования активности
+// Форма активности
 function showLogForm(mode, index = null) {
     const form = document.getElementById('log-form');
     const title = document.getElementById('log-form-title');
@@ -745,6 +824,7 @@ function showLogForm(mode, index = null) {
     const isMeetingCheckbox = document.getElementById('is-meeting');
     const partnerSelectGroup = document.getElementById('partner-select-group');
     const partnerSelect = document.getElementById('partner-select');
+    if (!form || !title || !submitBtn || !overlay || !isMeetingCheckbox || !partnerSelectGroup || !partnerSelect) return;
 
     editingLogIndex = index;
 
@@ -787,16 +867,16 @@ function showLogForm(mode, index = null) {
     }, 10);
 }
 
-// Скрытие формы активности
 function hideLogForm() {
     const form = document.getElementById('log-form');
     const overlay = document.getElementById('overlay');
     const partnerForm = document.getElementById('add-partner-form');
+    if (!form || !overlay) return;
 
     form.classList.remove('show');
     setTimeout(() => form.classList.add('hidden'), 500);
 
-    if (!partnerForm.classList.contains('show')) {
+    if (!partnerForm?.classList.contains('show')) {
         overlay.classList.remove('show');
         setTimeout(() => {
             overlay.classList.add('hidden');
@@ -806,45 +886,47 @@ function hideLogForm() {
     }
 }
 
-// Закрытие форм по клавише Esc
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         const partnerForm = document.getElementById('add-partner-form');
         const logForm = document.getElementById('log-form');
-        if (partnerForm.classList.contains('show')) hidePartnerForm();
-        else if (logForm.classList.contains('show')) hideLogForm();
+        if (partnerForm?.classList.contains('show')) hidePartnerForm();
+        else if (logForm?.classList.contains('show')) hideLogForm();
     }
 });
 
 // Сохранение партнера
-function savePartner() {
-    const name = document.getElementById('partner-name').value.trim();
-    const met = document.getElementById('partner-met').value.trim();
-    const metDate = document.getElementById('partner-met-date').value;
-    const notes = document.getElementById('partner-notes').value.trim();
-    const favorite = document.getElementById('partner-favorite').checked;
-    const status = document.querySelector('input[name="status"]:checked').value;
-
+async function savePartner() {
+    const name = document.getElementById('partner-name')?.value.trim();
     if (!name) {
         showToast(currentLanguage === 'ru' ? 'Пожалуйста, введите имя партнера.' : 'Please enter partner\'s name.', 'error');
         return;
     }
 
-    const partner = { name, met: met || null, metDate: metDate || null, notes: notes || null, favorite, status };
+    const partner = {
+        name,
+        met: document.getElementById('partner-met')?.value.trim() || null,
+        metDate: document.getElementById('partner-met-date')?.value || null,
+        notes: document.getElementById('partner-notes')?.value.trim() || null,
+        favorite: document.getElementById('partner-favorite')?.checked || false,
+        status: document.querySelector('input[name="status"]:checked')?.value || 'potential'
+    };
 
     try {
         if (currentPartnerIndex !== null) {
             partners[currentPartnerIndex] = partner;
             showToast(currentLanguage === 'ru' ? 'Партнер успешно обновлен!' : 'Partner successfully updated!', 'success');
         } else {
-            partners.push(partner);
-            showToast(currentLanguage === 'ru' ? 'Партнер успешно добавлен!' : 'Partner successfully added!', 'success');
+            // Проверка на существование партнёра с таким именем
+            if (!partners.some(p => p.name === partner.name)) {
+                partners.push(partner);
+                showToast(currentLanguage === 'ru' ? 'Партнер успешно добавлен!' : 'Partner successfully added!', 'success');
+            }
         }
-
+        await saveDataToIndexedDB();
         updateStats();
         renderFavorites();
         renderPartnersListTab();
-        saveData();
         hidePartnerForm();
         playSound(addSound);
     } catch (error) {
@@ -852,15 +934,14 @@ function savePartner() {
         showToast(currentLanguage === 'ru' ? 'Ошибка при сохранении партнера.' : 'Error saving partner.', 'error');
     }
 }
-
 // Удаление партнера
-function deletePartner(index) {
+async function deletePartner(index) {
     try {
         partners.splice(index, 1);
+        await saveDataToIndexedDB();
         updateStats();
         renderFavorites();
         renderPartnersListTab();
-        saveData();
         showToast(currentLanguage === 'ru' ? 'Партнер удален.' : 'Partner deleted.', 'success');
         playSound(deleteSound);
     } catch (error) {
@@ -869,13 +950,13 @@ function deletePartner(index) {
     }
 }
 
-// Переключение статуса избранного
-function toggleFavorite(index) {
+// Переключение избранного
+async function toggleFavorite(index) {
     try {
         partners[index].favorite = !partners[index].favorite;
+        await saveDataToIndexedDB();
         renderFavorites();
         renderPartnersListTab();
-        saveData();
         showToast(partners[index].favorite ? 
             (currentLanguage === 'ru' ? 'Добавлено в избранное!' : 'Added to favorites!') : 
             (currentLanguage === 'ru' ? 'Удалено из избранного.' : 'Removed from favorites.'), 'success');
@@ -887,10 +968,10 @@ function toggleFavorite(index) {
 }
 
 // Сохранение активности
-function saveLog() {
-    const entry = document.getElementById('log-entry').value.trim();
-    const isMeeting = document.getElementById('is-meeting').checked;
-    const partnerIndex = document.getElementById('partner-select').value;
+async function saveLog() {
+    const entry = document.getElementById('log-entry')?.value.trim();
+    const isMeeting = document.getElementById('is-meeting')?.checked;
+    const partnerIndex = document.getElementById('partner-select')?.value;
 
     if (!entry) {
         showToast(currentLanguage === 'ru' ? 'Пожалуйста, введите описание активности.' : 'Please enter activity description.', 'error');
@@ -910,13 +991,15 @@ function saveLog() {
             logs[editingLogIndex] = log;
             showToast(currentLanguage === 'ru' ? 'Активность обновлена!' : 'Activity updated!', 'success');
         } else {
-            logs.push(log);
-            showToast(currentLanguage === 'ru' ? 'Активность добавлена!' : 'Activity added!', 'success');
+            // Проверка на существование идентичной активности
+            if (!logs.some(l => l.entry === log.entry && l.date === log.date)) {
+                logs.push(log);
+                showToast(currentLanguage === 'ru' ? 'Активность добавлена!' : 'Activity added!', 'success');
+            }
         }
-
+        await saveDataToIndexedDB();
         renderRecentActivity();
         renderActivitiesList();
-        saveData();
         hideLogForm();
         playSound(addSound);
     } catch (error) {
@@ -926,12 +1009,12 @@ function saveLog() {
 }
 
 // Удаление активности
-function deleteLog(index) {
+async function deleteLog(index) {
     try {
         logs.splice(index, 1);
+        await saveDataToIndexedDB();
         renderRecentActivity();
         renderActivitiesList();
-        saveData();
         showToast(currentLanguage === 'ru' ? 'Активность удалена.' : 'Activity deleted.', 'success');
         playSound(deleteSound);
     } catch (error) {
@@ -940,7 +1023,7 @@ function deleteLog(index) {
     }
 }
 
-// Инициализация кнопок переключения темы
+// Тема
 function initializeThemeButtons() {
     const themeButtons = [
         document.getElementById('theme-toggle'),
@@ -961,19 +1044,19 @@ function initializeThemeButtons() {
     });
 }
 
-// Переключение темы
 function toggleTheme() {
     currentTheme = currentTheme === 'light' ? 'dark' : 'light';
     document.body.className = currentTheme;
     initializeThemeButtons();
-    saveData();
+    saveDataToIndexedDB();
     playSound(themeSound);
 }
 
-// Загрузка профиля
+// Профиль
 function loadProfile() {
     const photoPreview = document.getElementById('profile-photo-preview');
     const photoPlaceholder = document.getElementById('photo-placeholder');
+    if (!photoPreview || !photoPlaceholder) return;
 
     if (userProfile.photo) {
         photoPreview.src = userProfile.photo;
@@ -991,7 +1074,6 @@ function loadProfile() {
     document.getElementById('profile-bio').value = userProfile.bio || '';
 }
 
-// Обработка загрузки фото
 function handlePhotoUpload(event) {
     const file = event.target.files[0];
     if (file) {
@@ -1001,14 +1083,14 @@ function handlePhotoUpload(event) {
         }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             userProfile.photo = e.target.result;
             const photoPreview = document.getElementById('profile-photo-preview');
             const photoPlaceholder = document.getElementById('photo-placeholder');
             photoPreview.src = userProfile.photo;
             photoPreview.classList.remove('hidden');
             photoPlaceholder.classList.add('hidden');
-            saveData();
+            await saveDataToIndexedDB();
             showToast(currentLanguage === 'ru' ? 'Фото профиля обновлено!' : 'Profile photo updated!', 'success');
         };
         reader.onerror = () => showToast(currentLanguage === 'ru' ? 'Ошибка при загрузке фото.' : 'Error uploading photo.', 'error');
@@ -1016,16 +1098,15 @@ function handlePhotoUpload(event) {
     }
 }
 
-// Сохранение профиля
-function saveProfile() {
-    userProfile.name = document.getElementById('profile-name').value.trim();
-    userProfile.status = document.getElementById('profile-status').value.trim();
-    userProfile.location = document.getElementById('profile-location').value.trim();
-    userProfile.birthdate = document.getElementById('profile-birthdate').value;
-    userProfile.bio = document.getElementById('profile-bio').value.trim();
+async function saveProfile() {
+    userProfile.name = document.getElementById('profile-name')?.value.trim() || '';
+    userProfile.status = document.getElementById('profile-status')?.value.trim() || '';
+    userProfile.location = document.getElementById('profile-location')?.value.trim() || '';
+    userProfile.birthdate = document.getElementById('profile-birthdate')?.value || '';
+    userProfile.bio = document.getElementById('profile-bio')?.value.trim() || '';
 
     try {
-        saveData();
+        await saveDataToIndexedDB();
         showToast(currentLanguage === 'ru' ? 'Профиль сохранен!' : 'Profile saved!', 'success');
         playSound(addSound);
     } catch (error) {
@@ -1034,22 +1115,25 @@ function saveProfile() {
     }
 }
 
-// Проверка состояния сети
+// Сеть
 function checkNetworkStatus() {
     const networkStatus = document.getElementById('network-status');
+    if (!networkStatus) return;
+
     if (!navigator.onLine) {
-        networkStatus.textContent = currentLanguage === 'ru' ? 'Нет подключения к интернету 🌐' : 'No internet connection 🌐';
+        networkStatus.textContent = currentLanguage === 'ru' ? 'Оффлайн-режим 🌐' : 'Offline mode 🌐';
         networkStatus.classList.remove('hidden');
         setTimeout(() => networkStatus.classList.add('show'), 10);
     } else {
+        networkStatus.textContent = currentLanguage === 'ru' ? 'Онлайн 🌐' : 'Online 🌐';
         networkStatus.classList.remove('show');
         setTimeout(() => networkStatus.classList.add('hidden'), 300);
     }
 }
 
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadData();
+// Инициализация
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadDataFromIndexedDB();
     setDateConstraints();
     updateStats();
     renderRecentActivity();
@@ -1064,58 +1148,55 @@ document.addEventListener('DOMContentLoaded', () => {
     checkNetworkStatus();
 
     const languageToggleBtn = document.getElementById('language-toggle');
-    languageToggleBtn.textContent = currentLanguage === 'ru' ? 'Switch to English' : 'Сменить на русский';
+    if (languageToggleBtn) {
+        languageToggleBtn.textContent = currentLanguage === 'ru' ? 'Switch to English' : 'Сменить на русский';
+        languageToggleBtn.addEventListener('click', toggleLanguage);
+    }
 
     window.addEventListener('online', checkNetworkStatus);
     window.addEventListener('offline', checkNetworkStatus);
 
-    document.getElementById('overlay').addEventListener('click', () => {
+    // Закрытие форм и гайда по клику на оверлей
+    document.getElementById('overlay')?.addEventListener('click', () => {
         const partnerForm = document.getElementById('add-partner-form');
         const logForm = document.getElementById('log-form');
         const welcomeGuide = document.getElementById('welcome-guide');
-        if (partnerForm.classList.contains('show')) hidePartnerForm();
-        else if (logForm.classList.contains('show')) hideLogForm();
-        else if (welcomeGuide.classList.contains('show')) closeWelcomeGuide();
+        if (partnerForm?.classList.contains('show')) hidePartnerForm();
+        else if (logForm?.classList.contains('show')) hideLogForm();
+        else if (welcomeGuide?.classList.contains('show')) closeWelcomeGuide();
     });
 
-    document.getElementById('add-partner-form').addEventListener('click', (e) => e.stopPropagation());
-    document.getElementById('log-form').addEventListener('click', (e) => e.stopPropagation());
-    document.getElementById('welcome-guide').addEventListener('click', (e) => e.stopPropagation());
+    // Предотвращение закрытия форм при клике внутри них
+    document.getElementById('add-partner-form')?.addEventListener('click', (e) => e.stopPropagation());
+    document.getElementById('log-form')?.addEventListener('click', (e) => e.stopPropagation());
+    document.getElementById('welcome-guide')?.addEventListener('click', (e) => e.stopPropagation());
 
-    if (!hasSeenWelcomeGuide) {
-        showWelcomeGuide();
+    // Привязка обработчиков к кнопкам
+    document.getElementById('add-partner-btn')?.addEventListener('click', () => showPartnerForm());
+    document.getElementById('add-activity-btn')?.addEventListener('click', () => showLogForm('add'));
+    document.querySelector('#add-partner-form .save-btn')?.addEventListener('click', savePartner);
+    document.getElementById('log-form-submit')?.addEventListener('click', saveLog);
+
+    // Привязка обработчиков для фильтров и пагинации
+    document.getElementById('partner-search')?.addEventListener('input', () => renderPartnersListTab());
+    document.getElementById('activity-search')?.addEventListener('input', filterActivities);
+    document.getElementById('activity-date-filter')?.addEventListener('change', filterActivities);
+    document.getElementById('prev-partners-page')?.addEventListener('click', () => changePartnersPage(-1));
+    document.getElementById('next-partners-page')?.addEventListener('click', () => changePartnersPage(1));
+    document.getElementById('prev-activities-page')?.addEventListener('click', () => changeActivitiesPage(-1));
+    document.getElementById('next-activities-page')?.addEventListener('click', () => changeActivitiesPage(1));
+
+    // Регистрация существующего Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('Service Worker зарегистрирован:', registration);
+            })
+            .catch(error => {
+                console.error('Ошибка регистрации Service Worker:', error);
+            });
     }
 
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-
-        const installBtn = document.createElement('button');
-        installBtn.textContent = currentLanguage === 'ru' ? 'Установить LovePulse' : 'Install LovePulse';
-        installBtn.className = 'action-btn install-btn';
-        installBtn.style.position = 'fixed';
-        installBtn.style.bottom = '20px';
-        installBtn.style.right = '20px';
-        installBtn.style.zIndex = '1000';
-
-        installBtn.addEventListener('click', () => {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then(choiceResult => {
-                if (choiceResult.outcome === 'accepted') {
-                    showToast(currentLanguage === 'ru' ? 'Приложение устанавливается! 🎉' : 'App is being installed! 🎉', 'success');
-                } else {
-                    showToast(currentLanguage === 'ru' ? 'Установка отменена 😔' : 'Installation cancelled 😔', 'success');
-                }
-                deferredPrompt = null;
-                installBtn.remove();
-            });
-        });
-
-        document.body.appendChild(installBtn);
-    });
-
-    window.addEventListener('appinstalled', () => {
-        showToast(currentLanguage === 'ru' ? 'LovePulse успешно установлено! ❤️' : 'LovePulse successfully installed! ❤️', 'success');
-    });
+    // Показать гайд для новых пользователей
+    if (!hasSeenWelcomeGuide) showWelcomeGuide();
 });
