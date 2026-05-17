@@ -322,7 +322,7 @@ function showTab(tabId) {
     else if (tabId === 'profile-tab') loadProfile();
 
     const fab = document.getElementById('main-fab');
-    if (fab) fab.classList.toggle('hidden', tabId === 'settings-tab' || tabId === 'profile-tab');
+    if (fab) fab.classList.remove('hidden');
 
     const themeCheckbox = document.getElementById('theme-checkbox');
     if (themeCheckbox) themeCheckbox.checked = currentTheme === 'dark';
@@ -599,6 +599,7 @@ function getStatusColor(status) {
 
 function handleFabClick() {
     if (appState.activeTab === 'activities-tab') showLogForm('add');
+    else if (appState.activeTab === 'settings-tab' || appState.activeTab === 'profile-tab') showTab('partners-tab');
     else showPartnerForm();
 }
 
