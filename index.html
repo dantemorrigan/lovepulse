@@ -1818,6 +1818,71 @@
     .main { height: auto; overflow: visible; }
     .view { padding-bottom: 20px; }
   }
+
+  /* ── AUTH SCREEN ── */
+  .auth-screen {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px 60px;
+  }
+  .auth-logo {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 36px;
+    color: var(--ink);
+  }
+  .auth-tabs {
+    display: flex;
+    background: var(--bg-soft);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 24px;
+    width: 100%;
+    max-width: 340px;
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: var(--ink-3);
+    transition: all .2s var(--ease);
+  }
+  .auth-tab.active {
+    background: var(--bg-elev);
+    color: var(--ink);
+    box-shadow: var(--shadow-sm);
+  }
+  .auth-form { width: 100%; max-width: 340px; }
+  .auth-error {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  [data-theme="dark"] .auth-error { background: rgba(185,28,28,.2); color: #fca5a5; }
+  .auth-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-4);
+    margin-top: 16px;
+    line-height: 1.6;
+  }
 </style>
 </head>
 <body>
@@ -1883,51 +1948,62 @@
 </div>
 
 <script>
-// ============== STATE ==============
-const STORAGE_KEY = 'lovepulse_v1';
+// ============== AUTH ==============
+const USERS_KEY = 'lovepulse_users';
+const SESSION_KEY = 'lovepulse_session';
+const DATA_PREFIX = 'lovepulse_data_';
 
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); } catch { return []; }
+}
+function saveUsers(users) { localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
+function getCurrentUserId() { return localStorage.getItem(SESSION_KEY) || null; }
+function setSession(userId) { localStorage.setItem(SESSION_KEY, userId); }
+function clearSession() { localStorage.removeItem(SESSION_KEY); }
+
+async function hashPassword(password) {
+  try {
+    const enc = new TextEncoder();
+    const buf = await crypto.subtle.digest('SHA-256', enc.encode(password));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  } catch {
+    let h = 5381;
+    for (let i = 0; i < password.length; i++) h = ((h << 5) + h) ^ password.charCodeAt(i);
+    return (h >>> 0).toString(16).padStart(8,'0');
+  }
+}
+
+// ============== STATE ==============
 const DEFAULT_STATE = {
-  user: { name: 'Никита', bio: 'Москва · 22', theme: 'light' },
-  connections: [
-    { id: 'c1', name: 'Лера', role: 'partner', statusLabel: 'Моя девушка', note: 'Самый близкий человек ❤', color: 'rose', created: '2025-06-20' },
-    { id: 'c2', name: 'Антон', role: 'friend', statusLabel: 'Лучший друг', note: 'Брат из детства', color: 'mint', created: '2010-01-01' },
-    { id: 'c3', name: 'Валя', role: 'family', statusLabel: 'Сестра', note: 'Двоюродная, самый близкий друг', color: 'warm', created: '2003-08-28' },
-    { id: 'c4', name: 'Лена', role: 'friend', statusLabel: 'Интернет-друг', note: 'Познакомились в апреле 2025', color: 'cool', created: '2025-04-28' },
-    { id: 'c5', name: 'Артур', role: 'friend', statusLabel: 'Старый друг', note: 'Не общаемся с осени 2025', color: 'violet', created: '2022-03-15' },
-    { id: 'c6', name: 'Богдан', role: 'family', statusLabel: 'Младший брат', note: '11 лет, живёт у родителей', color: 'mint', created: '2014-05-10' },
-  ],
-  entries: [
-    { id: 'e1', date: '2026-05-15', text: 'Сходили с Лерой на ужин в новое место в Реутове. Долго болтали про Лондон — уже чувствуется предвкушение поездки.', tags: ['c1'] },
-    { id: 'e2', date: '2026-05-12', text: 'Созвонился с Антоном — он, как всегда, в своём репертуаре. Договорились созвониться через пару недель.', tags: ['c2'] },
-    { id: 'e3', date: '2026-05-08', text: 'Валя написала, поделилась новостями. Хорошая беседа, давно так не говорили.', tags: ['c3'] },
-    { id: 'e4', date: '2026-05-03', text: 'Играли с Лерой и Леной по сети — было весело. Такие вечера заряжают.', tags: ['c1','c4'] },
-    { id: 'e5', date: '2026-04-22', text: 'Богдан позвонил сам, хотел совета. Приятно, что доверяет.', tags: ['c6'] },
-    { id: 'e6', date: '2026-04-10', text: 'Вечер с Лерой дома — смотрели кино, болтали до 2 ночи. Такие моменты ценю больше всего.', tags: ['c1'] },
-  ],
-  onboarded: true,
+  user: { name: '', bio: '', theme: 'light' },
+  connections: [],
+  entries: [],
+  onboarded: false,
   plus: false
 };
 
-let state = loadState();
+let state = structuredClone(DEFAULT_STATE);
 
 function loadState() {
+  const uid = getCurrentUserId();
+  if (!uid) return structuredClone(DEFAULT_STATE);
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(DATA_PREFIX + uid);
     if (!raw) return structuredClone(DEFAULT_STATE);
     const parsed = JSON.parse(raw);
-    // Merge defaults for new fields
-    if (!parsed.user) parsed.user = DEFAULT_STATE.user;
+    if (!parsed.user) parsed.user = { name: '', bio: '', theme: 'light' };
     if (!parsed.user.theme) parsed.user.theme = 'light';
-    if (parsed.onboarded === undefined) parsed.onboarded = true;
+    if (parsed.onboarded === undefined) parsed.onboarded = false;
     if (parsed.plus === undefined) parsed.plus = false;
-    // Ensure entries always have tags array and connections have required fields
-    if (parsed.entries) parsed.entries.forEach(e => {
-      if (!Array.isArray(e.tags)) e.tags = [];
-    });
+    if (parsed.entries) parsed.entries.forEach(e => { if (!Array.isArray(e.tags)) e.tags = []; });
     return parsed;
   } catch { return structuredClone(DEFAULT_STATE); }
 }
-function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function saveState() {
+  const uid = getCurrentUserId();
+  if (!uid) return;
+  localStorage.setItem(DATA_PREFIX + uid, JSON.stringify(state));
+}
 function uid() { return Math.random().toString(36).slice(2,9); }
 
 const ROLES = {
@@ -1946,7 +2022,6 @@ const MONTHS_SHORT = ['янв','фев','мар','апр','мая','июн','и�
 function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
 }
-applyTheme(state.user.theme || 'light');
 
 // ============== ROUTING ==============
 let currentView = 'home';
@@ -3080,12 +3155,20 @@ function renderProfile() {
         </div>
       </div>
 
+      <div class="section-label">Аккаунт</div>
+      <div class="menu-group">
+        <div class="menu-item" id="logoutBtn">
+          <div class="menu-icon danger"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></div>
+          <div class="menu-label" style="color:var(--rose);">Выйти из аккаунта</div>
+        </div>
+      </div>
+
       <div class="section-label">О приложении</div>
       <div class="menu-group">
         <div class="menu-item">
           <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
           <div class="menu-label">Версия</div>
-          <div class="menu-value" id="versionTap" style="cursor:pointer;">1.1.0</div>
+          <div class="menu-value" id="versionTap" style="cursor:pointer;">2.0.0</div>
         </div>
         <div class="menu-item">
           <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
@@ -3110,7 +3193,7 @@ function renderProfile() {
         </div>
       </div>
       <div style="text-align:center;padding:28px 0 14px;color:var(--ink-4);font-size:11px;letter-spacing:.05em;line-height:1.8;">
-        LovePulse · v1.1.0<br>Made by Nikita Zhvaev
+        LovePulse · v2.0.0
       </div>
       <input type="file" id="importFile" accept=".json" style="display:none">
     </div>
@@ -3189,6 +3272,7 @@ function renderProfile() {
   v.querySelector('#exportBtn').addEventListener('click', exportData);
   v.querySelector('#importBtn').addEventListener('click', () => v.querySelector('#importFile').click());
   v.querySelector('#resetBtn').addEventListener('click', resetData);
+  v.querySelector('#logoutBtn').addEventListener('click', logout);
 
   v.querySelector('#importFile').addEventListener('change', e => {
     const file = e.target.files[0];
@@ -3327,9 +3411,9 @@ function exportData() {
 
 function resetData() {
   confirm2('Удалить все данные?', 'Все связи и записи будут удалены. Действие необратимо.', () => {
-    localStorage.removeItem(STORAGE_KEY);
+    const uid = getCurrentUserId();
+    if (uid) localStorage.removeItem(DATA_PREFIX + uid);
     state = structuredClone(DEFAULT_STATE);
-    saveState();
     toast('Данные сброшены');
     navigate('home');
   });
@@ -3395,9 +3479,151 @@ function showOnboarding() {
   });
 }
 
+// ============== AUTH UI ==============
+function checkAuth() {
+  const userId = getCurrentUserId();
+  if (!userId) { showAuthScreen(); return; }
+  const users = getUsers();
+  if (!users.find(u => u.id === userId)) { clearSession(); showAuthScreen(); return; }
+  state = loadState();
+  applyTheme(state.user.theme || 'light');
+  showApp();
+}
+
+function showAuthScreen() {
+  document.getElementById('header').style.display = 'none';
+  document.querySelector('.nav').style.display = 'none';
+  document.getElementById('fab').style.display = 'none';
+
+  const appEl = document.getElementById('app');
+  let authEl = document.getElementById('authScreen');
+  if (!authEl) {
+    authEl = document.createElement('div');
+    authEl.id = 'authScreen';
+    authEl.style.cssText = 'position:absolute;inset:0;background:var(--bg);z-index:200;overflow-y:auto;';
+    appEl.appendChild(authEl);
+  }
+  authEl.style.display = '';
+
+  let authTab = 'login';
+
+  function renderAuthScreen() {
+    authEl.innerHTML = `
+      <div class="auth-screen">
+        <div class="auth-logo">
+          <svg class="logo-icon" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="9" cy="14" r="8" stroke="var(--mint)" stroke-width="2.2" fill="none"/>
+            <circle cx="19" cy="14" r="8" stroke="var(--mint)" stroke-width="2.2" fill="none"/>
+            <circle cx="14" cy="14" r="3" fill="var(--mint)"/>
+          </svg>
+          LovePulse
+        </div>
+        <div class="auth-tabs">
+          <button class="auth-tab ${authTab==='login'?'active':''}" id="authTabLogin">Войти</button>
+          <button class="auth-tab ${authTab==='register'?'active':''}" id="authTabReg">Регистрация</button>
+        </div>
+        <div class="auth-form" id="authFormWrap"></div>
+      </div>
+    `;
+    authEl.querySelector('#authTabLogin').addEventListener('click', () => { authTab = 'login'; renderAuthScreen(); });
+    authEl.querySelector('#authTabReg').addEventListener('click', () => { authTab = 'register'; renderAuthScreen(); });
+    if (authTab === 'login') renderLoginForm(authEl.querySelector('#authFormWrap'));
+    else renderRegisterForm(authEl.querySelector('#authFormWrap'));
+  }
+
+  function renderLoginForm(container) {
+    container.innerHTML = `
+      <div id="authErr" class="auth-error" style="display:none;"></div>
+      <div class="field"><label>Email</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>
+      <div class="field"><label>Пароль</label><input type="password" id="authPass" autocomplete="current-password" placeholder="••••••••"></div>
+      <button class="btn" id="authLoginBtn" style="margin-top:8px;">Войти</button>
+      <div class="auth-hint">Нет аккаунта? Нажмите «Регистрация» выше.</div>
+    `;
+    const doLogin = async () => {
+      const email = container.querySelector('#authEmail').value.trim().toLowerCase();
+      const pass = container.querySelector('#authPass').value;
+      const errEl = container.querySelector('#authErr');
+      if (!email || !pass) { errEl.textContent = 'Заполните все поля'; errEl.style.display = ''; return; }
+      const users = getUsers();
+      const user = users.find(u => u.email === email);
+      if (!user) { errEl.textContent = 'Пользователь не найден'; errEl.style.display = ''; return; }
+      const hash = await hashPassword(pass);
+      if (hash !== user.passwordHash) { errEl.textContent = 'Неверный пароль'; errEl.style.display = ''; return; }
+      setSession(user.id);
+      state = loadState();
+      applyTheme(state.user.theme || 'light');
+      authEl.style.display = 'none';
+      showApp();
+    };
+    container.querySelector('#authLoginBtn').addEventListener('click', doLogin);
+    container.querySelector('#authPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  }
+
+  function renderRegisterForm(container) {
+    container.innerHTML = `
+      <div id="authErr" class="auth-error" style="display:none;"></div>
+      <div class="field"><label>Имя</label><input type="text" id="authName" autocomplete="name" placeholder="Как тебя зовут?"></div>
+      <div class="field"><label>Email</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>
+      <div class="field"><label>Пароль</label><input type="password" id="authPass" autocomplete="new-password" placeholder="Минимум 6 символов"></div>
+      <button class="btn" id="authRegBtn" style="margin-top:8px;">Создать аккаунт</button>
+      <div class="auth-hint">Данные хранятся только на этом устройстве.</div>
+    `;
+    const doRegister = async () => {
+      const name = container.querySelector('#authName').value.trim();
+      const email = container.querySelector('#authEmail').value.trim().toLowerCase();
+      const pass = container.querySelector('#authPass').value;
+      const errEl = container.querySelector('#authErr');
+      if (!name || !email || !pass) { errEl.textContent = 'Заполните все поля'; errEl.style.display = ''; return; }
+      if (pass.length < 6) { errEl.textContent = 'Пароль должен быть не менее 6 символов'; errEl.style.display = ''; return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'Введите корректный email'; errEl.style.display = ''; return; }
+      const users = getUsers();
+      if (users.find(u => u.email === email)) { errEl.textContent = 'Этот email уже зарегистрирован'; errEl.style.display = ''; return; }
+      const hash = await hashPassword(pass);
+      const newUser = {
+        id: 'u_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,7),
+        email,
+        name,
+        passwordHash: hash,
+        createdAt: Date.now()
+      };
+      users.push(newUser);
+      saveUsers(users);
+      setSession(newUser.id);
+      state = structuredClone(DEFAULT_STATE);
+      state.user.name = name;
+      saveState();
+      authEl.style.display = 'none';
+      showApp();
+    };
+    container.querySelector('#authRegBtn').addEventListener('click', doRegister);
+    container.querySelector('#authPass').addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+  }
+
+  renderAuthScreen();
+}
+
+function showApp() {
+  document.getElementById('header').style.display = '';
+  document.querySelector('.nav').style.display = '';
+  document.getElementById('fab').style.display = '';
+  if (!state.onboarded) showOnboarding();
+  else navigate('home');
+}
+
+function logout() {
+  confirm2('Выйти из аккаунта?', 'Вы будете перенаправлены на экран входа. Данные сохранятся.', () => {
+    clearSession();
+    state = structuredClone(DEFAULT_STATE);
+    applyTheme('light');
+    document.getElementById('header').style.display = 'none';
+    document.querySelector('.nav').style.display = 'none';
+    document.getElementById('fab').style.display = 'none';
+    showAuthScreen();
+  }, false);
+}
+
 // ============== INIT ==============
-if (!state.onboarded) showOnboarding();
-navigate('home');
+checkAuth();
 </script>
 </body>
 </html>
