@@ -28,62 +28,47 @@
         <!-- Затемнение фона -->
         <div id="overlay" class="overlay hidden"></div>
 
-        <!-- Название приложения -->
-        <div class="app-title">
-            <h1 class="app-name">LovePulse ❤️</h1>
-        </div>
-
-        <!-- Вкладки -->
-<div class="tabs">
-    <button class="tab active" onclick="showTab('dashboard-tab')" aria-label="Перейти на главную" data-ru="Главная" data-en="Dashboard">Главная</button>
-    <button class="tab" onclick="showTab('partners-tab')" aria-label="Перейти к партнерам" data-ru="Партнеры" data-en="Partners">Партнеры</button>
-    <button class="tab" onclick="showTab('activities-tab')" aria-label="Перейти к активностям" data-ru="Активности" data-en="Activities">Активности</button>
-<a href="file:///C:/Users/reich/Desktop/LovePulse/pulsehub/pulsehub.html" class="tab pulsehub-btn" aria-label="Перейти в PulseHub" data-ru="PulseHub data-en="PulseHub>
-    <i class="fas fa-heart"></i> PulseHub
-    <span class="notification-dot"></span>
-</a>
-    <button class="tab" onclick="showTab('profile-tab')" aria-label="Перейти к профилю" data-ru="Профиль" data-en="Profile">Профиль</button>
-    <button class="tab" onclick="showTab('settings-tab')" aria-label="Перейти к настройкам" data-ru="Настройки" data-en="Settings">Настройки</button>
-</div>
+        <!-- Шапка приложения -->
+        <header class="app-bar">
+            <span class="app-bar-logo">💗</span>
+            <span class="app-bar-title">LovePulse</span>
+            <div class="app-bar-actions">
+                <button class="icon-btn" onclick="showWelcomeGuide()" aria-label="Гайд">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </div>
+        </header>
 
         <!-- Вкладка "Главная" -->
         <div id="dashboard-tab" class="tab-content">
-            <div class="header">
-                <h1 data-ru="Панель любви ❤️" data-en="Love Dashboard ❤️">Панель любви ❤️</h1>
-                <div class="header-actions">
-                    <button class="add-partner-btn" onclick="showPartnerForm()" aria-label="Добавить нового партнера" data-ru="Добавить партнера" data-en="Add Partner">Добавить партнера</button>
-                    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"></button>
-                    <button id="welcome-guide-btn" class="welcome-guide-btn" onclick="showWelcomeGuide()" aria-label="Открыть приветственный гайд">
-                        <i class="fas fa-book"></i>
-                    </button>
+            <!-- Статистика -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon potential-icon"><i class="fas fa-user-plus"></i></div>
+                    <div class="stat-info">
+                        <span id="potential-count" class="stat-number">0</span>
+                        <p class="stat-label" data-ru="Потенциальные" data-en="Potential">Потенциальные</p>
+                    </div>
                 </div>
-            </div>
-            <p class="subtitle" data-ru="Отслеживайте свою романтическую судьбу 💫" data-en="Track your romantic journey 💫">Отслеживайте свою романтическую судьбу 💫</p>
-
-            <!-- Панель прогресса -->
-            <div class="progress-panel">
-                <h2><i class="fas fa-heart"></i> <span data-ru="Ваша статистика 📊" data-en="Your Stats 📊">Ваша статистика 📊</span></h2>
-                <p class="panel-subtitle" data-ru="Здесь видно, как обстоят дела в вашей личной жизни" data-en="See how your love life is going">Здесь видно, как обстоят дела в вашей личной жизни</p>
-                <div class="stats">
-                    <div class="stat">
-                        <i class="fas fa-user"></i>
-                        <span id="potential-count">0</span>
-                        <p data-ru="Потенциальные" data-en="Potential">Потенциальные</p>
+                <div class="stat-card">
+                    <div class="stat-icon serious-icon"><i class="fas fa-heart"></i></div>
+                    <div class="stat-info">
+                        <span id="serious-count" class="stat-number">0</span>
+                        <p class="stat-label" data-ru="Серьёзно" data-en="Serious">Серьёзно</p>
                     </div>
-                    <div class="stat">
-                        <i class="fas fa-clock"></i>
-                        <span id="meetings-count">0</span>
-                        <p data-ru="Встречи" data-en="Meetings">Встречи</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon meetings-icon"><i class="fas fa-handshake"></i></div>
+                    <div class="stat-info">
+                        <span id="meetings-count" class="stat-number">0</span>
+                        <p class="stat-label" data-ru="Встречи" data-en="Meetings">Встречи</p>
                     </div>
-                    <div class="stat">
-                        <i class="fas fa-heart"></i>
-                        <span id="serious-count">0</span>
-                        <p data-ru="Серьезно" data-en="Serious">Серьезно</p>
-                    </div>
-                    <div class="stat">
-                        <i class="fas fa-bolt"></i>
-                        <span id="active-count">0</span>
-                        <p data-ru="Активно" data-en="Active">Активно</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon active-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="stat-info">
+                        <span id="active-count" class="stat-number">0</span>
+                        <p class="stat-label" data-ru="Активно" data-en="Active">Активно</p>
                     </div>
                 </div>
             </div>
@@ -91,24 +76,19 @@
             <!-- Секции -->
             <div class="dashboard-sections">
                 <div class="section recent-activity">
-                    <h2 data-ru="Недавние активности 📅" data-en="Recent Activities 📅">Недавние активности 📅</h2>
+                    <h2 data-ru="Недавние события" data-en="Recent Activities">Недавние события</h2>
                     <p id="recent-activity-text" data-ru="Пока нет активностей" data-en="No activities yet">Пока нет активностей</p>
                     <div class="activity-wrapper">
                         <ul id="recent-activity-list"></ul>
                     </div>
-                    <button class="action-btn" onclick="showLogForm('add')" aria-label="Записать новую активность" data-ru="Записать новую активность" data-en="Log New Activity">Записать новую активность</button>
+                    <button class="action-btn" onclick="showLogForm('add')" aria-label="Записать новую активность" data-ru="Добавить событие" data-en="Add Event">Добавить событие</button>
                 </div>
 
                 <div class="section favorites">
-                    <h2 data-ru="Избранное 🌟" data-en="Favorites 🌟">Избранное 🌟</h2>
+                    <h2 data-ru="Избранное" data-en="Favorites">Избранное</h2>
                     <p id="favorites-text" data-ru="Пока нет избранных" data-en="No favorites yet">Пока нет избранных</p>
                     <ul id="favorites-list"></ul>
-                    <button class="action-btn" onclick="showTab('partners-tab')" aria-label="Посмотреть всех партнеров" data-ru="Посмотреть все" data-en="View All">Посмотреть все</button>
-                </div>
-
-                <div class="section manage-partners">
-                    <h2 data-ru="Список партнеров 👥" data-en="Partner List 👥">Список партнеров 👥</h2>
-                    <button class="action-btn" onclick="showTab('partners-tab')" aria-label="Посмотреть всех партнеров" data-ru="Посмотреть все" data-en="View All">Посмотреть все</button>
+                    <button class="action-btn" onclick="showTab('partners-tab')" aria-label="Посмотреть всех партнеров" data-ru="Все партнёры" data-en="All Partners">Все партнёры</button>
                 </div>
             </div>
         </div>
@@ -116,13 +96,9 @@
         <!-- Вкладка "Партнеры" -->
 <div id="partners-tab" class="tab-content hidden">
     <div class="header">
-        <h1 data-ru="Партнеры 👥" data-en="Partners 👥">Партнеры 👥</h1>
-        <div class="header-actions">
-            <button class="add-partner-btn" onclick="showPartnerForm()" aria-label="Добавить нового партнера" data-ru="Добавить партнера" data-en="Add Partner">Добавить партнера</button>
-            <button id="theme-toggle-partners" onclick="toggleTheme()" aria-label="Переключить тему"></button>
-        </div>
+        <h1 data-ru="Партнёры" data-en="Partners">Партнёры</h1>
     </div>
-    <p class="subtitle" data-ru="Управляйте вашими романтическими связями 💞" data-en="Manage your romantic connections 💞">Управляйте вашими романтическими связями 💞</p>
+    <p class="subtitle" data-ru="Управляйте своими связями" data-en="Manage your connections">Управляйте своими связями</p>
 
     <!-- Фильтры -->
     <div class="partner-filters">
@@ -160,13 +136,9 @@
         <!-- Вкладка "Активности" -->
         <div id="activities-tab" class="tab-content hidden">
             <div class="header">
-                <h1 data-ru="Активности 📅" data-en="Activities 📅">Активности 📅</h1>
-                <div class="header-actions">
-                    <button class="add-partner-btn" onclick="showLogForm('add')" aria-label="Добавить новую активность" data-ru="Добавить активность" data-en="Add Activity">Добавить активность</button>
-                    <button id="theme-toggle-activities" onclick="toggleTheme()" aria-label="Переключить тему"></button>
-                </div>
+                <h1 data-ru="Активности" data-en="Activities">Активности</h1>
             </div>
-            <p class="subtitle" data-ru="Отслеживайте свои романтические активности 💬" data-en="Track your romantic activities 💬">Отслеживайте свои романтические активности 💬</p>
+            <p class="subtitle" data-ru="История ваших встреч и событий" data-en="Your meetings and events history">История ваших встреч и событий</p>
             <div class="filters">
                 <div class="form-group">
                     <input type="text" id="activity-search" placeholder="Поиск активностей..." oninput="filterActivities()" aria-label="Поиск по активностям" data-ru-placeholder="Поиск активностей..." data-en-placeholder="Search activities...">
@@ -187,12 +159,14 @@
         <!-- Вкладка "Профиль" -->
         <div id="profile-tab" class="tab-content hidden">
             <div class="header">
-                <h1 data-ru="Профиль 👤" data-en="Profile 👤">Профиль 👤</h1>
+                <h1 data-ru="Профиль" data-en="Profile">Профиль</h1>
                 <div class="header-actions">
-                    <button id="theme-toggle-profile" onclick="toggleTheme()" aria-label="Переключить тему"></button>
+                    <button class="icon-btn" onclick="showTab('settings-tab')" aria-label="Настройки">
+                        <i class="fas fa-cog"></i>
+                    </button>
                 </div>
             </div>
-            <p class="subtitle" data-ru="Управление личной информацией ✏️" data-en="Manage personal information ✏️">Управление личной информацией ✏️</p>
+            <p class="subtitle" data-ru="Ваша личная информация" data-en="Your personal information">Ваша личная информация</p>
 
             <!-- Форма профиля -->
             <div class="profile-section">
@@ -240,40 +214,73 @@
         <!-- Вкладка "Настройки" -->
         <div id="settings-tab" class="tab-content hidden">
             <div class="header">
-                <h1 data-ru="Настройки ⚙️" data-en="Settings ⚙️">Настройки ⚙️</h1>
+                <h1 data-ru="Настройки" data-en="Settings">Настройки</h1>
             </div>
-            <p class="subtitle" data-ru="Управляйте настройками приложения" data-en="Manage app settings">Управляйте настройками приложения</p>
+            <p class="subtitle" data-ru="Персонализируйте приложение" data-en="Customize your app">Персонализируйте приложение</p>
 
-            <!-- Секция настроек -->
-            <div class="section">
-                <h2><i class="fas fa-info-circle"></i> <span data-ru="Информация о приложении" data-en="App Information">Информация о приложении</span></h2>
-                <p data-ru="Версия: 1.0 (Стабильная)" data-en="Version: 1.0 (Stable)">Версия: 1.0 (Стабильная)</p>
-                <p data-ru="Последнее обновление: 23.03.2025" data-en="Last Update: 03/23/2025">Последнее обновление: 23.03.2025</p>
-            </div>
-
-            <div class="section">
-                <h2><i class="fas fa-user"></i> <span data-ru="Разработчик" data-en="Developer">Разработчик</span></h2>
-                <p data-ru="Имя: Dante Morrigan" data-en="Name: Dante Morrigan">Имя: Dante Morrigan</p>
-                <p data-ru="Почта: kukispuki1209@gmail.com " data-en="Email: kukispuki1209@gmail.com ">Почта: <a href="/cdn-cgi/l/email-protection#fbd0ced0d2c8cbced0d28a898b82fbdcd6dad2d795d8d4d6"><span class="__cf_email__" data-cfemail="517a647a786261647a782023212851767c70787d3f727e7c">[email&#160;protected]</span></a></p>
-            </div>
-
-            <div class="section">
-                <h2><i class="fas fa-language"></i> <span data-ru="Язык" data-en="Language">Язык</span></h2>
-                <button id="language-toggle" class="action-btn" onclick="toggleLanguage()" aria-label="Сменить язык" data-ru="Сменить на английский" data-en="Switch to Russian">Сменить на английский</button>
+            <!-- Внешний вид -->
+            <div class="settings-group">
+                <h2 class="settings-group-title"><i class="fas fa-palette"></i> <span data-ru="Внешний вид" data-en="Appearance">Внешний вид</span></h2>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <i class="fas fa-moon"></i>
+                        <span data-ru="Тёмная тема" data-en="Dark Theme">Тёмная тема</span>
+                    </div>
+                    <label class="toggle-switch" aria-label="Toggle dark theme">
+                        <input type="checkbox" id="theme-checkbox" onchange="toggleTheme()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
             </div>
 
-            <div class="section">
-                <h2><i class="fab fa-github"></i> <span data-ru="Техническая информация" data-en="Technical Information">Техническая информация</span></h2>
-                <p data-ru="Языки: JavaScript, CSS, HTML" data-en="Languages: JavaScript, CSS, HTML">Языки: JavaScript, CSS, HTML</p>
-                <p data-ru="Хранилище: LocalStorage" data-en="Storage: LocalStorage">Хранилище: LocalStorage</p>
-                <p data-ru="Стили: Custom CSS с поддержкой тем" data-en="Styles: Custom CSS with theme support">Стили: Custom CSS с поддержкой тем</p>
+            <!-- Язык -->
+            <div class="settings-group">
+                <h2 class="settings-group-title"><i class="fas fa-language"></i> <span data-ru="Язык" data-en="Language">Язык</span></h2>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <i class="fas fa-globe"></i>
+                        <span data-ru="Текущий язык: Русский" data-en="Current: English">Текущий язык: Русский</span>
+                    </div>
+                    <button id="language-toggle" class="setting-btn" onclick="toggleLanguage()" data-ru="Сменить на английский" data-en="Switch to Russian">Сменить на английский</button>
+                </div>
             </div>
 
-            <div class="section">
-                <h2><i class="fas fa-code"></i> <span data-ru="Посмотреть на GitHub" data-en="View on GitHub">Посмотреть на GitHub</span></h2>
-                <a href="https://github.com/dantemorrigan/lovepulse" target="_blank" class="action-btn" aria-label="Перейти на GitHub проекта" data-ru="github.com/dantemorrigan/lovepulse" data-en="github.com/dantemorrigan/lovepulse">
-                    <i class="fab fa-github"></i> github.com/dantemorrigan/lovepulse
-                </a>
+            <!-- Данные -->
+            <div class="settings-group">
+                <h2 class="settings-group-title"><i class="fas fa-database"></i> <span data-ru="Данные" data-en="Data">Данные</span></h2>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <i class="fas fa-download"></i>
+                        <span data-ru="Экспорт данных" data-en="Export Data">Экспорт данных</span>
+                    </div>
+                    <button class="setting-btn" onclick="exportData()" data-ru="Скачать JSON" data-en="Download JSON">Скачать JSON</button>
+                </div>
+            </div>
+
+            <!-- О приложении -->
+            <div class="settings-group">
+                <h2 class="settings-group-title"><i class="fas fa-info-circle"></i> <span data-ru="О приложении" data-en="About">О приложении</span></h2>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <i class="fas fa-code-branch"></i>
+                        <span data-ru="Версия 1.0 (Стабильная)" data-en="Version 1.0 (Stable)">Версия 1.0 (Стабильная)</span>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <i class="fas fa-user"></i>
+                        <span>Dante Morrigan</span>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <i class="fab fa-github"></i>
+                        <span data-ru="Открыть на GitHub" data-en="View on GitHub">Открыть на GitHub</span>
+                    </div>
+                    <a href="https://github.com/dantemorrigan/lovepulse" target="_blank" class="setting-btn">
+                        GitHub
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -352,11 +359,37 @@
         </div>
 
         <!-- Звуковые эффекты -->
-        <audio id="add-sound" src="sounds/ding.mp3" preload="auto"></audio>
-        <audio id="delete-sound" src="sounds/whoosh.mp3" preload="auto"></audio>
-        <audio id="toggle-sound" src="sounds/click.mp3" preload="auto"></audio>
-        <audio id="theme-sound" src="sounds/pop.mp3" preload="auto"></audio>
+        <audio id="add-sound" src="sounds/ding.wav" preload="auto"></audio>
+        <audio id="delete-sound" src="sounds/whoosh.wav" preload="auto"></audio>
+        <audio id="toggle-sound" src="sounds/click.wav" preload="auto"></audio>
+        <audio id="theme-sound" src="sounds/pop.aiff" preload="auto"></audio>
+
+        <!-- Нижняя навигация -->
+        <nav class="bottom-nav" role="navigation" aria-label="Навигация">
+            <button class="nav-item active" onclick="showTab('dashboard-tab')" data-tab="dashboard-tab" aria-label="Главная">
+                <i class="fas fa-home"></i>
+                <span data-ru="Главная" data-en="Home">Главная</span>
+            </button>
+            <button class="nav-item" onclick="showTab('partners-tab')" data-tab="partners-tab" aria-label="Партнёры">
+                <i class="fas fa-users"></i>
+                <span data-ru="Партнёры" data-en="Partners">Партнёры</span>
+            </button>
+            <div class="nav-fab-space"></div>
+            <button class="nav-item" onclick="showTab('activities-tab')" data-tab="activities-tab" aria-label="Активности">
+                <i class="fas fa-calendar-alt"></i>
+                <span data-ru="События" data-en="Events">События</span>
+            </button>
+            <button class="nav-item" onclick="showTab('profile-tab')" data-tab="profile-tab" aria-label="Профиль">
+                <i class="fas fa-user-circle"></i>
+                <span data-ru="Профиль" data-en="Profile">Профиль</span>
+            </button>
+        </nav>
     </div>
+
+    <!-- Плавающая кнопка действия -->
+    <button id="main-fab" class="fab" onclick="handleFabClick()" aria-label="Добавить">
+        <i class="fas fa-plus"></i>
+    </button>
 
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script src="script.js"></script>

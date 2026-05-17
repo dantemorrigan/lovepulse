@@ -311,8 +311,8 @@ function showTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
     document.getElementById(tabId)?.classList.remove('hidden');
 
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    document.querySelector(`.tab[onclick="showTab('${tabId}')"]`)?.classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.querySelector(`.nav-item[data-tab="${tabId}"]`)?.classList.add('active');
 
     appState.activeTab = tabId;
     saveDataToIndexedDB();
@@ -321,7 +321,27 @@ function showTab(tabId) {
     else if (tabId === 'activities-tab') renderActivitiesList();
     else if (tabId === 'profile-tab') loadProfile();
 
+    const fab = document.getElementById('main-fab');
+    if (fab) fab.classList.toggle('hidden', tabId === 'settings-tab' || tabId === 'profile-tab');
+
+    const themeCheckbox = document.getElementById('theme-checkbox');
+    if (themeCheckbox) themeCheckbox.checked = currentTheme === 'dark';
+
     initializeThemeButtons();
+}
+
+function filterPartners(filter) {
+    currentFilter = filter;
+    appState.partnerFilter = filter;
+    currentPartnersPage = 1;
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.filter-btn[onclick="filterPartners('${filter}')"]`)?.classList.add('active');
+    renderPartnersListTab();
+}
+
+function filterActivities() {
+    currentActivitiesPage = 1;
+    renderActivitiesList();
 }
 
 // Статистика
@@ -561,34 +581,54 @@ function changeActivitiesPage(direction) {
 }
 
 
-function changeActivitiesPage(direction) {
-    let filteredLogs = [...logs];
-    const searchQuery = document.getElementById('activity-search')?.value.toLowerCase() || '';
-    const dateFilter = document.getElementById('activity-date-filter')?.value || '';
-    if (searchQuery) filteredLogs = filteredLogs.filter(log => log.entry.toLowerCase().includes(searchQuery));
-    if (dateFilter) filteredLogs = filteredLogs.filter(log => log.date === dateFilter);
-    filteredLogs = filteredLogs.slice().reverse();
 
-    const totalPages = Math.ceil(filteredLogs.length / ITEMS_PER_PAGE);
-    const newPage = currentActivitiesPage + direction;
 
-    if (newPage >= 1 && newPage <= totalPages) {
-        currentActivitiesPage = newPage;
-        appState.activitiesPage = currentActivitiesPage;
-        saveDataToIndexedDB();
-        renderActivitiesList();
-        playSound(toggleSound);
-    } else {
-        console.log(`Cannot change page: newPage=${newPage}, totalPages=${totalPages}`);
-    }
+function getInitials(name) {
+    return (name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 }
 
+function getStatusColor(status) {
+    const colors = {
+        potential: '#7c6af7',
+        serious: '#e84393',
+        friend: '#2dbf9a',
+        past: '#9b9bc0'
+    };
+    return colors[status] || colors.potential;
+}
+
+function handleFabClick() {
+    if (appState.activeTab === 'activities-tab') showLogForm('add');
+    else showPartnerForm();
+}
+
+function exportData() {
+    const data = { partners, logs, userProfile: { ...userProfile, photo: null }, exportDate: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lovepulse-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(currentLanguage === 'ru' ? 'Данные экспортированы!' : 'Data exported!', 'success');
+}
 
 // Карточка партнера
 function createPartnerCard(partner, index) {
     const card = document.createElement('div');
     card.className = 'partner-card';
     card.dataset.index = index;
+
+    // Avatar with initials or status color
+    const avatar = document.createElement('div');
+    avatar.className = 'partner-avatar';
+    avatar.style.background = getStatusColor(partner.status);
+    avatar.textContent = getInitials(partner.name);
+    card.appendChild(avatar);
+
+    const cardBody = document.createElement('div');
+    cardBody.className = 'partner-card-body';
 
     const header = document.createElement('div');
     header.className = 'partner-header';
@@ -601,15 +641,14 @@ function createPartnerCard(partner, index) {
     const statusBadge = document.createElement('span');
     statusBadge.className = `status-badge ${partner.status}`;
     const statusText = {
-        potential: { ru: 'Потенциальные', en: 'Potential' },
-        serious: { ru: 'Серьезные', en: 'Serious' },
-        friend: { ru: 'Друзья', en: 'Friends' },
-        past: { ru: 'В прошлом', en: 'Past' }
+        potential: { ru: 'Потенциал', en: 'Potential' },
+        serious: { ru: 'Серьёзно', en: 'Serious' },
+        friend: { ru: 'Друг', en: 'Friend' },
+        past: { ru: 'Прошлое', en: 'Past' }
     };
-    statusBadge.textContent = statusText[partner.status][currentLanguage];
+    statusBadge.textContent = statusText[partner.status]?.[currentLanguage] || partner.status;
     header.appendChild(statusBadge);
-
-    card.appendChild(header);
+    cardBody.appendChild(header);
 
     const info = document.createElement('div');
     info.className = 'partner-info';
@@ -617,34 +656,34 @@ function createPartnerCard(partner, index) {
     if (partner.met) {
         const met = document.createElement('div');
         met.className = 'info-item';
-        met.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${currentLanguage === 'ru' ? 'Познакомились:' : 'Met:'} ${partner.met}`;
+        met.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${partner.met}`;
         info.appendChild(met);
     }
 
     if (partner.metDate) {
         const metDate = document.createElement('div');
         metDate.className = 'info-item';
-        metDate.innerHTML = `<i class="fas fa-calendar-alt"></i> ${currentLanguage === 'ru' ? 'Дата встречи:' : 'Meeting date:'} ${partner.metDate}`;
+        metDate.innerHTML = `<i class="fas fa-calendar-alt"></i> ${partner.metDate}`;
         info.appendChild(metDate);
     }
 
     if (partner.notes) {
         const notes = document.createElement('div');
-        notes.className = 'info-item';
-        notes.innerHTML = `<i class="fas fa-sticky-note"></i> ${currentLanguage === 'ru' ? 'Заметки:' : 'Notes:'} ${partner.notes}`;
+        notes.className = 'info-item notes-item';
+        notes.innerHTML = `<i class="fas fa-sticky-note"></i> ${partner.notes}`;
         info.appendChild(notes);
     }
 
-    card.appendChild(info);
+    cardBody.appendChild(info);
 
     const actions = document.createElement('div');
     actions.className = 'partner-actions';
 
     const favoriteBtn = document.createElement('button');
-    favoriteBtn.className = 'action-btn';
+    favoriteBtn.className = `action-btn${partner.favorite ? ' favorite-active' : ''}`;
     favoriteBtn.innerHTML = partner.favorite ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
-    favoriteBtn.setAttribute('aria-label', partner.favorite ? 
-        (currentLanguage === 'ru' ? 'Удалить из избранного' : 'Remove from favorites') : 
+    favoriteBtn.setAttribute('aria-label', partner.favorite ?
+        (currentLanguage === 'ru' ? 'Удалить из избранного' : 'Remove from favorites') :
         (currentLanguage === 'ru' ? 'Добавить в избранное' : 'Add to favorites'));
     favoriteBtn.onclick = () => toggleFavorite(index);
     actions.appendChild(favoriteBtn);
@@ -657,13 +696,14 @@ function createPartnerCard(partner, index) {
     actions.appendChild(editBtn);
 
     const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'action-btn';
+    deleteBtn.className = 'action-btn danger';
     deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
     deleteBtn.setAttribute('aria-label', currentLanguage === 'ru' ? 'Удалить партнера' : 'Delete partner');
     deleteBtn.onclick = () => deletePartner(index);
     actions.appendChild(deleteBtn);
 
-    card.appendChild(actions);
+    cardBody.appendChild(actions);
+    card.appendChild(cardBody);
 
     const deleteSwipe = document.createElement('div');
     deleteSwipe.className = 'delete-swipe';
@@ -1025,23 +1065,8 @@ async function deleteLog(index) {
 
 // Тема
 function initializeThemeButtons() {
-    const themeButtons = [
-        document.getElementById('theme-toggle'),
-        document.getElementById('theme-toggle-partners'),
-        document.getElementById('theme-toggle-activities'),
-        document.getElementById('theme-toggle-profile')
-    ];
-
-    themeButtons.forEach(button => {
-        if (button) {
-            button.removeEventListener('click', toggleTheme);
-            button.addEventListener('click', toggleTheme);
-            button.innerHTML = currentTheme === 'light' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-            button.setAttribute('aria-label', currentTheme === 'light' ? 
-                (currentLanguage === 'ru' ? 'Переключить на темную тему' : 'Switch to dark theme') : 
-                (currentLanguage === 'ru' ? 'Переключить на светлую тему' : 'Switch to light theme'));
-        }
-    });
+    const themeCheckbox = document.getElementById('theme-checkbox');
+    if (themeCheckbox) themeCheckbox.checked = currentTheme === 'dark';
 }
 
 function toggleTheme() {
@@ -1138,11 +1163,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateStats();
     renderRecentActivity();
     renderFavorites();
-    showTab(appState.activeTab);
-    filterPartners(appState.partnerFilter);
+    currentFilter = appState.partnerFilter || 'all';
     document.getElementById('partner-search').value = appState.partnerSearch || '';
     document.getElementById('activity-search').value = appState.activitySearch || '';
     document.getElementById('activity-date-filter').value = appState.activityDateFilter || '';
+    showTab(appState.activeTab);
     renderPartnersListTab();
     renderActivitiesList();
     checkNetworkStatus();

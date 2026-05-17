@@ -3,22 +3,46 @@
 
 /* CSS-переменные для тем */
 :root {
-    --background-light: #f9f9f9;
-    --background-dark: #1a1a1a;
-    --text-light: #333;
-    --text-dark: #e0e0e0;
-    --container-bg-light: #fff;
-    --container-bg-dark: #2a2a2a;
-    --secondary-bg-light: #f9f9f9;
-    --secondary-bg-dark: #333;
-    --border-light: #ddd;
-    --border-dark: #666;
-    --accent-color: #ff6f61;
-    --accent-color-dark: #ff8780;
-    --button-bg-light: #f0f0f0;
-    --button-bg-dark: #555;
-    --button-text-light: #666;
-    --button-text-dark: #ccc;
+    /* Акцентные цвета */
+    --accent-color: #e84393;
+    --accent-color-dark: #f472b6;
+    --accent-secondary: #ff6f61;
+    --accent-gradient: linear-gradient(135deg, #e84393, #ff6f61);
+
+    /* Светлая тема */
+    --background-light: #fef6f9;
+    --container-bg-light: #ffffff;
+    --secondary-bg-light: #fff0f6;
+    --text-light: #1a1a2e;
+    --text-dark: #f0e6f6;
+    --border-light: #f0d9e8;
+    --button-bg-light: #fff0f6;
+    --button-text-light: #6b4c5e;
+
+    /* Тёмная тема */
+    --background-dark: #0f0f1a;
+    --container-bg-dark: #1a1a2e;
+    --secondary-bg-dark: #25253d;
+    --border-dark: #35355a;
+    --button-bg-dark: #25253d;
+    --button-text-dark: #b8b8e0;
+
+    /* Цвета статусов партнёров */
+    --status-potential: #7c6af7;
+    --status-serious: #e84393;
+    --status-friend: #2dbf9a;
+    --status-past: #9b9bc0;
+
+    /* Утилиты */
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --shadow-sm: 0 2px 8px rgba(232, 67, 147, 0.08);
+    --shadow-md: 0 4px 20px rgba(232, 67, 147, 0.15);
+    --shadow-lg: 0 8px 32px rgba(232, 67, 147, 0.22);
+
+    /* Нижняя навигация */
+    --bottom-nav-height: 65px;
 }
 
 /* Основные стили */
@@ -37,17 +61,6 @@ html, body {
 @media (display-mode: standalone) {
     html, body {
         overscroll-behavior: none;
-    }
-
-    .container {
-        padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
-        padding-left: env(safe-area-inset-left);
-        padding-right: env(safe-area-inset-right);
-    }
-
-    .app-title {
-        margin-top: 19px;
     }
 }
 
@@ -104,21 +117,19 @@ html, body {
     }
 
     .container {
-        padding: 14.25px;
+        padding: 0;
         height: auto;
         min-height: 100vh;
-        padding-top: calc(14.25px + env(safe-area-inset-top));
-        padding-bottom: calc(14.25px + env(safe-area-inset-bottom));
     }
 }
 
 body.light {
-    background-color: var(--background-light);
+    background: linear-gradient(160deg, #fef6f9 0%, #fff8f9 40%, #f5f0ff 100%);
     color: var(--text-light);
 }
 
 body.dark {
-    background-color: var(--background-dark);
+    background: linear-gradient(160deg, #0f0f1a 0%, #120d18 50%, #0f0f20 100%);
     color: var(--text-dark);
 }
 
@@ -126,22 +137,22 @@ body.dark {
     width: 100%;
     min-height: 100vh;
     height: auto;
-    padding: 19px;
+    padding: 0;
     box-sizing: border-box;
     transition: background-color 0.3s ease;
     box-shadow: none;
     position: relative;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
 }
 
 body.light .container {
-    background: var(--container-bg-light);
+    background: transparent;
 }
 
 body.dark .container {
-    background: var(--container-bg-dark);
+    background: transparent;
 }
 
 
@@ -172,69 +183,74 @@ body.dark .container {
     opacity: 1;
 }
 
-/* Название приложения */
-.app-title {
-    text-align: center;
-    margin-bottom: 19px;
+/* Шапка приложения */
+.app-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: rgba(255, 246, 249, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-light);
+    padding-top: calc(12px + env(safe-area-inset-top));
 }
 
-.app-name {
-    font-family: 'Playfair Display', serif; /* Шрифт для названия */
-    font-weight: 600;
-    font-size: 2.5em;
+body.dark .app-bar {
+    background: rgba(26, 26, 46, 0.85);
+    border-bottom-color: var(--border-dark);
+}
+
+.app-bar-logo {
+    font-size: 1.4em;
+}
+
+.app-bar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4em;
+    font-weight: 700;
     color: var(--accent-color);
-    animation: fadeIn 1s ease-in;
+    flex: 1;
 }
 
-body.dark .app-name {
+body.dark .app-bar-title {
     color: var(--accent-color-dark);
 }
 
-/* Вкладки */
-.tabs {
+.app-bar-actions {
     display: flex;
-    justify-content: center;
-    margin-bottom: 19px;
-    border-bottom: 1px solid var(--border-light);
+    gap: 8px;
 }
 
-body.dark .tabs {
-    border-bottom: 1px solid var(--border-dark);
-}
-
-.tab {
-    background: none;
+.icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
     border: none;
-    padding: 14.25px 28.5px;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1.14em;
-    font-weight: 500;
+    background: transparent;
     color: var(--button-text-light);
+    font-size: 1.1em;
     cursor: pointer;
-    transition: color 0.3s ease, border-bottom 0.3s ease, transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 
-body.dark .tab {
+body.dark .icon-btn {
     color: var(--button-text-dark);
 }
 
-.tab:hover {
-    color: var(--text-light);
-    transform: translateY(-2px);
+.icon-btn:hover {
+    background: var(--secondary-bg-light);
+    transform: scale(1.1);
 }
 
-body.dark .tab:hover {
-    color: var(--text-dark);
-}
-
-.tab.active {
-    color: var(--accent-color);
-    border-bottom: 2.85px solid var(--accent-color);
-}
-
-body.dark .tab.active {
-    color: var(--accent-color-dark);
-    border-bottom: 2.85px solid var(--accent-color-dark);
+body.dark .icon-btn:hover {
+    background: var(--secondary-bg-dark);
 }
 
 .tab-content {
@@ -243,8 +259,7 @@ body.dark .tab.active {
     transition: opacity 0.3s ease, transform 0.3s ease;
     flex: 1;
     overflow-y: auto;
-    max-height: calc(100vh - 200px);
-    padding-bottom: 19px;
+    padding: 20px 20px calc(var(--bottom-nav-height) + 90px);
 }
 
 .tab-content:not(.hidden) {
@@ -1117,33 +1132,7 @@ body.dark .action-btn:hover {
     transform: scale(0.95);
 }
 
-/* Переключатель темы */
-#theme-toggle, #theme-toggle-partners, #theme-toggle-activities, #theme-toggle-profile, #theme-toggle-guides, #theme-toggle-settings {
-    background: var(--button-bg-light);
-    color: var(--text-light);
-    padding: 9.5px;
-    border-radius: 50%;
-    width: 47.5px;
-    height: 47.5px;
-    font-size: 1.425em;
-    border: none;
-    cursor: pointer;
-    transition: background 0.4s ease, transform 0.4s ease;
-}
-
-body.dark #theme-toggle, body.dark #theme-toggle-partners, body.dark #theme-toggle-activities, body.dark #theme-toggle-profile, body.dark #theme-toggle-guides, body.dark #theme-toggle-settings {
-    background: var(--button-bg-dark);
-    color: var(--text-dark);
-}
-
-#theme-toggle:hover, #theme-toggle-partners:hover, #theme-toggle-activities:hover, #theme-toggle-profile:hover, #theme-toggle-guides:hover, #theme-toggle-settings:hover {
-    background: #e0e0e0;
-    transform: scale(1.05);
-}
-
-body.dark #theme-toggle:hover, body.dark #theme-toggle-partners:hover, body.dark #theme-toggle-activities:hover, body.dark #theme-toggle-profile:hover, body.dark #theme-toggle-guides:hover, body.dark #theme-toggle-settings:hover {
-    background: #666;
-}
+/* Переключатель темы — теперь только в настройках через .toggle-switch */
 
 /* Поля ввода */
 input, select, textarea {
@@ -1720,7 +1709,7 @@ body.dark .profile-section .form-group textarea {
 }
 
 /* Плавное появление при загрузке */
-.container, .app-title, .tabs, .tab-content, .progress-panel, .dashboard-sections, .section {
+.container, .app-bar, .tab-content, .dashboard-sections, .section {
     animation: fadeIn 0.5s ease-in forwards;
 }
 
@@ -1838,12 +1827,6 @@ body.dark .profile-section .form-group textarea {
     .add-partner-btn {
         padding: 9.5px 19px;
         font-size: 0.95em;
-    }
-
-    #theme-toggle, #theme-toggle-partners, #theme-toggle-activities, #theme-toggle-profile, #theme-toggle-settings {
-        width: 38px;
-        height: 38px;
-        font-size: 1.14em;
     }
 
     .partner-filters {
@@ -2129,5 +2112,448 @@ body.dark .welcome-guide-btn:hover {
 
     #add-partner-form.show, #log-form.show {
         transform: translate(-50%, 0) scale(1);
+    }
+}
+
+/* ===== НИЖНЯЯ НАВИГАЦИЯ ===== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--bottom-nav-height);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: rgba(255, 246, 249, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 200;
+}
+
+body.dark .bottom-nav {
+    background: rgba(26, 26, 46, 0.92);
+    border-top-color: var(--border-dark);
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    padding: 8px 4px;
+    color: var(--button-text-light);
+    font-size: 0.6em;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    text-decoration: none;
+}
+
+body.dark .nav-item {
+    color: var(--button-text-dark);
+}
+
+.nav-item i {
+    font-size: 1.6rem;
+    transition: transform 0.2s ease;
+}
+
+.nav-item.active {
+    color: var(--accent-color);
+}
+
+body.dark .nav-item.active {
+    color: var(--accent-color-dark);
+}
+
+.nav-item.active i {
+    animation: navPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes navPop {
+    0%   { transform: translateY(0) scale(1); }
+    50%  { transform: translateY(-5px) scale(1.2); }
+    100% { transform: translateY(0) scale(1); }
+}
+
+.nav-fab-space {
+    flex: 0 0 70px;
+}
+
+/* ===== FAB ===== */
+.fab {
+    position: fixed;
+    bottom: calc(var(--bottom-nav-height) - 22px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    color: #fff;
+    border: none;
+    font-size: 1.4em;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    z-index: 300;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fab:hover {
+    transform: translateX(-50%) scale(1.1);
+    box-shadow: 0 10px 36px rgba(232, 67, 147, 0.5);
+}
+
+.fab:active {
+    transform: translateX(-50%) scale(0.93);
+}
+
+.fab.hidden {
+    display: none;
+}
+
+/* ===== СТАТИСТИКА — НОВЫЕ КАРТОЧКИ ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: var(--container-bg-light);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    animation: slideUp 0.4s ease forwards;
+}
+
+body.dark .stat-card {
+    background: var(--secondary-bg-dark);
+    border-color: var(--border-dark);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    flex-shrink: 0;
+}
+
+.potential-icon { background: rgba(124, 106, 247, 0.15); color: var(--status-potential); }
+.serious-icon   { background: rgba(232, 67, 147, 0.15); color: var(--status-serious); }
+.meetings-icon  { background: rgba(45, 191, 154, 0.15); color: var(--status-friend); }
+.active-icon    { background: rgba(255, 111, 97, 0.15);  color: var(--accent-secondary); }
+
+.stat-number {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--text-light);
+    line-height: 1;
+}
+
+body.dark .stat-number {
+    color: var(--text-dark);
+}
+
+.stat-label {
+    font-size: 0.78em;
+    font-weight: 500;
+    color: var(--button-text-light);
+    margin: 2px 0 0;
+}
+
+body.dark .stat-label {
+    color: var(--button-text-dark);
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== АВАТАР ПАРТНЁРА ===== */
+.partner-card {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.partner-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+}
+
+.partner-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.partner-card-body .partner-header {
+    margin-bottom: 8px;
+}
+
+.partner-card-body .partner-info {
+    margin-bottom: 10px;
+}
+
+.partner-card-body .partner-actions {
+    margin-top: 4px;
+}
+
+/* Кнопка избранного активная */
+.action-btn.favorite-active {
+    color: #f59e0b !important;
+}
+
+.action-btn.danger {
+    color: #ef4444;
+}
+
+.action-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* ===== НАСТРОЙКИ ===== */
+.settings-group {
+    background: var(--container-bg-light);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+body.dark .settings-group {
+    background: var(--secondary-bg-dark);
+    border-color: var(--border-dark);
+}
+
+.settings-group-title {
+    font-size: 0.85em !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--button-text-light) !important;
+    padding: 12px 16px 8px;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.dark .settings-group-title {
+    color: var(--button-text-dark) !important;
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-top: 1px solid var(--border-light);
+}
+
+body.dark .setting-row {
+    border-top-color: var(--border-dark);
+}
+
+.setting-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95em;
+    color: var(--text-light);
+}
+
+body.dark .setting-info {
+    color: var(--text-dark);
+}
+
+.setting-info i {
+    color: var(--accent-color);
+    width: 18px;
+    text-align: center;
+}
+
+body.dark .setting-info i {
+    color: var(--accent-color-dark);
+}
+
+.setting-btn {
+    background: var(--secondary-bg-light);
+    color: var(--button-text-light);
+    border: 1px solid var(--border-light);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8em;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+body.dark .setting-btn {
+    background: var(--button-bg-dark);
+    color: var(--button-text-dark);
+    border-color: var(--border-dark);
+}
+
+.setting-btn:hover {
+    background: var(--border-light);
+    transform: scale(1.03);
+}
+
+body.dark .setting-btn:hover {
+    background: var(--border-dark);
+}
+
+/* ===== TOGGLE SWITCH ===== */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--border-light);
+    border-radius: 26px;
+    transition: background 0.3s ease;
+}
+
+body.dark .toggle-slider {
+    background: var(--border-dark);
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: var(--accent-color);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+}
+
+/* ===== МЕДИА-ЗАПРОСЫ ДЛЯ НИЖНЕЙ НАВИГАЦИИ ===== */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 14px;
+    }
+
+    .stat-number {
+        font-size: 1.5em;
+    }
+
+    .tab-content {
+        padding: 14px 14px calc(var(--bottom-nav-height) + 90px);
+        max-height: none;
+    }
+
+    .bottom-nav {
+        height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+    }
+
+    .fab {
+        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) - 22px);
+    }
+
+    .partners-grid {
+        grid-template-columns: 1fr;
+        max-height: none;
+    }
+
+    .dashboard-sections {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== ПОЛИРОВКА ===== */
+.header {
+    padding-bottom: 4px;
+}
+
+h1 {
+    font-size: 1.9em;
+}
+
+body.dark h1 {
+    color: var(--text-dark);
+}
+
+/* Убираем старые ограничения max-height на больших экранах */
+@media (min-width: 769px) {
+    .tab-content {
+        max-height: none;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
     }
 }
