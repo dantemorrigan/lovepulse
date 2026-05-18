@@ -820,6 +820,7 @@
   }
   .nav-btn svg { transition: transform .3s var(--ease-spring); }
   .nav-btn.active svg { transform: translateY(-2px) scale(1.08); }
+  .web-logo { display: none; }
 
   /* FAB */
   .fab {
@@ -2543,7 +2544,7 @@ function renderHome() {
   const nc = v.querySelector('#neglectedCard');
   if (nc) nc.addEventListener('click', () => navigate('connections'));
 
-  if (total === 0) showWelcomePopup();
+  if (total === 0 && state.onboarded) showWelcomePopup();
 }
 
 function showWelcomePopup() {
@@ -3377,7 +3378,7 @@ function renderProfile() {
         </div>
       </div>
       <div style="text-align:center;padding:28px 0 14px;color:var(--ink-4);font-size:11px;letter-spacing:.05em;line-height:1.8;">
-        LovePulse · v2.7.0
+        LovePulse · v3.0.0
       </div>
       <input type="file" id="importFile" accept=".json" style="display:none">
     </div>
@@ -3536,10 +3537,6 @@ function openLovePlus() {
       </div>
     </div>
     <div class="lp-features" id="lpFeatures"></div>
-    <div class="lp-footer">
-      <button class="lp-notify-btn" id="lpNotifyBtn">Уведомить о запуске</button>
-      <div class="lp-footer-note">Бесплатный ранний доступ для первых пользователей</div>
-    </div>
   `);
 
   // Рендерим фичи через DOM (без кавычек в шаблоне)
@@ -3566,10 +3563,6 @@ function openLovePlus() {
     container.appendChild(row);
   });
 
-  document.getElementById('lpNotifyBtn').addEventListener('click', () => {
-    toast('Запомнили! Уведомим о запуске 🚀');
-    closeModal();
-  });
 }
 
 function exportData() {
@@ -3763,56 +3756,124 @@ function showAuthScreen() {
   }
 
   function renderLoginForm(container) {
-    container.innerHTML = `
-      <div id="authErr" class="auth-error" style="display:none;"></div>
-      <div class="field"><label>Email</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>
-      <div class="field"><label>Пароль</label><input type="password" id="authPass" autocomplete="current-password" placeholder="••••••••"></div>
-      <button class="btn" id="authLoginBtn" style="margin-top:8px;">Войти</button>
-      <div class="auth-hint">Нет аккаунта? Нажмите «Регистрация» выше.</div>
-    `;
-    const doLogin = async () => {
-      const email = container.querySelector('#authEmail').value.trim().toLowerCase();
-      const pass = container.querySelector('#authPass').value;
-      const errEl = container.querySelector('#authErr');
-      const btn = container.querySelector('#authLoginBtn');
-      if (!email || !pass) { errEl.textContent = 'Заполните все поля'; errEl.style.display = ''; return; }
-      errEl.style.display = 'none';
-      btn.disabled = true; btn.textContent = 'Входим…';
-      showLoader('Входим…');
-      let data, error;
-      try {
-        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
-        ({ data, error } = await Promise.race([
-          sb.auth.signInWithPassword({ email, password: pass }),
-          timeout.then(() => { throw new Error('timeout'); })
-        ]));
-      } catch (e) {
+    function showPasswordForm() {
+      container.innerHTML = `
+        <div id="authErr" class="auth-error" style="display:none;"></div>
+        <div class="field"><label>Email</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>
+        <div class="field"><label>Пароль</label><input type="password" id="authPass" autocomplete="current-password" placeholder="••••••••"></div>
+        <button class="btn" id="authLoginBtn" style="margin-top:8px;">Войти</button>
+        <div class="auth-hint">Нет аккаунта? Нажмите «Регистрация» выше.</div>
+      `;
+      const doLogin = async () => {
+        const email = container.querySelector('#authEmail').value.trim().toLowerCase();
+        const pass = container.querySelector('#authPass').value;
+        const errEl = container.querySelector('#authErr');
+        const btn = container.querySelector('#authLoginBtn');
+        if (!email || !pass) { errEl.textContent = 'Заполните все поля'; errEl.style.display = ''; return; }
+        errEl.style.display = 'none';
+        btn.disabled = true; btn.textContent = 'Входим…';
+        showLoader('Входим…');
+        let data, error;
+        try {
+          const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
+          ({ data, error } = await Promise.race([
+            sb.auth.signInWithPassword({ email, password: pass }),
+            timeout.then(() => { throw new Error('timeout'); })
+          ]));
+        } catch (e) {
+          hideLoader();
+          btn.disabled = false; btn.textContent = 'Войти';
+          errEl.textContent = e.message === 'timeout' ? 'Превышено время ожидания. Проверьте соединение.' : e.message;
+          errEl.style.display = '';
+          return;
+        }
+        if (error) {
+          hideLoader();
+          btn.disabled = false; btn.textContent = 'Войти';
+          errEl.textContent = error.message === 'Invalid login credentials' ? 'Неверный email или пароль' : error.message;
+          errEl.style.display = '';
+          return;
+        }
+        // Password verified — sign out locally and send OTP as second factor
+        await sb.auth.signOut({ scope: 'local' });
+        let otpErr;
+        try {
+          ({ error: otpErr } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false } }));
+        } catch(e) { otpErr = e; }
         hideLoader();
-        btn.disabled = false; btn.textContent = 'Войти';
-        errEl.textContent = e.message === 'timeout' ? 'Превышено время ожидания. Проверьте соединение.' : e.message;
-        errEl.style.display = '';
-        return;
-      }
-      if (error) {
+        if (otpErr) {
+          btn.disabled = false; btn.textContent = 'Войти';
+          errEl.textContent = 'Не удалось отправить код. Попробуйте снова.';
+          errEl.style.display = '';
+          return;
+        }
+        showOtpForm(email);
+      };
+      container.querySelector('#authLoginBtn').addEventListener('click', doLogin);
+      container.querySelector('#authPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    }
+
+    function showOtpForm(email) {
+      container.innerHTML = `
+        <div id="authErr" class="auth-error" style="display:none;"></div>
+        <div class="auth-hint" style="text-align:center;margin-bottom:16px;">
+          📬 Код подтверждения отправлен на <strong>${email}</strong>
+        </div>
+        <div class="field">
+          <label>Код из письма</label>
+          <input type="text" id="otpCode" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code" style="letter-spacing:0.2em;font-size:20px;text-align:center;">
+        </div>
+        <button class="btn" id="otpVerifyBtn" style="margin-top:8px;">Подтвердить</button>
+        <div style="text-align:center;margin-top:12px;">
+          <span id="otpBack" style="cursor:pointer;color:var(--ink-3);font-size:13px;">← Назад</span>
+        </div>
+      `;
+      setTimeout(() => container.querySelector('#otpCode')?.focus(), 100);
+      const doVerify = async () => {
+        const token = container.querySelector('#otpCode').value.trim();
+        const errEl = container.querySelector('#authErr');
+        const btn = container.querySelector('#otpVerifyBtn');
+        if (!token || token.length < 6) { errEl.textContent = 'Введите 6-значный код из письма'; errEl.style.display = ''; return; }
+        errEl.style.display = 'none';
+        btn.disabled = true; btn.textContent = 'Проверяем…';
+        showLoader('Проверяем код…');
+        let data, error;
+        try {
+          const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
+          ({ data, error } = await Promise.race([
+            sb.auth.verifyOtp({ email, token, type: 'email' }),
+            timeout.then(() => { throw new Error('timeout'); })
+          ]));
+        } catch(e) {
+          hideLoader();
+          btn.disabled = false; btn.textContent = 'Подтвердить';
+          errEl.textContent = e.message === 'timeout' ? 'Превышено время ожидания.' : e.message;
+          errEl.style.display = '';
+          return;
+        }
+        if (error) {
+          hideLoader();
+          btn.disabled = false; btn.textContent = 'Подтвердить';
+          errEl.textContent = 'Неверный или истёкший код. Попробуйте снова.';
+          errEl.style.display = '';
+          return;
+        }
+        if (currentUserId) { hideLoader(); return; }
+        currentUserId = data.user.id;
+        currentUserEmail = data.user.email || null;
+        state = _loadCachedState(currentUserId);
+        applyTheme(state.user.theme || 'light');
+        authEl.style.display = 'none';
         hideLoader();
-        btn.disabled = false; btn.textContent = 'Войти';
-        errEl.textContent = error.message === 'Invalid login credentials' ? 'Неверный email или пароль' : error.message;
-        errEl.style.display = '';
-        return;
-      }
-      // onAuthStateChange may have already handled the session — skip if so
-      if (currentUserId) { hideLoader(); return; }
-      currentUserId = data.user.id;
-      currentUserEmail = data.user.email || null;
-      state = _loadCachedState(currentUserId);
-      applyTheme(state.user.theme || 'light');
-      authEl.style.display = 'none';
-      hideLoader();
-      showApp();
-      _syncFromCloud(currentUserId);
-    };
-    container.querySelector('#authLoginBtn').addEventListener('click', doLogin);
-    container.querySelector('#authPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+        showApp();
+        _syncFromCloud(currentUserId);
+      };
+      container.querySelector('#otpVerifyBtn').addEventListener('click', doVerify);
+      container.querySelector('#otpCode').addEventListener('keydown', e => { if (e.key === 'Enter') doVerify(); });
+      container.querySelector('#otpBack').addEventListener('click', () => showPasswordForm());
+    }
+
+    showPasswordForm();
   }
 
   function renderRegisterForm(container) {
