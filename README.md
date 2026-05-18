@@ -43,10 +43,6 @@ screenshots/        — скриншоты для PWA store
 
 Chrome 80+ · Safari 13+ · Firefox 60+ · iOS Safari · Android Chrome
 
-## Версия
-
-v4.9.0
-
 ## Лицензия
 
 MIT
