@@ -1711,24 +1711,6 @@
   .timeline-date { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
   .timeline-text { font-size: 13px; color: var(--ink-2); line-height: 1.4; }
 
-  /* ── DEV PANEL ── */
-  .dev-panel {
-    background: #0d1117; border-radius: var(--radius); padding: 16px;
-    margin-bottom: 14px; border: 1px solid #30363d;
-  }
-  .dev-panel-title {
-    font-size: 10px; text-transform: uppercase; letter-spacing: .14em;
-    color: #58a6ff; font-weight: 600; margin-bottom: 12px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .dev-panel-title::before { content: '●'; color: #3fb950; }
-  .dev-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 0; border-bottom: 1px solid #21262d; font-size: 13px; color: #e6edf3;
-  }
-  .dev-row:last-child { border-bottom: none; }
-  .dev-val { font-size: 12px; color: #58a6ff; font-family: monospace; }
-
   /* ── PDF PRINT ── */
   @media print {
     .nav, .header, .fab, .modal-backdrop, .toast { display: none !important; }
@@ -3488,7 +3470,7 @@ function renderProfile() {
         <div class="menu-item">
           <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
           <div class="menu-label">Версия</div>
-          <div class="menu-value" id="versionTap" style="cursor:pointer;">5.0.5</div>
+          <div class="menu-value">5.0.5</div>
         </div>
         <div class="menu-item">
           <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
@@ -3502,16 +3484,7 @@ function renderProfile() {
         </div>
       </div>
 
-      <div id="devSection" style="display:none;margin-bottom:14px;">
-        <div class="dev-panel">
-          <div class="dev-panel-title">Developer Mode</div>
-          <div class="dev-row"><span>Connections</span><span class="dev-val">${state.connections.length}</span></div>
-          <div class="dev-row"><span>Entries</span><span class="dev-val">${state.entries.length}</span></div>
-          <div class="dev-row"><span>Notifications</span><span class="dev-val" id="devNotifVal">${typeof Notification !== 'undefined' ? Notification.permission : 'n/a'}</span></div>
-          <div class="dev-row"><span>Storage</span><span class="dev-val">localStorage</span></div>
-        </div>
-      </div>
-      <div style="text-align:center;padding:28px 0 14px;color:var(--ink-4);font-size:11px;letter-spacing:.05em;line-height:1.8;">
+<div style="text-align:center;padding:28px 0 14px;color:var(--ink-4);font-size:11px;letter-spacing:.05em;line-height:1.8;">
         LovePulse · v4.9.0
       </div>
       <input type="file" id="importFile" accept=".json" style="display:none">
@@ -3544,29 +3517,6 @@ function renderProfile() {
       toast('Фото обновлено ✓');
     };
     reader.readAsDataURL(file);
-  });
-
-  // Dev mode: 5 taps on version
-  let versionTaps = 0, versionTimer;
-  v.querySelector('#versionTap').addEventListener('click', () => {
-    versionTaps++;
-    clearTimeout(versionTimer);
-    versionTimer = setTimeout(() => { versionTaps = 0; }, 1500);
-    if (versionTaps >= 5) {
-      versionTaps = 0;
-      const devSec = v.querySelector('#devSection');
-      const isVisible = devSec.style.display !== 'none';
-      devSec.style.display = isVisible ? 'none' : 'block';
-      toast(isVisible ? 'Dev mode скрыт' : '🛠 Dev mode активирован');
-
-      if (!isVisible) {
-        v.querySelector('#devNotifVal').addEventListener('click', async () => {
-          const ok = await requestNotifications();
-          v.querySelector('#devNotifVal').textContent = Notification.permission;
-          toast(ok ? '🔔 Уведомления разрешены' : 'Уведомления запрещены');
-        });
-      }
-    }
   });
 
   v.querySelector('#editProfileBtn').addEventListener('click', editProfile);
