@@ -475,6 +475,8 @@
     letter-spacing: -0.02em;
     line-height: 1;
     margin-bottom: 6px;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   .stat-label {
     font-size: 12px;
@@ -862,6 +864,9 @@
     padding: 22px 22px calc(22px + env(safe-area-inset-bottom));
     max-height: 88vh;
     overflow-y: auto;
+    overflow-x: hidden;
+    overflow-wrap: break-word;
+    word-break: break-word;
     animation: slideUp .35s var(--ease-spring);
   }
   @keyframes slideUp {
@@ -1153,6 +1158,7 @@
     .fab { bottom: 28px; right: 28px; position: fixed; }
     .view { max-width: 960px; margin: 0 auto; padding: 32px 48px 60px; }
     .toast { position: fixed; }
+    .confirm-overlay { position: fixed; }
 
     /* Desktop modal: centered dialog instead of bottom sheet */
     .modal-backdrop {
@@ -2657,10 +2663,10 @@ function openConnection(id) {
   openModal(`
     <div class="modal-handle"></div>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:22px;">
-      <div class="avatar ${c.color}" style="width:62px;height:62px;font-size:22px;">${initials(c.name)}</div>
-      <div style="flex:1">
-        <div style="font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-0.02em;">${c.name}</div>
-        <div style="font-size:13px;color:var(--ink-3);margin-top:3px;">${c.statusLabel || ROLES[c.role]} · ${ROLES[c.role]}</div>
+      <div class="avatar ${c.color}" style="width:62px;height:62px;font-size:22px;flex-shrink:0;">${initials(c.name)}</div>
+      <div style="flex:1;min-width:0;overflow:hidden;">
+        <div style="font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-0.02em;overflow-wrap:break-word;word-break:break-word;">${c.name}</div>
+        <div style="font-size:13px;color:var(--ink-3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.statusLabel || ROLES[c.role]} · ${ROLES[c.role]}</div>
       </div>
     </div>
     ${c.note ? `<div style="background:var(--bg-elev);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;font-size:14px;color:var(--ink-2);line-height:1.5;">${c.note}</div>` : ''}
