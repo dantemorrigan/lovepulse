@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lovepulse-cache-v5';
+const CACHE_NAME = 'lovepulse-cache-v6';
 const urlsToCache = [
     '/',
     '/index.html',
