@@ -3185,8 +3185,6 @@ function renderProfile() {
       <div id="devSection" style="display:none;margin-bottom:14px;">
         <div class="dev-panel">
           <div class="dev-panel-title">Developer Mode</div>
-          <div class="dev-row"><span>LovePlus+</span><div id="plusToggleWrap"></div></div>
-          <div class="dev-row"><span>state.plus</span><span class="dev-val" id="devPlusVal">${state.plus}</span></div>
           <div class="dev-row"><span>Connections</span><span class="dev-val">${state.connections.length}</span></div>
           <div class="dev-row"><span>Entries</span><span class="dev-val">${state.entries.length}</span></div>
           <div class="dev-row"><span>Notifications</span><span class="dev-val" id="devNotifVal">${typeof Notification !== 'undefined' ? Notification.permission : 'n/a'}</span></div>
@@ -3241,22 +3239,6 @@ function renderProfile() {
       toast(isVisible ? 'Dev mode скрыт' : '🛠 Dev mode активирован');
 
       if (!isVisible) {
-        // Plus toggle
-        const tw = v.querySelector('#plusToggleWrap');
-        const track = document.createElement('div');
-        track.className = 'toggle-track' + (state.plus ? ' on' : '');
-        track.innerHTML = '<div class="toggle-thumb"></div>';
-        track.style.cursor = 'pointer';
-        tw.appendChild(track);
-        track.addEventListener('click', () => {
-          state.plus = !state.plus;
-          saveState();
-          track.classList.toggle('on', state.plus);
-          v.querySelector('#devPlusVal').textContent = state.plus;
-          toast(state.plus ? '✅ LovePlus+ включён' : '❌ LovePlus+ выключен');
-          setTimeout(() => navigate('profile'), 400);
-        });
-
         // Notifications
         v.querySelector('#devNotifVal').addEventListener('click', async () => {
           const ok = await requestNotifications();
