@@ -1532,211 +1532,6 @@
     background: rgba(192,24,46,.15);
   }
 
-  /* ── LOVEPLUS SUBSCRIPTION ── */
-  .loveplus-btn {
-    width: 100%;
-    background: linear-gradient(135deg, #1a0a2e, #2d1054, #1a0a2e);
-    background-size: 200% 200%;
-    animation: gradShift 4s ease infinite;
-    border: none;
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    cursor: pointer;
-    margin-bottom: 24px;
-    position: relative;
-    overflow: hidden;
-    transition: transform .2s var(--ease);
-  }
-  @keyframes gradShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  .loveplus-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(105deg,
-      transparent 20%,
-      rgba(255,255,255,.06) 40%,
-      rgba(255,255,255,.12) 50%,
-      rgba(255,255,255,.06) 60%,
-      transparent 80%
-    );
-    animation: shimmer 3s ease-in-out infinite;
-  }
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    60%, 100% { transform: translateX(100%); }
-  }
-  .loveplus-btn:active { transform: scale(.98); }
-  .loveplus-icon {
-    width: 40px; height: 40px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #9333ea, #c026d3);
-    display: grid; place-items: center;
-    flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(147,51,234,.4);
-  }
-  .loveplus-text { flex: 1; text-align: left; }
-  .loveplus-title {
-    font-family: 'Fraunces', serif;
-    font-size: 16px;
-    font-weight: 500;
-    color: white;
-    letter-spacing: -0.01em;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .loveplus-badge {
-    font-size: 9px;
-    font-family: 'Geist', sans-serif;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    background: linear-gradient(135deg, #9333ea, #c026d3);
-    color: white;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-  .loveplus-sub {
-    font-size: 12px;
-    color: rgba(255,255,255,.55);
-    margin-top: 2px;
-  }
-  .loveplus-chev {
-    color: rgba(255,255,255,.4);
-    flex-shrink: 0;
-  }
-
-  /* ── LOVEPLUS MODAL ── */
-  .lp-modal-header {
-    background: linear-gradient(160deg, #1a0a2e, #2d1054);
-    margin: -22px -22px 0;
-    padding: 32px 24px 28px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    border-radius: 24px 24px 0 0;
-  }
-  .lp-modal-header::before {
-    content: '';
-    position: absolute;
-    top: -40%; left: 20%;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(147,51,234,.35), transparent 70%);
-    filter: blur(20px);
-  }
-  .lp-modal-header::after {
-    content: '';
-    position: absolute;
-    bottom: -30%; right: 10%;
-    width: 160px; height: 160px;
-    background: radial-gradient(circle, rgba(192,38,211,.3), transparent 70%);
-    filter: blur(20px);
-  }
-  .lp-logo {
-    font-family: 'Fraunces', serif;
-    font-size: 32px;
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    color: white;
-    position: relative;
-    margin-bottom: 6px;
-  }
-  .lp-logo span {
-    background: linear-gradient(135deg, #c084fc, #e879f9);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-style: italic;
-  }
-  .lp-coming {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,.1);
-    border: 1px solid rgba(255,255,255,.15);
-    border-radius: 999px;
-    padding: 5px 14px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.7);
-    position: relative;
-  }
-  .lp-coming::before {
-    content: '';
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: #a855f7;
-    animation: pulse 1.8s ease-in-out infinite;
-  }
-
-  .lp-features {
-    padding: 20px 0 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .lp-feature {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 14px;
-    border-radius: var(--radius-sm);
-    transition: background .15s var(--ease);
-  }
-  .lp-feature:active { background: var(--bg-soft); }
-  .lp-feature-icon {
-    width: 38px; height: 38px;
-    border-radius: 11px;
-    display: grid; place-items: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .lp-feature-text { flex: 1; }
-  .lp-feature-title {
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 2px;
-    color: var(--ink);
-  }
-  .lp-feature-desc {
-    font-size: 12px;
-    color: var(--ink-3);
-    line-height: 1.4;
-  }
-  .lp-footer {
-    margin-top: 20px;
-    text-align: center;
-  }
-  .lp-notify-btn {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: none;
-    background: linear-gradient(135deg, #7c3aed, #a21caf);
-    color: white;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 8px 24px -6px rgba(124,58,237,.4);
-    transition: transform .2s var(--ease), box-shadow .2s var(--ease);
-    letter-spacing: 0.01em;
-  }
-  .lp-notify-btn:active { transform: scale(.98); box-shadow: none; }
-  .lp-footer-note {
-    font-size: 11px;
-    color: var(--ink-4);
-    margin-top: 10px;
-  }
 
   .top-person-row {
     display: flex;
@@ -1778,29 +1573,6 @@
   }
   .toggle-track.on .toggle-thumb { transform: translateX(20px); }
 
-
-  /* ── HEALTH SCORE ── */
-  [data-theme="dark"]
-  [data-theme="dark"]
-  [data-theme="dark"]
-  [data-theme="dark"]
-
-
-  /* ── PLUS BADGE ── */
-  .plus-active-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: linear-gradient(135deg,#7c3aed,#a21caf);
-    color: white; font-size: 10px; font-weight: 700;
-    letter-spacing: .1em; padding: 3px 9px; border-radius: 999px;
-    text-transform: uppercase;
-  }
-  .plus-gate {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--bg-soft); border: 1px dashed var(--line-2);
-    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px;
-    font-size: 13px; color: var(--ink-3);
-  }
-  .plus-gate svg { flex-shrink: 0; color: #9333ea; }
 
   /* ── MAP СВЯЗЕЙ ── */
   .conn-map-wrap {
@@ -2131,8 +1903,7 @@ const DEFAULT_STATE = {
   user: { name: '', bio: '', theme: 'light' },
   connections: [],
   entries: [],
-  onboarded: false,
-  plus: false
+  onboarded: false
 };
 
 let state = structuredClone(DEFAULT_STATE);
@@ -2143,7 +1914,6 @@ function _mergeWithDefaults(parsed) {
   if (!s.user.name) s.user.name = 'Новый пользователь';
   if (!s.user.theme) s.user.theme = 'light';
   if (s.onboarded === undefined) s.onboarded = false;
-  if (s.plus === undefined) s.plus = false;
   if (s.entries) s.entries.forEach(e => { if (!Array.isArray(e.tags)) e.tags = []; });
   return s;
 }
@@ -2341,14 +2111,7 @@ function calcStreak() {
 // ============== HEALTH SCORE ==============
 // Возвращает { score: 0-100, label, cls, color, breakdown }
 
-// ============== LOVEPLUS ==============
-function isPlus() { return !!state.plus; }
-
-function plusGate(featureName) {
-  return '<div class="plus-gate"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span><b>LovePlus+</b> — ' + featureName + '. Включи подписку в профиле.</span></div>';
-}
-
-// Health Score
+// ============== HEALTH SCORE ==============
 function calcHealthScore(connId, role) {
   const now = Date.now(), DAY = 86400000;
   const freq = { partner:3,family:7,friend:14,buddy:30,colleague:21,ex:60 }[role] || 21;
@@ -2407,7 +2170,6 @@ async function requestNotifications() {
   return perm === 'granted';
 }
 function scheduleReminders() {
-  if (!isPlus()) return;
   state.connections.forEach(c => {
     const threshold = c.reminderDays || 14;
     const last = lastEntryDate(c.id);
@@ -2451,8 +2213,8 @@ function renderHome() {
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   }).length;
   const recentEntries = [...state.entries].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 5);
-  const anniversaries = isPlus() ? getAnniversaries() : [];
-  if (isPlus()) scheduleReminders();
+  const anniversaries = getAnniversaries();
+  scheduleReminders();
   const streak = calcStreak();
 
   // Люди которым давно не писал (> 30 дней или вообще никогда)
@@ -2648,7 +2410,7 @@ function renderConnList() {
           <div class="conn-name">${c.name}</div>
           <div class="conn-meta">${c.statusLabel || ROLES[c.role] || c.role}${last ? ' · ' + daysAgo(last) : ''}</div>
         </div>
-        ${isPlus() ? (() => { const hs=calcHealthScore(c.id,c.role); return '<div class="health-ring" style="width:38px;height:38px;" title="'+hs.label+'">'+healthRingSVG(hs.score,hs.color,38)+'<div class="health-score-label" style="color:'+hs.color+';">'+hs.score+'</div></div>'; })() : (entryCount ? '<span class="conn-count">'+entryCount+'</span>' : '')}
+        ${(() => { const hs=calcHealthScore(c.id,c.role); return '<div class="health-ring" style="width:38px;height:38px;" title="'+hs.label+'">'+healthRingSVG(hs.score,hs.color,38)+'<div class="health-score-label" style="color:'+hs.color+';">'+hs.score+'</div></div>'; })()}
         <span class="role-tag">${ROLES[c.role] || c.role}</span>
       </div>
     `;
@@ -2722,11 +2484,9 @@ function openConnectionForm(existing) {
     </div>
     <div class="field"><label>Статус (своими словами)</label><input id="fStatus" value="${c.statusLabel ? c.statusLabel : ''}" maxlength="60" placeholder="Моя девушка, старый друг..."></div>
     <div class="field"><label>Заметка</label><textarea id="fNote" maxlength="300" placeholder="Что важно помнить об этом человеке">${c.note||''}</textarea></div>
-    ${isPlus() ? `
-      <div class="field"><label>📅 Важная дата (годовщина)</label><input type="date" id="fAnniv" value="${c.anniversary||''}"></div>
-      <div class="field"><label>📅 Название даты</label><input id="fAnnivLabel" value="${c.anniversaryLabel||''}" placeholder="Знакомство, день рождения..."></div>
-      <div class="field"><label>🔔 Напомнить если нет записей (дней)</label><input type="number" id="fReminder" value="${c.reminderDays||14}" min="1" max="365"></div>
-    ` : ''}
+    <div class="field"><label>📅 Важная дата (годовщина)</label><input type="date" id="fAnniv" value="${c.anniversary||''}"></div>
+    <div class="field"><label>📅 Название даты</label><input id="fAnnivLabel" value="${c.anniversaryLabel||''}" placeholder="Знакомство, день рождения..."></div>
+    <div class="field"><label>🔔 Напомнить если нет записей (дней)</label><input type="number" id="fReminder" value="${c.reminderDays||14}" min="1" max="365"></div>
     <button class="btn" id="saveConn">${existing ? 'Сохранить' : 'Создать'}</button>
   `);
 
@@ -2741,9 +2501,9 @@ function openConnectionForm(existing) {
     if (!name) { toast('Введи имя'); return; }
     const note = document.getElementById('fNote').value.trim();
     const statusLabel = document.getElementById('fStatus').value.trim();
-    const anniversary = isPlus() && document.getElementById('fAnniv') ? document.getElementById('fAnniv').value : (existing?.anniversary||'');
-    const anniversaryLabel = isPlus() && document.getElementById('fAnnivLabel') ? document.getElementById('fAnnivLabel').value.trim() : (existing?.anniversaryLabel||'');
-    const reminderDays = isPlus() && document.getElementById('fReminder') ? parseInt(document.getElementById('fReminder').value)||14 : (existing?.reminderDays||14);
+    const anniversary = document.getElementById('fAnniv') ? document.getElementById('fAnniv').value : (existing?.anniversary||'');
+    const anniversaryLabel = document.getElementById('fAnnivLabel') ? document.getElementById('fAnnivLabel').value.trim() : (existing?.anniversaryLabel||'');
+    const reminderDays = document.getElementById('fReminder') ? parseInt(document.getElementById('fReminder').value)||14 : (existing?.reminderDays||14);
     if (existing) {
       Object.assign(existing, { name, role, note, statusLabel, anniversary, anniversaryLabel, reminderDays });
       toast('Сохранено ✓');
@@ -2928,20 +2688,15 @@ function renderStats() {
   requestAnimationFrame(() => {
     v.querySelectorAll('.bar').forEach((b,i) => setTimeout(() => { b.style.height = b.dataset.h+'%'; }, 50*i));
     v.querySelectorAll('.top-bar-fill').forEach((b,i) => setTimeout(() => { b.style.width = b.dataset.pct+'%'; }, 100+50*i));
-    // Render plus extras into placeholder
     const extra = v.querySelector('#statsExtraBlock');
     if (extra) {
-      if (isPlus()) {
-        const moodCard = document.createElement('div');
-        moodCard.className = 'chart-card';
-        moodCard.style.marginBottom = '14px';
-        moodCard.innerHTML = '<div class="chart-title">🎭 Настроение по людям</div><div class="chart-sub">Какие эмоции чаще всего с кем</div><div id="moodStatsBlock"></div>';
-        extra.appendChild(moodCard);
-        renderMoodStats();
-        renderConnMap();
-      } else {
-        extra.innerHTML = '<div class="plus-gate"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span><b>LovePlus+</b> — карта связей и mood-статистика. Включи в профиле.</span></div>';
-      }
+      const moodCard = document.createElement('div');
+      moodCard.className = 'chart-card';
+      moodCard.style.marginBottom = '14px';
+      moodCard.innerHTML = '<div class="chart-title">🎭 Настроение по людям</div><div class="chart-sub">Какие эмоции чаще всего с кем</div><div id="moodStatsBlock"></div>';
+      extra.appendChild(moodCard);
+      renderMoodStats();
+      renderConnMap();
     }
   });
 }
@@ -3119,8 +2874,8 @@ function renderDiaryList() {
       entry.className = 'diary-entry';
       entry.dataset.entry = e.id;
 
-      // Mood (Plus only)
-      if (e.mood && isPlus()) {
+      // Mood
+      if (e.mood) {
         const m = moodById(e.mood);
         if (m) {
           const moodEl = document.createElement('div');
@@ -3172,7 +2927,7 @@ function openEntry(id) {
     <div style="margin-bottom:18px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);">${d.day} ${d.month} ${d.year}</div>
-        ${e.mood && isPlus() ? (() => { const m=moodById(e.mood); return m ? '<span style="font-size:14px;">'+m.emoji+'</span><span style="font-size:11px;color:var(--ink-3);">'+m.label+'</span>' : ''; })() : ''}
+        ${e.mood ? (() => { const m=moodById(e.mood); return m ? '<span style="font-size:14px;">'+m.emoji+'</span><span style="font-size:11px;color:var(--ink-3);">'+m.label+'</span>' : ''; })() : ''}
       </div>
       <div style="font-family:'Fraunces',serif;font-size:18px;line-height:1.6;font-weight:400;color:var(--ink);">${e.text}</div>
     </div>
@@ -3222,23 +2977,21 @@ function openEntryForm(existing) {
     <div id="moodFieldSlot"></div>
     <button class="btn" id="saveEntry">${existing ? 'Сохранить' : 'Записать'}</button>
   `);
-  // Inject mood picker if Plus
-  if (isPlus()) {
-    const slot = document.getElementById('moodFieldSlot');
-    if (slot) {
-      const wrap = document.createElement('div');
-      wrap.className = 'field';
-      wrap.innerHTML = '<label>🎭 Настроение</label><div class="mood-picker" id="moodPicker"></div>';
-      slot.appendChild(wrap);
-      const picker = document.getElementById('moodPicker');
-      MOODS.forEach(m => {
-        const opt = document.createElement('div');
-        opt.className = 'mood-opt' + (e.mood===m.id ? ' selected' : '');
-        opt.dataset.mood = m.id;
-        opt.textContent = m.emoji + ' ' + m.label;
-        picker.appendChild(opt);
-      });
-    }
+  // Inject mood picker
+  const slot = document.getElementById('moodFieldSlot');
+  if (slot) {
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+    wrap.innerHTML = '<label>🎭 Настроение</label><div class="mood-picker" id="moodPicker"></div>';
+    slot.appendChild(wrap);
+    const picker = document.getElementById('moodPicker');
+    MOODS.forEach(m => {
+      const opt = document.createElement('div');
+      opt.className = 'mood-opt' + (e.mood===m.id ? ' selected' : '');
+      opt.dataset.mood = m.id;
+      opt.textContent = m.emoji + ' ' + m.label;
+      picker.appendChild(opt);
+    });
   }
   document.querySelectorAll('#tagPicker .tag-pickable').forEach(t => t.addEventListener('click', () => {
     const tid = t.dataset.id;
@@ -3246,13 +2999,11 @@ function openEntryForm(existing) {
     else { tags.push(tid); t.classList.add('selected'); }
   }));
   let selectedMood = e.mood || null;
-  if (isPlus()) {
-    document.querySelectorAll('#moodPicker .mood-opt').forEach(opt => opt.addEventListener('click', () => {
-      document.querySelectorAll('#moodPicker .mood-opt').forEach(o=>o.classList.remove('selected'));
-      opt.classList.add('selected');
-      selectedMood = opt.dataset.mood;
-    }));
-  }
+  document.querySelectorAll('#moodPicker .mood-opt').forEach(opt => opt.addEventListener('click', () => {
+    document.querySelectorAll('#moodPicker .mood-opt').forEach(o=>o.classList.remove('selected'));
+    opt.classList.add('selected');
+    selectedMood = opt.dataset.mood;
+  }));
   document.getElementById('saveEntry').addEventListener('click', () => {
     const text = document.getElementById('fText').value.trim();
     const date = document.getElementById('fDate').value;
@@ -3287,21 +3038,9 @@ function renderProfile() {
         </div>
         <div class="profile-name" style="display:flex;align-items:center;gap:8px;justify-content:center;">
           ${state.user.name}
-          ${isPlus() ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="#a855f7" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' : ''}
         </div>
         <div class="profile-bio">${state.user.bio || ''}</div>
       </div>
-
-      <button class="loveplus-btn" id="loveplusBtn">
-        <div class="loveplus-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        </div>
-        <div class="loveplus-text">
-          <div class="loveplus-title">Love<span style="font-style:italic;opacity:.9">Plus</span> <span class="loveplus-badge">+</span></div>
-          <div class="loveplus-sub">Расширенные возможности</div>
-        </div>
-        <svg class="loveplus-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
-      </button>
 
       <div class="section-label">Профиль</div>
       <div class="menu-group">
@@ -3359,8 +3098,6 @@ function renderProfile() {
       <div id="devSection" style="display:none;margin-bottom:14px;">
         <div class="dev-panel">
           <div class="dev-panel-title">Developer Mode</div>
-          <div class="dev-row"><span>LovePlus+</span><div id="plusToggleWrap"></div></div>
-          <div class="dev-row"><span>state.plus</span><span class="dev-val" id="devPlusVal">${state.plus}</span></div>
           <div class="dev-row"><span>Connections</span><span class="dev-val">${state.connections.length}</span></div>
           <div class="dev-row"><span>Entries</span><span class="dev-val">${state.entries.length}</span></div>
           <div class="dev-row"><span>Notifications</span><span class="dev-val" id="devNotifVal">${typeof Notification !== 'undefined' ? Notification.permission : 'n/a'}</span></div>
@@ -3416,20 +3153,6 @@ function renderProfile() {
       toast(isVisible ? 'Dev mode скрыт' : '🛠 Dev mode активирован');
 
       if (!isVisible) {
-        const tw = v.querySelector('#plusToggleWrap');
-        const track = document.createElement('div');
-        track.className = 'toggle-track' + (state.plus ? ' on' : '');
-        track.innerHTML = '<div class="toggle-thumb"></div>';
-        track.style.cursor = 'pointer';
-        tw.appendChild(track);
-        track.addEventListener('click', () => {
-          state.plus = !state.plus;
-          saveState();
-          track.classList.toggle('on', state.plus);
-          v.querySelector('#devPlusVal').textContent = state.plus;
-          toast(state.plus ? '✅ LovePlus+ включён' : '❌ LovePlus+ выключен');
-          setTimeout(() => navigate('profile'), 400);
-        });
         v.querySelector('#devNotifVal').addEventListener('click', async () => {
           const ok = await requestNotifications();
           v.querySelector('#devNotifVal').textContent = Notification.permission;
@@ -3439,7 +3162,6 @@ function renderProfile() {
     }
   });
 
-  v.querySelector('#loveplusBtn').addEventListener('click', openLovePlus);
   v.querySelector('#editProfileBtn').addEventListener('click', editProfile);
   v.querySelector('#exportBtn').addEventListener('click', exportData);
   v.querySelector('#importBtn').addEventListener('click', () => v.querySelector('#importFile').click());
@@ -3502,59 +3224,13 @@ function editProfile() {
   });
 }
 
-function openLovePlus() {
-  const features = [
-    { icon: '🔔', bg: '#fef3c7', title: 'Умные напоминалки', desc: 'Уведомления когда давно не писал кому-то важному' },
-    { icon: '🗺️', bg: '#ede9fe', title: 'Карта связей', desc: 'Интерактивный граф твоего окружения' },
-    { icon: '💜', bg: '#fce7f3', title: 'Health score', desc: 'Автоматический пульс каждой связи в реальном времени' },
-    { icon: '📅', bg: '#d1fae5', title: 'Годовщины и даты', desc: 'Памятные даты и timeline отношений' },
-    { icon: '🎭', bg: '#fee2e2', title: 'Mood-теги', desc: 'Настроение к каждой записи и статистика по людям' },
-    { icon: '📄', bg: '#dbeafe', title: 'Экспорт в PDF', desc: 'Красивая история отношений с человеком' },
-  ];
-
-  openModal(`
-    <div class="lp-modal-header">
-      <div class="modal-handle" style="background:rgba(255,255,255,.2);margin-bottom:20px;"></div>
-      <div class="lp-logo">Love<span>Plus</span> +</div>
-      <div style="margin-top:10px;position:relative;">
-        ${isPlus() ? '<span class="plus-active-badge">✓ Активна</span>' : '<span class="lp-coming">СКОРО</span>'}
-      </div>
-    </div>
-    <div class="lp-features" id="lpFeatures"></div>
-  `);
-
-  // Рендерим фичи через DOM (без кавычек в шаблоне)
-  const container = document.getElementById('lpFeatures');
-  features.forEach(f => {
-    const row = document.createElement('div');
-    row.className = 'lp-feature';
-    const iconEl = document.createElement('div');
-    iconEl.className = 'lp-feature-icon';
-    iconEl.style.background = f.bg;
-    iconEl.textContent = f.icon;
-    const textEl = document.createElement('div');
-    textEl.className = 'lp-feature-text';
-    const title = document.createElement('div');
-    title.className = 'lp-feature-title';
-    title.textContent = f.title;
-    const desc = document.createElement('div');
-    desc.className = 'lp-feature-desc';
-    desc.textContent = f.desc;
-    textEl.appendChild(title);
-    textEl.appendChild(desc);
-    row.appendChild(iconEl);
-    row.appendChild(textEl);
-    container.appendChild(row);
-  });
-
-}
 
 function exportData() {
   openModal(`
     <div class="modal-handle"></div>
     <div class="modal-title">Экспорт</div>
     <button class="btn secondary" id="exportJson" style="margin-bottom:8px;">📦 JSON — резервная копия</button>
-    ${isPlus() ? '<button class="btn" id="exportPdf">📄 PDF — история отношений</button>' : '<div class="plus-gate" style="margin-top:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span><b>LovePlus+</b> — PDF-экспорт</span></div>'}
+    <button class="btn" id="exportPdf">📄 PDF — история отношений</button>
   `);
   setTimeout(() => {
     document.getElementById('exportJson').addEventListener('click', () => {
