@@ -1,4 +1,3 @@
-![image](https://github.com/user-attachments/assets/d4cee6ba-df9c-48d0-9d27-47a55863a561)
 
 # LovePulse
 
