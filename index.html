@@ -1072,22 +1072,23 @@
 
   /* ── WEB LAYOUT ── */
   @media (min-width: 900px) {
-    body { overflow: auto; background: #e8ede9; }
+    html, body { height: 100%; overflow: hidden; background: var(--bg); }
     .app {
-      max-width: 1200px;
-      height: auto;
-      min-height: 100vh;
-      overflow: visible;
+      max-width: none;
+      width: 100%;
+      height: 100vh;
+      min-height: unset;
+      overflow: hidden;
       flex-direction: row;
       border-radius: 0;
       box-shadow: none;
+      margin: 0;
     }
     .header { display: none; }
     .nav {
-      position: sticky;
-      top: 0;
-      left: 0;
-      width: 220px;
+      position: relative;
+      flex-shrink: 0;
+      width: 240px;
       height: 100vh;
       flex-direction: column;
       justify-content: flex-start;
@@ -1100,6 +1101,7 @@
       -webkit-backdrop-filter: none;
       background: var(--bg-elev);
       z-index: 10;
+      overflow-y: auto;
     }
     .web-logo {
       font-family: 'Fraunces', serif;
@@ -1112,6 +1114,7 @@
       padding: 8px 12px 20px;
       border-bottom: 1px solid var(--line);
       margin-bottom: 8px;
+      color: var(--ink);
     }
     .nav-btn {
       flex-direction: row;
@@ -1122,21 +1125,18 @@
       font-size: 14px;
     }
     .nav-btn .nav-label { font-size: 14px; letter-spacing: 0; }
-    .nav-btn.active { background: var(--bg-soft); color: var(--ink); }
-    .nav-btn.active svg { transform: none; }
+    .nav-btn.active { background: var(--mint-soft); color: var(--mint-2); }
+    .nav-btn.active svg { transform: none; color: var(--mint-2); }
     .nav-btn svg { transition: none; }
     .main {
       flex: 1;
       overflow-y: auto;
       height: 100vh;
-      position: sticky;
-      top: 0;
     }
     .fab { bottom: 28px; right: 28px; position: fixed; }
-    .view { max-width: 720px; padding-bottom: 60px; }
+    .view { max-width: 860px; padding: 32px 48px 60px; }
     .modal-backdrop { position: fixed; }
     .toast { position: fixed; }
-    [data-theme="dark"] body { background: #0a120b; }
   }
 
   /* ── ONBOARDING ── */
@@ -1883,6 +1883,37 @@
     margin-top: 16px;
     line-height: 1.6;
   }
+
+  /* ── APP LOADER ── */
+  .app-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    opacity: 1;
+    transition: opacity .2s var(--ease);
+  }
+  .app-loader.hidden { opacity: 0; pointer-events: none; }
+  .app-loader-spinner {
+    width: 34px;
+    height: 34px;
+    border: 2.5px solid var(--line-2);
+    border-top-color: var(--mint);
+    border-radius: 50%;
+    animation: loaderSpin .65s linear infinite;
+  }
+  @keyframes loaderSpin { to { transform: rotate(360deg); } }
+  .app-loader-text {
+    font-size: 14px;
+    color: var(--ink-3);
+    font-weight: 500;
+    letter-spacing: .01em;
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
@@ -1915,6 +1946,14 @@
   </button>
 
   <nav class="nav">
+    <div class="web-logo">
+      <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+        <circle cx="9" cy="14" r="8" stroke="var(--mint)" stroke-width="2.2" fill="none"/>
+        <circle cx="19" cy="14" r="8" stroke="var(--mint)" stroke-width="2.2" fill="none"/>
+        <circle cx="14" cy="14" r="3" fill="var(--mint)"/>
+      </svg>
+      LovePulse
+    </div>
     <button class="nav-btn active" data-view="home">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
       <span class="nav-label">Лента</span>
@@ -3525,6 +3564,26 @@ function showOnboarding() {
   });
 }
 
+// ============== LOADER ==============
+function showLoader(msg) {
+  let el = document.getElementById('appLoader');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'appLoader';
+    el.className = 'app-loader';
+    el.innerHTML = `<div class="app-loader-spinner"></div><div class="app-loader-text"></div>`;
+    document.body.appendChild(el);
+  }
+  el.querySelector('.app-loader-text').textContent = msg || '';
+  el.classList.remove('hidden');
+}
+function hideLoader() {
+  const el = document.getElementById('appLoader');
+  if (!el) return;
+  el.classList.add('hidden');
+  setTimeout(() => { if (el.classList.contains('hidden')) el.remove(); }, 250);
+}
+
 // ============== AUTH UI ==============
 async function checkAuth() {
   document.getElementById('header').style.display = 'none';
@@ -3599,20 +3658,21 @@ function showAuthScreen() {
       const btn = container.querySelector('#authLoginBtn');
       if (!email || !pass) { errEl.textContent = 'Заполните все поля'; errEl.style.display = ''; return; }
       btn.disabled = true; btn.textContent = 'Входим…';
+      showLoader('Входим…');
       const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
       if (error) {
+        hideLoader();
         btn.disabled = false; btn.textContent = 'Войти';
         errEl.textContent = error.message === 'Invalid login credentials' ? 'Неверный email или пароль' : error.message;
         errEl.style.display = '';
         return;
       }
       currentUserId = data.user.id;
-      // Show app immediately from local cache — feels instant
       state = _loadCachedState(currentUserId);
       applyTheme(state.user.theme || 'light');
       authEl.style.display = 'none';
+      hideLoader();
       showApp();
-      // Sync real data (connections, role, etc.) from Supabase in background
       _syncFromCloud(currentUserId);
     };
     container.querySelector('#authLoginBtn').addEventListener('click', doLogin);
@@ -3685,6 +3745,7 @@ function showApp() {
 
 function logout() {
   confirm2('Выйти из аккаунта?', 'Вы будете перенаправлены на экран входа. Данные сохранятся в облаке.', async () => {
+    showLoader('Выходим…');
     await sb.auth.signOut();
     currentUserId = null;
     currentUserRole = 'user';
@@ -3693,6 +3754,7 @@ function logout() {
     document.getElementById('header').style.display = 'none';
     document.querySelector('.nav').style.display = 'none';
     document.getElementById('fab').style.display = 'none';
+    hideLoader();
     showAuthScreen();
   }, false);
 }
