@@ -3821,7 +3821,7 @@ function showAuthScreen() {
         </div>
         <div class="field">
           <label>Код из письма</label>
-          <input type="text" id="otpCode" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code" style="letter-spacing:0.2em;font-size:20px;text-align:center;">
+          <input type="text" id="otpCode" inputmode="numeric" maxlength="8" placeholder="00000000" autocomplete="one-time-code" style="letter-spacing:0.2em;font-size:20px;text-align:center;">
         </div>
         <button class="btn" id="otpVerifyBtn" style="margin-top:8px;">Подтвердить</button>
         <div style="text-align:center;margin-top:12px;">
@@ -3833,7 +3833,7 @@ function showAuthScreen() {
         const token = container.querySelector('#otpCode').value.trim();
         const errEl = container.querySelector('#authErr');
         const btn = container.querySelector('#otpVerifyBtn');
-        if (!token || token.length < 6) { errEl.textContent = 'Введите 6-значный код из письма'; errEl.style.display = ''; return; }
+        if (!token || token.length < 8) { errEl.textContent = 'Введите 8-значный код из письма'; errEl.style.display = ''; return; }
         errEl.style.display = 'none';
         btn.disabled = true; btn.textContent = 'Проверяем…';
         showLoader('Проверяем код…');
