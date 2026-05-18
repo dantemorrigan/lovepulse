@@ -323,6 +323,12 @@
     font-weight: 500;
     font-size: 14px;
     margin-bottom: 3px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   .feed-sub {
     font-size: 12px;
@@ -417,13 +423,16 @@
     font-weight: 500;
     font-size: 15px;
     margin-bottom: 2px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .conn-meta {
     font-size: 12px;
     color: var(--ink-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .status-dot {
     width: 7px; height: 7px;
@@ -661,6 +670,12 @@
     line-height: 1.5;
     color: var(--ink-2);
     margin-bottom: 10px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   .diary-tags {
     display: flex;
@@ -1967,6 +1982,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
+<div id="appLoader" class="app-loader">
+  <div class="app-loader-spinner"></div>
+  <div class="app-loader-text">Загружаем…</div>
+</div>
 <div class="app" id="app">
 
   <header class="header" id="header">
@@ -2050,6 +2069,7 @@ const _sessionPromise = sb.auth.getSession();
 sb.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN' && session && !currentUserId) {
     currentUserId = session.user.id;
+    currentUserEmail = session.user.email || null;
     state = _loadCachedState(currentUserId);
     if (!state.user.name) {
       state.user.name = session.user.user_metadata?.name || 'Новый пользователь';
@@ -2067,6 +2087,8 @@ sb.auth.onAuthStateChange(async (event, session) => {
 const DATA_PREFIX = 'lovepulse_cache_';
 let currentUserId = null;
 let currentUserRole = 'user';
+let currentUserEmail = null;
+const ADMIN_EMAIL = 'admin@lovepulse.dev';
 
 function getCurrentUserId() { return currentUserId; }
 function isAdmin() { return currentUserRole === 'admin'; }
@@ -2693,15 +2715,15 @@ function openConnectionForm(existing) {
   openModal(`
     <div class="modal-handle"></div>
     <div class="modal-title">${existing ? 'Редактировать' : 'Новая связь'}</div>
-    <div class="field"><label>Имя</label><input id="fName" value="${c.name}" placeholder="Как зовут?"></div>
+    <div class="field"><label>Имя</label><input id="fName" value="${c.name}" maxlength="50" placeholder="Как зовут?"></div>
     <div class="field">
       <label>Роль</label>
       <div class="role-grid" id="roleGrid">
         ${Object.entries(ROLES).map(([k,lbl]) => `<div class="role-opt ${c.role===k?'selected':''}" data-role="${k}">${lbl}</div>`).join('')}
       </div>
     </div>
-    <div class="field"><label>Статус (своими словами)</label><input id="fStatus" value="${c.statusLabel ? c.statusLabel : ''}" placeholder="Моя девушка, старый друг..."></div>
-    <div class="field"><label>Заметка</label><textarea id="fNote" placeholder="Что важно помнить об этом человеке">${c.note||''}</textarea></div>
+    <div class="field"><label>Статус (своими словами)</label><input id="fStatus" value="${c.statusLabel ? c.statusLabel : ''}" maxlength="60" placeholder="Моя девушка, старый друг..."></div>
+    <div class="field"><label>Заметка</label><textarea id="fNote" maxlength="300" placeholder="Что важно помнить об этом человеке">${c.note||''}</textarea></div>
     ${isPlus() ? `
       <div class="field"><label>📅 Важная дата (годовщина)</label><input type="date" id="fAnniv" value="${c.anniversary||''}"></div>
       <div class="field"><label>📅 Название даты</label><input id="fAnnivLabel" value="${c.anniversaryLabel||''}" placeholder="Знакомство, день рождения..."></div>
@@ -3190,7 +3212,7 @@ function openEntryForm(existing) {
     <div class="modal-handle"></div>
     <div class="modal-title">${existing ? 'Редактировать' : 'Новая запись'}</div>
     <div class="field"><label>Дата</label><input type="date" id="fDate" value="${e.date}"></div>
-    <div class="field"><label>Что произошло</label><textarea id="fText" style="min-height:120px;" placeholder="Опиши момент...">${e.text}</textarea></div>
+    <div class="field"><label>Что произошло</label><textarea id="fText" style="min-height:120px;" maxlength="2000" placeholder="Опиши момент...">${e.text}</textarea></div>
     <div class="field">
       <label>Кто был рядом</label>
       <div class="tag-picker" id="tagPicker">
@@ -3330,7 +3352,7 @@ function renderProfile() {
         <div class="menu-item">
           <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
           <div class="menu-label">Версия</div>
-          <div class="menu-value" id="versionTap" style="cursor:pointer;">2.6.0</div>
+          <div class="menu-value" id="versionTap" ${currentUserEmail === ADMIN_EMAIL ? 'style="cursor:pointer;"' : ''}>2.7.0</div>
         </div>
         <div class="menu-item">
           <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
@@ -3356,7 +3378,7 @@ function renderProfile() {
         </div>
       </div>
       <div style="text-align:center;padding:28px 0 14px;color:var(--ink-4);font-size:11px;letter-spacing:.05em;line-height:1.8;">
-        LovePulse · v2.6.0
+        LovePulse · v2.7.0
       </div>
       <input type="file" id="importFile" accept=".json" style="display:none">
     </div>
@@ -3390,9 +3412,10 @@ function renderProfile() {
     reader.readAsDataURL(file);
   });
 
-  // Dev mode: тап 5 раз по версии
+  // Dev mode: только для admin@lovepulse.dev
   let versionTaps = 0, versionTimer;
   v.querySelector('#versionTap').addEventListener('click', () => {
+    if (currentUserEmail !== ADMIN_EMAIL) return;
     versionTaps++;
     clearTimeout(versionTimer);
     versionTimer = setTimeout(() => { versionTaps = 0; }, 1500);
@@ -3671,19 +3694,19 @@ async function checkAuth() {
   document.querySelector('.nav').style.display = 'none';
   document.getElementById('fab').style.display = 'none';
 
-  const { data: { session } } = await _sessionPromise; // pre-warmed, no extra RTT
+  const { data: { session } } = await _sessionPromise;
   if (!session) { showAuthScreen(); return; }
 
   currentUserId = session.user.id;
-  // Show app immediately from local cache — feels instant
+  currentUserEmail = session.user.email || null;
   state = _loadCachedState(currentUserId);
   applyTheme(state.user.theme || 'light');
   showApp();
-  // Sync real data from Supabase in the background
   _syncFromCloud(currentUserId);
 }
 
 function showAuthScreen() {
+  hideLoader();
   document.getElementById('header').style.display = 'none';
   document.querySelector('.nav').style.display = 'none';
   document.getElementById('fab').style.display = 'none';
@@ -3749,6 +3772,7 @@ function showAuthScreen() {
         return;
       }
       currentUserId = data.user.id;
+      currentUserEmail = data.user.email || null;
       state = _loadCachedState(currentUserId);
       applyTheme(state.user.theme || 'light');
       authEl.style.display = 'none';
@@ -3763,7 +3787,7 @@ function showAuthScreen() {
   function renderRegisterForm(container) {
     container.innerHTML = `
       <div id="authErr" class="auth-error" style="display:none;"></div>
-      <div class="field"><label>Имя</label><input type="text" id="authName" autocomplete="name" placeholder="Как тебя зовут?"></div>
+      <div class="field"><label>Имя</label><input type="text" id="authName" maxlength="40" autocomplete="name" placeholder="Как тебя зовут?"></div>
       <div class="field"><label>Email</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>
       <div class="field"><label>Пароль</label><input type="password" id="authPass" autocomplete="new-password" placeholder="Минимум 6 символов"></div>
       <button class="btn" id="authRegBtn" style="margin-top:8px;">Создать аккаунт</button>
@@ -3817,6 +3841,7 @@ function showAuthScreen() {
 }
 
 function showApp() {
+  hideLoader();
   document.getElementById('header').style.display = '';
   document.querySelector('.nav').style.display = '';
   document.getElementById('fab').style.display = '';
@@ -3827,9 +3852,10 @@ function showApp() {
 function logout() {
   confirm2('Выйти из аккаунта?', 'Вы будете перенаправлены на экран входа. Данные сохранятся в облаке.', async () => {
     showLoader('Выходим…');
-    try { await sb.auth.signOut(); } catch(e) { /* сессия уже истекла — всё равно чистим локальное состояние */ }
+    try { await sb.auth.signOut({ scope: 'local' }); } catch(e) { /* игнорируем — чистим локальное состояние */ }
     currentUserId = null;
     currentUserRole = 'user';
+    currentUserEmail = null;
     state = structuredClone(DEFAULT_STATE);
     applyTheme('light');
     document.getElementById('header').style.display = 'none';
