@@ -874,6 +874,7 @@
     border-radius: 999px;
     margin: 0 auto 18px;
   }
+  .modal-close-btn { display: none; }
   .modal-title {
     font-family: 'Fraunces', serif;
     font-size: 22px;
@@ -1151,8 +1152,68 @@
     }
     .fab { bottom: 28px; right: 28px; position: fixed; }
     .view { max-width: 960px; margin: 0 auto; padding: 32px 48px 60px; }
-    .modal-backdrop { position: fixed; }
     .toast { position: fixed; }
+
+    /* Desktop modal: centered dialog instead of bottom sheet */
+    .modal-backdrop {
+      position: fixed;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal {
+      width: 100%;
+      max-width: 560px;
+      border-radius: 20px;
+      padding: 36px 40px 40px;
+      max-height: 88vh;
+      animation: modalIn .2s var(--ease);
+      box-shadow: 0 12px 48px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.08);
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(.96) translateY(8px); }
+      to   { opacity: 1; transform: scale(1)  translateY(0); }
+    }
+    .modal-handle { display: none; }
+    .modal-title { font-size: 26px; margin-bottom: 24px; }
+    .modal-close-btn {
+      display: flex !important;
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: var(--bg-soft);
+      color: var(--ink-3);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      line-height: 1;
+      transition: background .15s, color .15s;
+    }
+    .modal-close-btn:hover { background: var(--line); color: var(--ink); }
+    .modal { position: relative; }
+
+    /* Improve form fields spacing on desktop */
+    .field { margin-bottom: 16px; }
+    .field input, .field textarea, .field select { font-size: 15px; padding: 13px 16px; }
+    .field textarea { min-height: 100px; }
+
+    /* Role grid: single row of 3+3 with more padding */
+    .role-opt { padding: 12px 10px; font-size: 13px; }
+
+    /* Two-column layout for short fields */
+    .modal-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 20px;
+    }
+
+    /* Btn improvements on desktop */
+    .btn { padding: 15px; font-size: 15px; border-radius: 14px; }
+    .btn:hover { opacity: .88; }
   }
 
   /* ── ONBOARDING ── */
@@ -3517,7 +3578,17 @@ function resetData() {
 // ============== MODAL ==============
 const modal = document.getElementById('modal');
 const modalContent = document.getElementById('modalContent');
-function openModal(html) { modalContent.innerHTML = html; modal.classList.add('open'); }
+function openModal(html) {
+  modalContent.innerHTML = html;
+  // Inject desktop close button (hidden on mobile via CSS)
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'modal-close-btn';
+  closeBtn.setAttribute('aria-label', 'Закрыть');
+  closeBtn.innerHTML = '&#x2715;';
+  closeBtn.addEventListener('click', closeModal);
+  modalContent.appendChild(closeBtn);
+  modal.classList.add('open');
+}
 function closeModal() { modal.classList.remove('open'); }
 modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
