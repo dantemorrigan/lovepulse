@@ -1,30 +1,22 @@
 {
     "name": "LovePulse",
     "short_name": "LovePulse",
-    "start_url": "/index.html",
+    "description": "Дневник отношений и трекер связей — веди записи, следи за пульсом близких, анализируй паттерны общения.",
+    "version": "5.0.0",
+    "start_url": "/lovepulse/",
     "display": "standalone",
-    "background_color": "#ff6f61",
-    "theme_color": "#ff6f61",
-    "scope": "/",
+    "background_color": "#4cc9a0",
+    "theme_color": "#4cc9a0",
+    "scope": "/lovepulse/",
+    "orientation": "portrait",
+    "categories": ["lifestyle", "social", "productivity"],
     "icons": [
-        {"src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
-        {"src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
+        {"src": "/lovepulse/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+        {"src": "/lovepulse/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
     ],
     "screenshots": [
-        {
-            "src": "/screenshots/wide-screenshot.png",
-            "sizes": "1280x720",
-            "type": "image/png",
-            "form_factor": "wide",
-            "label": "LovePulse на десктопе"
-        },
-        {
-            "src": "/screenshots/narrow-screenshot.png",
-            "sizes": "720x1280",
-            "type": "image/png",
-            "form_factor": "narrow",
-            "label": "LovePulse на мобильном устройстве"
-        }
+        {"src": "/lovepulse/screenshots/narrow-screenshot.png", "sizes": "1080x1920", "type": "image/png", "form_factor": "narrow"},
+        {"src": "/lovepulse/screenshots/wide-screenshot.png", "sizes": "1920x1080", "type": "image/png", "form_factor": "wide"}
     ],
-    "keywords": ["dating", "relationships", "love", "tracker", "pwa"]
+    "keywords": ["relationships", "diary", "tracker", "pwa", "offline"]
 }
