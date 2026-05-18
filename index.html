@@ -3622,6 +3622,9 @@ fab.addEventListener('click', () => {
 
 // ============== ONBOARDING ==============
 function showOnboarding() {
+  // Prevent duplicate onboarding overlay
+  if (document.getElementById('onboard')) return;
+
   const slides = [
     { icon: '💚', title: 'Добро пожаловать в <em>LovePulse</em>', text: 'Приложение для отслеживания твоих связей — романтических, дружеских, семейных.' },
     { icon: '👥', title: 'Добавляй <em>людей</em>', text: 'Создавай карточки для близких. Указывай роль, статус своими словами и заметки о человеке.' },
@@ -3663,7 +3666,12 @@ function showOnboarding() {
   ob.querySelector('#obSlide').style.transition = 'opacity .2s';
   ob.querySelector('#obNext').addEventListener('click', () => {
     if (current < slides.length-1) { goTo(current+1); }
-    else { state.onboarded = true; saveState(); ob.remove(); }
+    else {
+      state.onboarded = true;
+      saveState();
+      ob.remove();
+      navigate('home');
+    }
   });
 }
 
