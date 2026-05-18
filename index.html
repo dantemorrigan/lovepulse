@@ -2066,8 +2066,13 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const _sessionPromise = sb.auth.getSession();
 
 // Handles email confirmation links — when user clicks the link in their inbox,
+// Flag set during 2FA flow to prevent onAuthStateChange from auto-logging in
+// while we wait for the user to enter their OTP code
+let _otpPending = false;
+
 // Supabase fires SIGNED_IN here and we log them in without a manual reload
 sb.auth.onAuthStateChange(async (event, session) => {
+  if (_otpPending) return; // block auto-login during 2FA
   if (event === 'SIGNED_IN' && session && !currentUserId) {
     currentUserId = session.user.id;
     currentUserEmail = session.user.email || null;
@@ -3773,6 +3778,7 @@ function showAuthScreen() {
         errEl.style.display = 'none';
         btn.disabled = true; btn.textContent = 'Входим…';
         showLoader('Входим…');
+        _otpPending = true; // block onAuthStateChange from auto-logging in
         let data, error;
         try {
           const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
@@ -3781,6 +3787,7 @@ function showAuthScreen() {
             timeout.then(() => { throw new Error('timeout'); })
           ]));
         } catch (e) {
+          _otpPending = false;
           hideLoader();
           btn.disabled = false; btn.textContent = 'Войти';
           errEl.textContent = e.message === 'timeout' ? 'Превышено время ожидания. Проверьте соединение.' : e.message;
@@ -3788,6 +3795,7 @@ function showAuthScreen() {
           return;
         }
         if (error) {
+          _otpPending = false;
           hideLoader();
           btn.disabled = false; btn.textContent = 'Войти';
           errEl.textContent = error.message === 'Invalid login credentials' ? 'Неверный email или пароль' : error.message;
@@ -3802,6 +3810,7 @@ function showAuthScreen() {
         } catch(e) { otpErr = e; }
         hideLoader();
         if (otpErr) {
+          _otpPending = false;
           btn.disabled = false; btn.textContent = 'Войти';
           errEl.textContent = 'Не удалось отправить код. Попробуйте снова.';
           errEl.style.display = '';
@@ -3856,8 +3865,9 @@ function showAuthScreen() {
           btn.disabled = false; btn.textContent = 'Подтвердить';
           errEl.textContent = 'Неверный или истёкший код. Попробуйте снова.';
           errEl.style.display = '';
-          return;
+          return; // keep _otpPending=true so user can retry
         }
+        _otpPending = false;
         if (currentUserId) { hideLoader(); return; }
         currentUserId = data.user.id;
         currentUserEmail = data.user.email || null;
@@ -3870,7 +3880,7 @@ function showAuthScreen() {
       };
       container.querySelector('#otpVerifyBtn').addEventListener('click', doVerify);
       container.querySelector('#otpCode').addEventListener('keydown', e => { if (e.key === 'Enter') doVerify(); });
-      container.querySelector('#otpBack').addEventListener('click', () => showPasswordForm());
+      container.querySelector('#otpBack').addEventListener('click', () => { _otpPending = false; showPasswordForm(); });
     }
 
     showPasswordForm();
