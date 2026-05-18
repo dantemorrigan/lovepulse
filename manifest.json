@@ -3,20 +3,20 @@
     "short_name": "LovePulse",
     "description": "Дневник отношений и трекер связей — веди записи, следи за пульсом близких, анализируй паттерны общения.",
     "version": "4.9.0",
-    "start_url": "/index.html",
+    "start_url": "/lovepulse/",
     "display": "standalone",
     "background_color": "#4cc9a0",
     "theme_color": "#4cc9a0",
-    "scope": "/",
+    "scope": "/lovepulse/",
     "orientation": "portrait",
     "categories": ["lifestyle", "social", "productivity"],
     "icons": [
-        {"src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
-        {"src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+        {"src": "/lovepulse/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+        {"src": "/lovepulse/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
     ],
     "screenshots": [
-        {"src": "/screenshots/narrow-screenshot.png", "sizes": "1080x1920", "type": "image/png", "form_factor": "narrow"},
-        {"src": "/screenshots/wide-screenshot.png",   "sizes": "1920x1080", "type": "image/png", "form_factor": "wide"}
+        {"src": "/lovepulse/screenshots/narrow-screenshot.png", "sizes": "1080x1920", "type": "image/png", "form_factor": "narrow"},
+        {"src": "/lovepulse/screenshots/wide-screenshot.png", "sizes": "1920x1080", "type": "image/png", "form_factor": "wide"}
     ],
     "keywords": ["relationships", "diary", "tracker", "pwa", "offline"]
 }
