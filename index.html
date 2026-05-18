@@ -2474,7 +2474,10 @@ function renderConnList() {
     const entryCount = state.entries.filter(e => e.tags.includes(c.id)).length;
     return `
       <div class="connection" data-conn="${c.id}">
-        <div class="avatar ${c.color}" style="${c.photo ? 'overflow:hidden;padding:0;' : ''}">${c.photo ? `<img src="${c.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : initials(c.name)}</div>
+        ${c.photo
+          ? `<div style="width:44px;height:44px;border-radius:50%;overflow:hidden;flex-shrink:0;"><img src="${c.photo}" style="width:100%;height:100%;object-fit:cover;display:block;"></div>`
+          : `<div class="avatar ${c.color}">${initials(c.name)}</div>`
+        }
         <div class="conn-info">
           <div class="conn-name">${c.name}</div>
           <div class="conn-meta">${c.statusLabel || ROLES[c.role] || c.role}${last ? ' · ' + daysAgo(last) : ''}</div>
@@ -2515,7 +2518,7 @@ function openConnection(id) {
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
       ${avatarHtml}
       <div style="flex:1;min-width:0;">
-        <div style="font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-0.02em;overflow-wrap:break-word;word-break:break-word;">${c.name}</div>
+        <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:500;letter-spacing:-0.02em;word-break:break-all;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${c.name}</div>
         <div style="font-size:13px;color:var(--ink-3);margin-top:3px;">${c.statusLabel || ROLES[c.role]}${age !== null ? ' · ' + age + ' ' + plural(age,'год','года','лет') : ''}</div>
       </div>
     </div>
@@ -3497,9 +3500,13 @@ function resetData() {
 // ============== MODAL ==============
 const modal = document.getElementById('modal');
 const modalContent = document.getElementById('modalContent');
+let _swipeCtrl = null;
+
 function openModal(html) {
+  if (_swipeCtrl) { _swipeCtrl.abort(); _swipeCtrl = null; }
   modalContent.innerHTML = html;
-  // Inject desktop close button (hidden on mobile via CSS)
+  modalContent.removeAttribute('style');
+
   const closeBtn = document.createElement('button');
   closeBtn.className = 'modal-close-btn';
   closeBtn.setAttribute('aria-label', 'Закрыть');
@@ -3507,8 +3514,48 @@ function openModal(html) {
   closeBtn.addEventListener('click', closeModal);
   modalContent.appendChild(closeBtn);
   modal.classList.add('open');
+
+  // Swipe-down to close
+  _swipeCtrl = new AbortController();
+  const sig = { signal: _swipeCtrl.signal };
+  let sy = 0, active = false;
+
+  modalContent.addEventListener('touchstart', ev => {
+    if (ev.touches.length !== 1) return;
+    const top = modalContent.getBoundingClientRect().top;
+    if (ev.touches[0].clientY - top > 80) return;
+    sy = ev.touches[0].clientY;
+    active = true;
+    modalContent.style.transition = 'none';
+  }, { passive: true, ...sig });
+
+  modalContent.addEventListener('touchmove', ev => {
+    if (!active) return;
+    const dy = ev.touches[0].clientY - sy;
+    if (dy > 0) modalContent.style.transform = `translateY(${(dy * 0.72).toFixed(1)}px)`;
+  }, { passive: true, ...sig });
+
+  modalContent.addEventListener('touchend', ev => {
+    if (!active) return;
+    active = false;
+    const dy = ev.changedTouches[0].clientY - sy;
+    if (dy > 90) {
+      modalContent.style.transition = 'transform .2s ease-in';
+      modalContent.style.transform = 'translateY(110%)';
+      setTimeout(() => closeModal(), 200);
+    } else {
+      modalContent.style.transition = 'transform .3s cubic-bezier(.34,1.56,.64,1)';
+      modalContent.style.transform = '';
+      setTimeout(() => { modalContent.style.transition = ''; }, 320);
+    }
+  }, { passive: true, ...sig });
 }
-function closeModal() { modal.classList.remove('open'); }
+
+function closeModal() {
+  modal.classList.remove('open');
+  modalContent.removeAttribute('style');
+  if (_swipeCtrl) { _swipeCtrl.abort(); _swipeCtrl = null; }
+}
 modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
 // ============== FAB ==============
