@@ -1884,6 +1884,7 @@
     line-height: 1.6;
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <div class="app" id="app">
@@ -1948,30 +1949,18 @@
 </div>
 
 <script>
+// ============== SUPABASE ==============
+const SUPABASE_URL = 'https://vqletsjfqxnzzzezpwi.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_jIx55gnCcDJ7xiWQkaD5iQ_g-Xt7Gdo';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // ============== AUTH ==============
-const USERS_KEY = 'lovepulse_users';
-const SESSION_KEY = 'lovepulse_session';
-const DATA_PREFIX = 'lovepulse_data_';
+const DATA_PREFIX = 'lovepulse_cache_';
+let currentUserId = null;
+let currentUserRole = 'user';
 
-function getUsers() {
-  try { return JSON.parse(localStorage.getItem(USERS_KEY) || '[]'); } catch { return []; }
-}
-function saveUsers(users) { localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
-function getCurrentUserId() { return localStorage.getItem(SESSION_KEY) || null; }
-function setSession(userId) { localStorage.setItem(SESSION_KEY, userId); }
-function clearSession() { localStorage.removeItem(SESSION_KEY); }
-
-async function hashPassword(password) {
-  try {
-    const enc = new TextEncoder();
-    const buf = await crypto.subtle.digest('SHA-256', enc.encode(password));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-  } catch {
-    let h = 5381;
-    for (let i = 0; i < password.length; i++) h = ((h << 5) + h) ^ password.charCodeAt(i);
-    return (h >>> 0).toString(16).padStart(8,'0');
-  }
-}
+function getCurrentUserId() { return currentUserId; }
+function isAdmin() { return currentUserRole === 'admin'; }
 
 // ============== STATE ==============
 const DEFAULT_STATE = {
@@ -1984,25 +1973,39 @@ const DEFAULT_STATE = {
 
 let state = structuredClone(DEFAULT_STATE);
 
-function loadState() {
-  const uid = getCurrentUserId();
-  if (!uid) return structuredClone(DEFAULT_STATE);
+function _mergeWithDefaults(parsed) {
+  const s = { ...structuredClone(DEFAULT_STATE), ...parsed };
+  if (!s.user) s.user = { name: '', bio: '', theme: 'light' };
+  if (!s.user.theme) s.user.theme = 'light';
+  if (s.onboarded === undefined) s.onboarded = false;
+  if (s.plus === undefined) s.plus = false;
+  if (s.entries) s.entries.forEach(e => { if (!Array.isArray(e.tags)) e.tags = []; });
+  return s;
+}
+
+function _loadCachedState(uid) {
   try {
     const raw = localStorage.getItem(DATA_PREFIX + uid);
     if (!raw) return structuredClone(DEFAULT_STATE);
-    const parsed = JSON.parse(raw);
-    if (!parsed.user) parsed.user = { name: '', bio: '', theme: 'light' };
-    if (!parsed.user.theme) parsed.user.theme = 'light';
-    if (parsed.onboarded === undefined) parsed.onboarded = false;
-    if (parsed.plus === undefined) parsed.plus = false;
-    if (parsed.entries) parsed.entries.forEach(e => { if (!Array.isArray(e.tags)) e.tags = []; });
-    return parsed;
+    return _mergeWithDefaults(JSON.parse(raw));
   } catch { return structuredClone(DEFAULT_STATE); }
 }
+
 function saveState() {
-  const uid = getCurrentUserId();
-  if (!uid) return;
-  localStorage.setItem(DATA_PREFIX + uid, JSON.stringify(state));
+  if (!currentUserId) return;
+  localStorage.setItem(DATA_PREFIX + currentUserId, JSON.stringify(state));
+  _pushStateToCloud();
+}
+
+async function _pushStateToCloud() {
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    await sb.from('user_data').upsert(
+      { user_id: user.id, data: state, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' }
+    );
+  } catch (e) { console.warn('Sync error:', e); }
 }
 function uid() { return Math.random().toString(36).slice(2,9); }
 
@@ -3168,7 +3171,7 @@ function renderProfile() {
         <div class="menu-item">
           <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
           <div class="menu-label">Версия</div>
-          <div class="menu-value" id="versionTap" style="cursor:pointer;">2.0.0</div>
+          <div class="menu-value" id="versionTap" style="cursor:pointer;">2.5.0</div>
         </div>
         <div class="menu-item">
           <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
@@ -3185,13 +3188,16 @@ function renderProfile() {
       <div id="devSection" style="display:none;margin-bottom:14px;">
         <div class="dev-panel">
           <div class="dev-panel-title">Developer Mode</div>
+          ${isAdmin() ? `<div class="dev-row"><span>LovePlus+</span><div id="plusToggleWrap"></div></div>
+          <div class="dev-row"><span>state.plus</span><span class="dev-val" id="devPlusVal">${state.plus}</span></div>` : ''}
+          <div class="dev-row"><span>Role</span><span class="dev-val">${currentUserRole}</span></div>
           <div class="dev-row"><span>Connections</span><span class="dev-val">${state.connections.length}</span></div>
           <div class="dev-row"><span>Entries</span><span class="dev-val">${state.entries.length}</span></div>
           <div class="dev-row"><span>Notifications</span><span class="dev-val" id="devNotifVal">${typeof Notification !== 'undefined' ? Notification.permission : 'n/a'}</span></div>
         </div>
       </div>
       <div style="text-align:center;padding:28px 0 14px;color:var(--ink-4);font-size:11px;letter-spacing:.05em;line-height:1.8;">
-        LovePulse · v2.0.0
+        LovePulse · v2.5.0
       </div>
       <input type="file" id="importFile" accept=".json" style="display:none">
     </div>
@@ -3239,6 +3245,23 @@ function renderProfile() {
       toast(isVisible ? 'Dev mode скрыт' : '🛠 Dev mode активирован');
 
       if (!isVisible) {
+        // Plus toggle — admins only
+        if (isAdmin()) {
+          const tw = v.querySelector('#plusToggleWrap');
+          const track = document.createElement('div');
+          track.className = 'toggle-track' + (state.plus ? ' on' : '');
+          track.innerHTML = '<div class="toggle-thumb"></div>';
+          track.style.cursor = 'pointer';
+          tw.appendChild(track);
+          track.addEventListener('click', () => {
+            state.plus = !state.plus;
+            saveState();
+            track.classList.toggle('on', state.plus);
+            v.querySelector('#devPlusVal').textContent = state.plus;
+            toast(state.plus ? '✅ LovePlus+ включён' : '❌ LovePlus+ выключен');
+            setTimeout(() => navigate('profile'), 400);
+          });
+        }
         // Notifications
         v.querySelector('#devNotifVal').addEventListener('click', async () => {
           const ok = await requestNotifications();
@@ -3462,12 +3485,30 @@ function showOnboarding() {
 }
 
 // ============== AUTH UI ==============
-function checkAuth() {
-  const userId = getCurrentUserId();
-  if (!userId) { showAuthScreen(); return; }
-  const users = getUsers();
-  if (!users.find(u => u.id === userId)) { clearSession(); showAuthScreen(); return; }
-  state = loadState();
+async function checkAuth() {
+  document.getElementById('header').style.display = 'none';
+  document.querySelector('.nav').style.display = 'none';
+  document.getElementById('fab').style.display = 'none';
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { showAuthScreen(); return; }
+
+  currentUserId = session.user.id;
+
+  try {
+    const [{ data: userData }, { data: profileData }] = await Promise.all([
+      sb.from('user_data').select('data').eq('user_id', currentUserId).single(),
+      sb.from('profiles').select('role').eq('id', currentUserId).single()
+    ]);
+    state = (userData?.data && Object.keys(userData.data).length > 0)
+      ? _mergeWithDefaults(userData.data)
+      : _loadCachedState(currentUserId);
+    currentUserRole = profileData?.role || 'user';
+  } catch {
+    state = _loadCachedState(currentUserId);
+    currentUserRole = 'user';
+  }
+
   applyTheme(state.user.theme || 'light');
   showApp();
 }
@@ -3525,14 +3566,30 @@ function showAuthScreen() {
       const email = container.querySelector('#authEmail').value.trim().toLowerCase();
       const pass = container.querySelector('#authPass').value;
       const errEl = container.querySelector('#authErr');
+      const btn = container.querySelector('#authLoginBtn');
       if (!email || !pass) { errEl.textContent = 'Заполните все поля'; errEl.style.display = ''; return; }
-      const users = getUsers();
-      const user = users.find(u => u.email === email);
-      if (!user) { errEl.textContent = 'Пользователь не найден'; errEl.style.display = ''; return; }
-      const hash = await hashPassword(pass);
-      if (hash !== user.passwordHash) { errEl.textContent = 'Неверный пароль'; errEl.style.display = ''; return; }
-      setSession(user.id);
-      state = loadState();
+      btn.disabled = true; btn.textContent = 'Входим…';
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (error) {
+        btn.disabled = false; btn.textContent = 'Войти';
+        errEl.textContent = error.message === 'Invalid login credentials' ? 'Неверный email или пароль' : error.message;
+        errEl.style.display = '';
+        return;
+      }
+      currentUserId = data.user.id;
+      try {
+        const [{ data: userData }, { data: profileData }] = await Promise.all([
+          sb.from('user_data').select('data').eq('user_id', currentUserId).single(),
+          sb.from('profiles').select('role').eq('id', currentUserId).single()
+        ]);
+        state = (userData?.data && Object.keys(userData.data).length > 0)
+          ? _mergeWithDefaults(userData.data)
+          : _loadCachedState(currentUserId);
+        currentUserRole = profileData?.role || 'user';
+      } catch {
+        state = _loadCachedState(currentUserId);
+        currentUserRole = 'user';
+      }
       applyTheme(state.user.theme || 'light');
       authEl.style.display = 'none';
       showApp();
@@ -3548,32 +3605,43 @@ function showAuthScreen() {
       <div class="field"><label>Email</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>
       <div class="field"><label>Пароль</label><input type="password" id="authPass" autocomplete="new-password" placeholder="Минимум 6 символов"></div>
       <button class="btn" id="authRegBtn" style="margin-top:8px;">Создать аккаунт</button>
-      <div class="auth-hint">Данные хранятся только на этом устройстве.</div>
+      <div class="auth-hint">Данные синхронизируются между устройствами через облако.</div>
     `;
     const doRegister = async () => {
       const name = container.querySelector('#authName').value.trim();
       const email = container.querySelector('#authEmail').value.trim().toLowerCase();
       const pass = container.querySelector('#authPass').value;
       const errEl = container.querySelector('#authErr');
+      const btn = container.querySelector('#authRegBtn');
       if (!name || !email || !pass) { errEl.textContent = 'Заполните все поля'; errEl.style.display = ''; return; }
       if (pass.length < 6) { errEl.textContent = 'Пароль должен быть не менее 6 символов'; errEl.style.display = ''; return; }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'Введите корректный email'; errEl.style.display = ''; return; }
-      const users = getUsers();
-      if (users.find(u => u.email === email)) { errEl.textContent = 'Этот email уже зарегистрирован'; errEl.style.display = ''; return; }
-      const hash = await hashPassword(pass);
-      const newUser = {
-        id: 'u_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,7),
-        email,
-        name,
-        passwordHash: hash,
-        createdAt: Date.now()
-      };
-      users.push(newUser);
-      saveUsers(users);
-      setSession(newUser.id);
+      btn.disabled = true; btn.textContent = 'Создаём…';
+      const { data, error } = await sb.auth.signUp({
+        email, password: pass, options: { data: { name } }
+      });
+      if (error) {
+        btn.disabled = false; btn.textContent = 'Создать аккаунт';
+        errEl.textContent = error.message;
+        errEl.style.display = '';
+        return;
+      }
+      if (!data.session) {
+        // Email confirmation required
+        container.innerHTML = `<div class="auth-hint" style="text-align:center;padding:32px 0;">
+          📬 Проверьте почту — мы отправили письмо для подтверждения аккаунта.
+        </div>`;
+        return;
+      }
+      currentUserId = data.user.id;
+      currentUserRole = 'user';
       state = structuredClone(DEFAULT_STATE);
       state.user.name = name;
-      saveState();
+      // Ensure profile name is saved (trigger may not have fired yet)
+      await Promise.all([
+        sb.from('profiles').upsert({ id: currentUserId, name, role: 'user' }, { onConflict: 'id' }),
+        sb.from('user_data').upsert({ user_id: currentUserId, data: state, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+      ]);
       authEl.style.display = 'none';
       showApp();
     };
@@ -3593,8 +3661,10 @@ function showApp() {
 }
 
 function logout() {
-  confirm2('Выйти из аккаунта?', 'Вы будете перенаправлены на экран входа. Данные сохранятся.', () => {
-    clearSession();
+  confirm2('Выйти из аккаунта?', 'Вы будете перенаправлены на экран входа. Данные сохранятся в облаке.', async () => {
+    await sb.auth.signOut();
+    currentUserId = null;
+    currentUserRole = 'user';
     state = structuredClone(DEFAULT_STATE);
     applyTheme('light');
     document.getElementById('header').style.display = 'none';
