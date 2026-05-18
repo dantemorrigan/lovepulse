@@ -2,7 +2,7 @@
     "name": "LovePulse",
     "short_name": "LovePulse",
     "description": "Дневник отношений и трекер связей — веди записи, следи за пульсом близких, анализируй паттерны общения.",
-    "version": "5.0.0",
+    "version": "5.0.5",
     "start_url": "/lovepulse/",
     "display": "standalone",
     "background_color": "#4cc9a0",

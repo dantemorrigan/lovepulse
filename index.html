@@ -421,6 +421,54 @@
   .avatar.warm { background: #ffe8d4; color: #b85c1a; }
   .avatar.cool { background: #dbeafe; color: #1e40af; }
   .avatar.violet { background: #ede9fe; color: #6d28d9; }
+  .avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:block; }
+
+  /* Connection photo upload widget */
+  .conn-photo-upload {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--bg-soft); border: 2px dashed var(--line-2);
+    display: grid; place-items: center; cursor: pointer; overflow: hidden;
+    transition: border-color .2s, transform .15s;
+    flex-shrink: 0;
+  }
+  .conn-photo-upload.has-photo { border: 2px solid var(--mint); }
+  .conn-photo-upload:active { transform: scale(.94); }
+
+  /* Fullscreen connection map overlay */
+  .connmap-fs {
+    position: absolute; inset: 0; z-index: 200;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    animation: cmSlideUp .25s var(--ease) both;
+  }
+  @keyframes cmSlideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .connmap-fs-header {
+    padding: 16px 18px 12px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    background: var(--bg);
+  }
+  .connmap-fs-back {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--bg-soft); border: none; cursor: pointer;
+    display: grid; place-items: center; color: var(--ink);
+    transition: transform .2s var(--ease);
+  }
+  .connmap-fs-back:active { transform: scale(.9); }
+  .connmap-fs-body {
+    flex: 1; overflow: auto; padding: 8px;
+    display: flex; align-items: flex-start; justify-content: center;
+  }
+  .connmap-fs-body svg { width: 100%; max-width: 560px; }
+
+  /* Map preview card in stats */
+  .connmap-preview {
+    cursor: pointer; transition: transform .2s var(--ease);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .connmap-preview:active { transform: scale(.98); }
   .conn-info { flex: 1; min-width: 0; }
   .conn-name {
     font-weight: 500;
@@ -2170,24 +2218,39 @@ function getAnniversaries() {
   return results.sort((a,b)=>a.diff-b.diff);
 }
 
+function calcAge(birthdate) {
+  if (!birthdate) return null;
+  const b = new Date(birthdate);
+  const t = new Date();
+  let age = t.getFullYear() - b.getFullYear();
+  if (t.getMonth() < b.getMonth() || (t.getMonth() === b.getMonth() && t.getDate() < b.getDate())) age--;
+  return age >= 0 ? age : null;
+}
+
+function resizePhoto(file, cb) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 320;
+      let w = img.width, h = img.height;
+      if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
+      else        { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(c.toDataURL('image/jpeg', 0.78));
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 // Notifications
 async function requestNotifications() {
   if (!('Notification' in window)) { toast('Браузер не поддерживает уведомления'); return false; }
   const perm = await Notification.requestPermission();
   return perm === 'granted';
-}
-function scheduleReminders() {
-  state.connections.forEach(c => {
-    const threshold = c.reminderDays || 14;
-    const last = lastEntryDate(c.id);
-    const diff = last ? Math.floor((Date.now()-new Date(last))/86400000) : 999;
-    if (diff >= threshold && Notification.permission === 'granted') {
-      new Notification('LovePulse', {
-        body: 'Давно не писал про ' + c.name + ' — уже ' + diff + ' дней',
-        icon: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="11" cy="16" r="9" stroke="#4cc9a0" stroke-width="2" fill="none"/><circle cx="21" cy="16" r="9" stroke="#4cc9a0" stroke-width="2" fill="none"/><circle cx="16" cy="16" r="3" fill="#4cc9a0"/></svg>')
-      });
-    }
-  });
 }
 
 // ============== CONFIRM DIALOG ==============
@@ -2221,7 +2284,6 @@ function renderHome() {
   }).length;
   const recentEntries = [...state.entries].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 5);
   const anniversaries = getAnniversaries();
-  scheduleReminders();
   const streak = calcStreak();
 
   // Люди которым давно не писал (> 30 дней или вообще никогда)
@@ -2412,7 +2474,7 @@ function renderConnList() {
     const entryCount = state.entries.filter(e => e.tags.includes(c.id)).length;
     return `
       <div class="connection" data-conn="${c.id}">
-        <div class="avatar ${c.color}">${initials(c.name)}</div>
+        <div class="avatar ${c.color}" style="${c.photo ? 'overflow:hidden;padding:0;' : ''}">${c.photo ? `<img src="${c.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : initials(c.name)}</div>
         <div class="conn-info">
           <div class="conn-name">${c.name}</div>
           <div class="conn-meta">${c.statusLabel || ROLES[c.role] || c.role}${last ? ' · ' + daysAgo(last) : ''}</div>
@@ -2429,15 +2491,35 @@ function openConnection(id) {
   const c = state.connections.find(x => x.id === id);
   if (!c) return;
   const relatedEntries = state.entries.filter(e => e.tags.includes(id)).sort((a,b) => b.date.localeCompare(a.date));
+  const age = calcAge(c.birthdate);
+
+  const avatarHtml = c.photo
+    ? `<div style="width:72px;height:72px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid var(--mint);">
+         <img src="${c.photo}" style="width:100%;height:100%;object-fit:cover;">
+       </div>`
+    : `<div class="avatar ${c.color}" style="width:72px;height:72px;font-size:24px;flex-shrink:0;">${initials(c.name)}</div>`;
+
+  const annexHtml = c.anniversary ? (() => {
+    const d = fmtDate(c.anniversary);
+    return `<div style="background:var(--bg-elev);border:1px solid var(--line);border-radius:14px;padding:13px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:22px;">📅</span>
+      <div>
+        <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">${c.anniversaryLabel || 'Важная дата'}</div>
+        <div style="font-size:15px;font-weight:500;">${d.day} ${d.monthFull} ${d.year}</div>
+      </div>
+    </div>`;
+  })() : '';
+
   openModal(`
     <div class="modal-handle"></div>
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:22px;">
-      <div class="avatar ${c.color}" style="width:62px;height:62px;font-size:22px;flex-shrink:0;">${initials(c.name)}</div>
-      <div style="flex:1;min-width:0;overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      ${avatarHtml}
+      <div style="flex:1;min-width:0;">
         <div style="font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-0.02em;overflow-wrap:break-word;word-break:break-word;">${c.name}</div>
-        <div style="font-size:13px;color:var(--ink-3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.statusLabel || ROLES[c.role]} · ${ROLES[c.role]}</div>
+        <div style="font-size:13px;color:var(--ink-3);margin-top:3px;">${c.statusLabel || ROLES[c.role]}${age !== null ? ' · ' + age + ' ' + plural(age,'год','года','лет') : ''}</div>
       </div>
     </div>
+    ${annexHtml}
     ${c.note ? `<div style="background:var(--bg-elev);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;font-size:14px;color:var(--ink-2);line-height:1.5;">${c.note}</div>` : ''}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">
       <div class="stat-tile"><div class="stat-num">${relatedEntries.length}</div><div class="stat-label">заметок</div></div>
@@ -2479,9 +2561,21 @@ function deleteConnection(id) {
 function openConnectionForm(existing) {
   const c = existing || { name: '', role: 'friend', statusLabel: '', note: '', color: COLORS[Math.floor(Math.random()*COLORS.length)] };
   let role = c.role;
+  let photoData = c.photo || null;
+
   openModal(`
     <div class="modal-handle"></div>
     <div class="modal-title">${existing ? 'Редактировать' : 'Новая связь'}</div>
+
+    <div style="display:flex;justify-content:center;margin-bottom:20px;">
+      <div id="photoPreview" class="conn-photo-upload${photoData ? ' has-photo' : ''}">
+        ${photoData
+          ? `<img id="photoImg" src="${photoData}" style="width:100%;height:100%;object-fit:cover;">`
+          : `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M3 20a9 9 0 0 1 18 0"/><circle cx="12" cy="8" r="4"/></svg>`}
+      </div>
+      <input type="file" id="fPhoto" accept="image/*" style="display:none">
+    </div>
+
     <div class="field"><label>Имя</label><input id="fName" value="${c.name}" maxlength="50" placeholder="Как зовут?"></div>
     <div class="field">
       <label>Роль</label>
@@ -2489,13 +2583,26 @@ function openConnectionForm(existing) {
         ${Object.entries(ROLES).map(([k,lbl]) => `<div class="role-opt ${c.role===k?'selected':''}" data-role="${k}">${lbl}</div>`).join('')}
       </div>
     </div>
-    <div class="field"><label>Статус (своими словами)</label><input id="fStatus" value="${c.statusLabel ? c.statusLabel : ''}" maxlength="60" placeholder="Моя девушка, старый друг..."></div>
+    <div class="field"><label>Статус (своими словами)</label><input id="fStatus" value="${c.statusLabel||''}" maxlength="60" placeholder="Моя девушка, старый друг..."></div>
+    <div class="field"><label>🎂 Дата рождения</label><input type="date" id="fBirthdate" value="${c.birthdate||''}"></div>
     <div class="field"><label>Заметка</label><textarea id="fNote" maxlength="300" placeholder="Что важно помнить об этом человеке">${c.note||''}</textarea></div>
-    <div class="field"><label>📅 Важная дата (годовщина)</label><input type="date" id="fAnniv" value="${c.anniversary||''}"></div>
+    <div class="field"><label>📅 Важная дата</label><input type="date" id="fAnniv" value="${c.anniversary||''}"></div>
     <div class="field"><label>📅 Название даты</label><input id="fAnnivLabel" value="${c.anniversaryLabel||''}" placeholder="Знакомство, день рождения..."></div>
-    <div class="field"><label>🔔 Напомнить если нет записей (дней)</label><input type="number" id="fReminder" value="${c.reminderDays||14}" min="1" max="365"></div>
     <button class="btn" id="saveConn">${existing ? 'Сохранить' : 'Создать'}</button>
   `);
+
+  // Photo upload
+  document.getElementById('photoPreview').addEventListener('click', () => document.getElementById('fPhoto').click());
+  document.getElementById('fPhoto').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    resizePhoto(file, data => {
+      photoData = data;
+      const prev = document.getElementById('photoPreview');
+      prev.classList.add('has-photo');
+      prev.innerHTML = `<img src="${data}" style="width:100%;height:100%;object-fit:cover;">`;
+    });
+  });
 
   document.querySelectorAll('#roleGrid .role-opt').forEach(o => o.addEventListener('click', () => {
     document.querySelectorAll('#roleGrid .role-opt').forEach(x => x.classList.remove('selected'));
@@ -2506,16 +2613,16 @@ function openConnectionForm(existing) {
   document.getElementById('saveConn').addEventListener('click', () => {
     const name = document.getElementById('fName').value.trim();
     if (!name) { toast('Введи имя'); return; }
-    const note = document.getElementById('fNote').value.trim();
-    const statusLabel = document.getElementById('fStatus').value.trim();
-    const anniversary = document.getElementById('fAnniv') ? document.getElementById('fAnniv').value : (existing?.anniversary||'');
-    const anniversaryLabel = document.getElementById('fAnnivLabel') ? document.getElementById('fAnnivLabel').value.trim() : (existing?.anniversaryLabel||'');
-    const reminderDays = document.getElementById('fReminder') ? parseInt(document.getElementById('fReminder').value)||14 : (existing?.reminderDays||14);
+    const note          = document.getElementById('fNote').value.trim();
+    const statusLabel   = document.getElementById('fStatus').value.trim();
+    const birthdate     = document.getElementById('fBirthdate').value;
+    const anniversary   = document.getElementById('fAnniv').value;
+    const anniversaryLabel = document.getElementById('fAnnivLabel').value.trim();
     if (existing) {
-      Object.assign(existing, { name, role, note, statusLabel, anniversary, anniversaryLabel, reminderDays });
+      Object.assign(existing, { name, role, note, statusLabel, birthdate, anniversary, anniversaryLabel, photo: photoData });
       toast('Сохранено ✓');
     } else {
-      state.connections.unshift({ id: uid(), name, role, statusLabel, note, anniversary, anniversaryLabel, reminderDays, color: c.color, created: new Date().toISOString().slice(0,10) });
+      state.connections.unshift({ id: uid(), name, role, statusLabel, note, birthdate, anniversary, anniversaryLabel, photo: photoData, color: c.color, created: new Date().toISOString().slice(0,10) });
       toast('Связь добавлена');
     }
     saveState();
@@ -2703,7 +2810,22 @@ function renderStats() {
       moodCard.innerHTML = '<div class="chart-title">🎭 Настроение по людям</div><div class="chart-sub">Какие эмоции чаще всего с кем</div><div id="moodStatsBlock"></div>';
       extra.appendChild(moodCard);
       renderMoodStats();
-      renderConnMap();
+      if (state.connections.length) {
+        const mapCard = document.createElement('div');
+        mapCard.className = 'chart-card connmap-preview';
+        mapCard.style.marginBottom = '14px';
+        mapCard.innerHTML = `
+          <div style="display:flex;align-items:center;gap:14px;">
+            <span style="font-size:32px;line-height:1;">🗺️</span>
+            <div style="flex:1;">
+              <div class="chart-title" style="margin-bottom:2px;">Карта связей</div>
+              <div class="chart-sub" style="margin-bottom:0;">Твоё окружение · ${state.connections.length} ${plural(state.connections.length,'связь','связи','связей')}</div>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--mint-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </div>`;
+        mapCard.addEventListener('click', openConnMapFull);
+        extra.appendChild(mapCard);
+      }
     }
   });
 }
@@ -2740,28 +2862,23 @@ function renderMoodStats() {
   });
 }
 
-function renderConnMap() {
-  const existing = document.querySelector('.conn-map-wrap');
-  if (existing) existing.remove();
+function openConnMapFull() {
   const total = state.connections.length;
   if (!total) return;
 
   const colMap = {mint:'#4cc9a0',rose:'#f9a8d4',warm:'#fcd34d',cool:'#93c5fd',violet:'#c4b5fd'};
   const nodeR = 22;
 
-  // Radius large enough that adjacent node circles don't overlap
   const minChord = nodeR * 2 + 10;
   const R = total <= 1 ? 85 : Math.max(85, Math.ceil(minChord / (2 * Math.sin(Math.PI / total))) + 6);
 
-  // SVG canvas: orbit radius + room for node + name label on each side
-  const pad = nodeR + 24;
+  const pad = nodeR + 28;
   const half = R + pad;
   const W = half * 2;
   const H = W;
   const cx = half, cy = half;
   const angleOffset = -Math.PI / 2;
 
-  // Initial node positions
   const pos = state.connections.map((c, i) => ({
     x: cx + R * Math.cos(angleOffset + (2 * Math.PI / total) * i),
     y: cy + R * Math.sin(angleOffset + (2 * Math.PI / total) * i),
@@ -2773,37 +2890,24 @@ function renderConnMap() {
 
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.style.cssText = 'display:block;width:100%;touch-action:none;-webkit-user-select:none;user-select:none;';
+  svg.style.cssText = 'display:block;width:100%;max-width:560px;touch-action:none;-webkit-user-select:none;user-select:none;';
 
-  // Animations
   const styleEl = document.createElementNS(NS, 'style');
   styleEl.textContent = `
-    @keyframes mnPop {
-      from { opacity:0; transform:scale(.15); }
-      to   { opacity:1; transform:scale(1);  }
-    }
-    @keyframes mnFade {
-      from { opacity:0; }
-      to   { opacity:1; }
-    }
-    .mn-c {
-      transform-box:fill-box; transform-origin:center;
-      animation: mnPop .5s cubic-bezier(.34,1.56,.64,1) both;
-    }
-    .mn-t { animation: mnFade .4s ease both; }
+    @keyframes mnPop  { from{opacity:0;transform:scale(.15)} to{opacity:1;transform:scale(1)} }
+    @keyframes mnFade { from{opacity:0} to{opacity:1} }
+    .mn-c { transform-box:fill-box;transform-origin:center;animation:mnPop .5s cubic-bezier(.34,1.56,.64,1) both; }
+    .mn-t { animation:mnFade .4s ease both; }
     .map-node-g { cursor:grab; }
     .map-node-g:active { cursor:grabbing; }
   `;
   svg.appendChild(styleEl);
 
-  const gLines  = document.createElementNS(NS, 'g');
-  const gNodes  = document.createElementNS(NS, 'g');
+  const gLines = document.createElementNS(NS, 'g');
+  const gNodes = document.createElementNS(NS, 'g');
   const gCenter = document.createElementNS(NS, 'g');
-  svg.appendChild(gLines);
-  svg.appendChild(gNodes);
-  svg.appendChild(gCenter);
+  svg.appendChild(gLines); svg.appendChild(gNodes); svg.appendChild(gCenter);
 
-  // Centre node (always on top)
   const cGlow = document.createElementNS(NS, 'circle');
   cGlow.setAttribute('cx', cx); cGlow.setAttribute('cy', cy); cGlow.setAttribute('r', 32);
   cGlow.setAttribute('fill', 'var(--mint)'); cGlow.setAttribute('opacity', '.10');
@@ -2826,21 +2930,17 @@ function renderConnMap() {
   const nodeGrps = [];
 
   function applyPos(idx) {
-    const {x, y, col} = pos[idx];
+    const {x, y} = pos[idx];
     const g = nodeGrps[idx];
     g.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)})`);
-    // Name: above node if in top half, below if in bottom half
     g.querySelector('.mn-name').setAttribute('y', y < cy ? -(nodeR + 8) : (nodeR + 13));
-    // Line from centre to node edge
     const dx = x - cx, dy = y - cy;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dist = Math.sqrt(dx*dx + dy*dy);
     if (dist > 0) {
       const cr = 24, nr = nodeR + 3;
       const l = lineEls[idx];
-      l.setAttribute('x1', (cx + dx / dist * cr).toFixed(1));
-      l.setAttribute('y1', (cy + dy / dist * cr).toFixed(1));
-      l.setAttribute('x2', (x  - dx / dist * nr).toFixed(1));
-      l.setAttribute('y2', (y  - dy / dist * nr).toFixed(1));
+      l.setAttribute('x1', (cx + dx/dist*cr).toFixed(1)); l.setAttribute('y1', (cy + dy/dist*cr).toFixed(1));
+      l.setAttribute('x2', (x - dx/dist*nr).toFixed(1));  l.setAttribute('y2', (y - dy/dist*nr).toFixed(1));
     }
   }
 
@@ -2849,26 +2949,18 @@ function renderConnMap() {
     const col = p.col;
     const displayName = p.name.length > 9 ? p.name.slice(0, 8) + '…' : p.name;
 
-    // Dashed line
     const line = document.createElementNS(NS, 'line');
-    line.setAttribute('stroke', 'var(--line-2)');
-    line.setAttribute('stroke-width', '1.5');
-    line.setAttribute('stroke-dasharray', '4 3');
-    line.setAttribute('opacity', '0.65');
-    line.setAttribute('class', 'mn-t');
-    line.style.animationDelay = delay;
-    gLines.appendChild(line);
-    lineEls.push(line);
+    line.setAttribute('stroke', 'var(--line-2)'); line.setAttribute('stroke-width', '1.5');
+    line.setAttribute('stroke-dasharray', '4 3'); line.setAttribute('opacity', '0.65');
+    line.setAttribute('class', 'mn-t'); line.style.animationDelay = delay;
+    gLines.appendChild(line); lineEls.push(line);
 
-    // Node group (positioned via transform)
     const g = document.createElementNS(NS, 'g');
-    g.setAttribute('class', 'map-node-g');
-    g.dataset.idx = i;
+    g.setAttribute('class', 'map-node-g'); g.dataset.idx = i;
 
     const circle = document.createElementNS(NS, 'circle');
     circle.setAttribute('cx', 0); circle.setAttribute('cy', 0); circle.setAttribute('r', nodeR);
-    circle.setAttribute('fill', col + '22');
-    circle.setAttribute('stroke', col); circle.setAttribute('stroke-width', '1.5');
+    circle.setAttribute('fill', col + '22'); circle.setAttribute('stroke', col); circle.setAttribute('stroke-width', '1.5');
     circle.setAttribute('class', 'mn-c'); circle.style.animationDelay = delay;
 
     const iniT = document.createElementNS(NS, 'text');
@@ -2881,8 +2973,7 @@ function renderConnMap() {
     iniT.textContent = initials(p.name);
 
     const nameT = document.createElementNS(NS, 'text');
-    nameT.setAttribute('x', 0);
-    nameT.setAttribute('text-anchor', 'middle');
+    nameT.setAttribute('x', 0); nameT.setAttribute('text-anchor', 'middle');
     nameT.setAttribute('font-size', '9'); nameT.setAttribute('font-family', 'Geist,sans-serif');
     nameT.setAttribute('fill', 'var(--ink-3)'); nameT.setAttribute('font-weight', '400');
     nameT.setAttribute('pointer-events', 'none');
@@ -2890,54 +2981,56 @@ function renderConnMap() {
     nameT.textContent = displayName;
 
     g.append(circle, iniT, nameT);
-    gNodes.appendChild(g);
-    nodeGrps.push(g);
+    gNodes.appendChild(g); nodeGrps.push(g);
     applyPos(i);
   });
 
-  // Drag via Pointer Events
+  // Drag
   let drag = null, ox = 0, oy = 0;
-
   function svgPt(e) {
     const pt = svg.createSVGPoint();
     const src = (e.touches && e.touches[0]) || e;
     pt.x = src.clientX; pt.y = src.clientY;
     return pt.matrixTransform(svg.getScreenCTM().inverse());
   }
-
   gNodes.addEventListener('pointerdown', e => {
-    const g = e.target.closest('.map-node-g');
-    if (!g) return;
+    const g = e.target.closest('.map-node-g'); if (!g) return;
     drag = +g.dataset.idx;
-    const pt = svgPt(e);
-    ox = pt.x - pos[drag].x;
-    oy = pt.y - pos[drag].y;
-    svg.setPointerCapture(e.pointerId);
-    e.preventDefault();
+    const pt = svgPt(e); ox = pt.x - pos[drag].x; oy = pt.y - pos[drag].y;
+    svg.setPointerCapture(e.pointerId); e.preventDefault();
   });
-
   svg.addEventListener('pointermove', e => {
     if (drag === null) return;
-    const pt = svgPt(e);
-    pos[drag].x = pt.x - ox;
-    pos[drag].y = pt.y - oy;
-    applyPos(drag);
-    e.preventDefault();
+    const pt = svgPt(e); pos[drag].x = pt.x - ox; pos[drag].y = pt.y - oy;
+    applyPos(drag); e.preventDefault();
   });
-
   svg.addEventListener('pointerup',     () => { drag = null; });
   svg.addEventListener('pointercancel', () => { drag = null; });
 
-  // Mount
-  const chartArea = document.querySelector('.view');
-  if (!chartArea) return;
-  const wrap = document.createElement('div');
-  wrap.className = 'conn-map-wrap chart-card';
-  const hdr = document.createElement('div'); hdr.className = 'chart-title'; hdr.textContent = '🗺️ Карта связей';
-  const sub = document.createElement('div'); sub.className = 'chart-sub'; sub.style.marginBottom = '12px';
-  sub.textContent = 'Твоё окружение · перемещай узлы';
-  wrap.append(hdr, sub, svg);
-  chartArea.insertBefore(wrap, chartArea.firstChild);
+  // Fullscreen overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'connmap-fs';
+
+  const header = document.createElement('div');
+  header.className = 'connmap-fs-header';
+  header.innerHTML = `
+    <button class="connmap-fs-back" id="cmBack" aria-label="Назад">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <div>
+      <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:500;letter-spacing:-0.01em;">Карта связей</div>
+      <div style="font-size:12px;color:var(--ink-3);margin-top:1px;">${total} ${plural(total,'связь','связи','связей')} · перемещай узлы</div>
+    </div>`;
+
+  const body = document.createElement('div');
+  body.className = 'connmap-fs-body';
+  body.appendChild(svg);
+
+  overlay.appendChild(header);
+  overlay.appendChild(body);
+  document.getElementById('app').appendChild(overlay);
+
+  overlay.querySelector('#cmBack').addEventListener('click', () => overlay.remove());
 }
 
 // ============== DIARY ==============
@@ -3225,7 +3318,7 @@ function renderProfile() {
         <div class="menu-item">
           <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
           <div class="menu-label">Версия</div>
-          <div class="menu-value" id="versionTap" style="cursor:pointer;">5.0.0</div>
+          <div class="menu-value" id="versionTap" style="cursor:pointer;">5.0.5</div>
         </div>
         <div class="menu-item">
           <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
