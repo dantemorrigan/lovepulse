@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.dantemorrigan.lovepulse",
+    "sha256_cert_fingerprints": [
+      "FE:AD:B5:42:CF:FE:3E:DF:CC:46:58:FD:3B:C8:1D:6A:33:2C:53:35:61:72:EA:F2:ED:2C:A4:BE:7F:5D:B4:50"
+    ]
+  }
+}]
