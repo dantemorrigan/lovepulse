@@ -3415,10 +3415,12 @@ function exportData() {
 }
 
 function resetData() {
-  confirm2('Удалить все данные?', 'Все связи и записи будут удалены. Действие необратимо.', () => {
-    const uid = getCurrentUserId();
-    if (uid) localStorage.removeItem(DATA_PREFIX + uid);
-    state = structuredClone(DEFAULT_STATE);
+  confirm2('Удалить все данные?', 'Все связи и записи будут удалены. Действие необратимо.', async () => {
+    if (currentUserId) {
+      localStorage.removeItem(DATA_PREFIX + currentUserId);
+      state = structuredClone(DEFAULT_STATE);
+      await _pushStateToCloud(); // wipe cloud data too
+    }
     toast('Данные сброшены');
     navigate('home');
   });
@@ -3637,11 +3639,9 @@ function showAuthScreen() {
       currentUserRole = 'user';
       state = structuredClone(DEFAULT_STATE);
       state.user.name = name;
-      // Ensure profile name is saved (trigger may not have fired yet)
-      await Promise.all([
-        sb.from('profiles').upsert({ id: currentUserId, name, role: 'user' }, { onConflict: 'id' }),
-        sb.from('user_data').upsert({ user_id: currentUserId, data: state, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
-      ]);
+      // Trigger already created profiles + user_data rows; push initial state
+      localStorage.setItem(DATA_PREFIX + currentUserId, JSON.stringify(state));
+      await _pushStateToCloud();
       authEl.style.display = 'none';
       showApp();
     };
