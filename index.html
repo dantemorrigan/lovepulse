@@ -1884,6 +1884,55 @@
     line-height: 1.6;
   }
 
+  /* ── WELCOME POPUP ── */
+  .welcome-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 500;
+    display: flex;
+    align-items: flex-end;
+    animation: fadeIn .25s var(--ease);
+  }
+  .welcome-sheet {
+    width: 100%;
+    background: var(--bg-elev);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 28px 40px;
+    animation: slideUp .35s var(--ease);
+  }
+  .welcome-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+    text-align: center;
+  }
+  .welcome-sheet h2 {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+  .welcome-sheet p {
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .welcome-sheet .btn { width: 100%; margin-bottom: 10px; }
+  .welcome-skip {
+    display: block;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-4);
+    cursor: pointer;
+    padding: 4px;
+  }
+  @media (min-width: 900px) {
+    .welcome-overlay { align-items: center; justify-content: center; }
+    .welcome-sheet { max-width: 420px; border-radius: 24px; padding: 36px 36px 36px; }
+  }
+
   /* ── APP LOADER ── */
   .app-loader {
     position: fixed;
@@ -2002,11 +2051,15 @@ sb.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN' && session && !currentUserId) {
     currentUserId = session.user.id;
     state = _loadCachedState(currentUserId);
+    if (!state.user.name) {
+      state.user.name = session.user.user_metadata?.name || 'Новый пользователь';
+      localStorage.setItem(DATA_PREFIX + currentUserId, JSON.stringify(state));
+    }
     applyTheme(state.user.theme || 'light');
     const authEl = document.getElementById('authScreen');
     if (authEl) authEl.style.display = 'none';
     showApp();
-    _syncFromCloud(currentUserId); // load real data in background
+    _syncFromCloud(currentUserId);
   }
 });
 
@@ -2031,7 +2084,8 @@ let state = structuredClone(DEFAULT_STATE);
 
 function _mergeWithDefaults(parsed) {
   const s = { ...structuredClone(DEFAULT_STATE), ...parsed };
-  if (!s.user) s.user = { name: '', bio: '', theme: 'light' };
+  if (!s.user) s.user = { name: 'Новый пользователь', bio: '', theme: 'light' };
+  if (!s.user.name) s.user.name = 'Новый пользователь';
   if (!s.user.theme) s.user.theme = 'light';
   if (s.onboarded === undefined) s.onboarded = false;
   if (s.plus === undefined) s.plus = false;
@@ -2467,6 +2521,33 @@ function renderHome() {
   v.querySelectorAll('[data-entry]').forEach(it => it.addEventListener('click', () => openEntry(it.dataset.entry)));
   const nc = v.querySelector('#neglectedCard');
   if (nc) nc.addEventListener('click', () => navigate('connections'));
+
+  if (total === 0) showWelcomePopup();
+}
+
+function showWelcomePopup() {
+  if (document.getElementById('welcomeOverlay')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'welcomeOverlay';
+  overlay.className = 'welcome-overlay';
+  overlay.innerHTML = `
+    <div class="welcome-sheet">
+      <span class="welcome-icon">🫂</span>
+      <h2>Добавь первую связь</h2>
+      <p>LovePulse помогает не терять людей, которые важны.<br>
+         Начни с добавления партнёра, друга или близкого человека — и отслеживай ваш пульс.</p>
+      <button class="btn" id="welcomeAdd">Добавить связь</button>
+      <span class="welcome-skip" id="welcomeSkip">Позже</span>
+    </div>
+  `;
+  document.getElementById('app').appendChild(overlay);
+  overlay.querySelector('#welcomeAdd').addEventListener('click', () => {
+    overlay.remove();
+    navigate('connections');
+    setTimeout(() => document.getElementById('fab')?.click(), 200);
+  });
+  overlay.querySelector('#welcomeSkip').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
 // ============== CONNECTIONS ==============
@@ -3249,7 +3330,7 @@ function renderProfile() {
         <div class="menu-item">
           <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
           <div class="menu-label">Версия</div>
-          <div class="menu-value" id="versionTap" style="cursor:pointer;">2.5.0</div>
+          <div class="menu-value" id="versionTap" style="cursor:pointer;">2.6.0</div>
         </div>
         <div class="menu-item">
           <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
@@ -3275,7 +3356,7 @@ function renderProfile() {
         </div>
       </div>
       <div style="text-align:center;padding:28px 0 14px;color:var(--ink-4);font-size:11px;letter-spacing:.05em;line-height:1.8;">
-        LovePulse · v2.5.0
+        LovePulse · v2.6.0
       </div>
       <input type="file" id="importFile" accept=".json" style="display:none">
     </div>
@@ -3746,7 +3827,7 @@ function showApp() {
 function logout() {
   confirm2('Выйти из аккаунта?', 'Вы будете перенаправлены на экран входа. Данные сохранятся в облаке.', async () => {
     showLoader('Выходим…');
-    await sb.auth.signOut();
+    try { await sb.auth.signOut(); } catch(e) { /* сессия уже истекла — всё равно чистим локальное состояние */ }
     currentUserId = null;
     currentUserRole = 'user';
     state = structuredClone(DEFAULT_STATE);
