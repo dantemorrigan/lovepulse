@@ -1,4 +1,4 @@
-!image (https://github.com/dantemorrigan/lovepulse/blob/main/icons/icon-512x512.png?raw=true)
+
 
 # LovePulse
 
