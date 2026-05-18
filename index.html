@@ -457,11 +457,19 @@
     transition: transform .2s var(--ease);
   }
   .connmap-fs-back:active { transform: scale(.9); }
-  .connmap-fs-body {
-    flex: 1; overflow: auto; padding: 8px;
-    display: flex; align-items: flex-start; justify-content: center;
+  .connmap-fs-reset {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--bg-soft); border: none; cursor: pointer;
+    display: grid; place-items: center; color: var(--ink-3);
+    margin-left: auto; transition: transform .2s var(--ease);
   }
-  .connmap-fs-body svg { width: 100%; max-width: 560px; }
+  .connmap-fs-reset:active { transform: scale(.88) rotate(90deg); }
+  .connmap-fs-body {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+  .connmap-fs-body svg { display: block; }
 
   /* Map preview card in stats */
   .connmap-preview {
@@ -2869,148 +2877,7 @@ function openConnMapFull() {
   const total = state.connections.length;
   if (!total) return;
 
-  const colMap = {mint:'#4cc9a0',rose:'#f9a8d4',warm:'#fcd34d',cool:'#93c5fd',violet:'#c4b5fd'};
-  const nodeR = 22;
-
-  const minChord = nodeR * 2 + 10;
-  const R = total <= 1 ? 85 : Math.max(85, Math.ceil(minChord / (2 * Math.sin(Math.PI / total))) + 6);
-
-  const pad = nodeR + 28;
-  const half = R + pad;
-  const W = half * 2;
-  const H = W;
-  const cx = half, cy = half;
-  const angleOffset = -Math.PI / 2;
-
-  const pos = state.connections.map((c, i) => ({
-    x: cx + R * Math.cos(angleOffset + (2 * Math.PI / total) * i),
-    y: cy + R * Math.sin(angleOffset + (2 * Math.PI / total) * i),
-    col: colMap[c.color] || '#4cc9a0',
-    name: c.name
-  }));
-
-  const NS = 'http://www.w3.org/2000/svg';
-
-  const svg = document.createElementNS(NS, 'svg');
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.style.cssText = 'display:block;width:100%;max-width:560px;touch-action:none;-webkit-user-select:none;user-select:none;';
-
-  const styleEl = document.createElementNS(NS, 'style');
-  styleEl.textContent = `
-    @keyframes mnPop  { from{opacity:0;transform:scale(.15)} to{opacity:1;transform:scale(1)} }
-    @keyframes mnFade { from{opacity:0} to{opacity:1} }
-    .mn-c { transform-box:fill-box;transform-origin:center;animation:mnPop .5s cubic-bezier(.34,1.56,.64,1) both; }
-    .mn-t { animation:mnFade .4s ease both; }
-    .map-node-g { cursor:grab; }
-    .map-node-g:active { cursor:grabbing; }
-  `;
-  svg.appendChild(styleEl);
-
-  const gLines = document.createElementNS(NS, 'g');
-  const gNodes = document.createElementNS(NS, 'g');
-  const gCenter = document.createElementNS(NS, 'g');
-  svg.appendChild(gLines); svg.appendChild(gNodes); svg.appendChild(gCenter);
-
-  const cGlow = document.createElementNS(NS, 'circle');
-  cGlow.setAttribute('cx', cx); cGlow.setAttribute('cy', cy); cGlow.setAttribute('r', 32);
-  cGlow.setAttribute('fill', 'var(--mint)'); cGlow.setAttribute('opacity', '.10');
-  cGlow.setAttribute('class', 'mn-c'); cGlow.style.animationDelay = '0s';
-  const cFill = document.createElementNS(NS, 'circle');
-  cFill.setAttribute('cx', cx); cFill.setAttribute('cy', cy); cFill.setAttribute('r', 22);
-  cFill.setAttribute('fill', 'var(--mint)');
-  cFill.setAttribute('class', 'mn-c'); cFill.style.animationDelay = '0s';
-  const cTxt = document.createElementNS(NS, 'text');
-  cTxt.setAttribute('x', cx); cTxt.setAttribute('y', cy + 1);
-  cTxt.setAttribute('text-anchor', 'middle'); cTxt.setAttribute('dominant-baseline', 'middle');
-  cTxt.setAttribute('font-size', '12'); cTxt.setAttribute('font-family', 'Fraunces,serif');
-  cTxt.setAttribute('fill', 'white'); cTxt.setAttribute('font-weight', '600');
-  cTxt.setAttribute('pointer-events', 'none');
-  cTxt.setAttribute('class', 'mn-t'); cTxt.style.animationDelay = '.1s';
-  cTxt.textContent = initials(state.user.name);
-  gCenter.append(cGlow, cFill, cTxt);
-
-  const lineEls = [];
-  const nodeGrps = [];
-
-  function applyPos(idx) {
-    const {x, y} = pos[idx];
-    const g = nodeGrps[idx];
-    g.setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)})`);
-    g.querySelector('.mn-name').setAttribute('y', y < cy ? -(nodeR + 8) : (nodeR + 13));
-    const dx = x - cx, dy = y - cy;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    if (dist > 0) {
-      const cr = 24, nr = nodeR + 3;
-      const l = lineEls[idx];
-      l.setAttribute('x1', (cx + dx/dist*cr).toFixed(1)); l.setAttribute('y1', (cy + dy/dist*cr).toFixed(1));
-      l.setAttribute('x2', (x - dx/dist*nr).toFixed(1));  l.setAttribute('y2', (y - dy/dist*nr).toFixed(1));
-    }
-  }
-
-  pos.forEach((p, i) => {
-    const delay = (i * 0.04).toFixed(2) + 's';
-    const col = p.col;
-    const displayName = p.name.length > 9 ? p.name.slice(0, 8) + '…' : p.name;
-
-    const line = document.createElementNS(NS, 'line');
-    line.setAttribute('stroke', 'var(--line-2)'); line.setAttribute('stroke-width', '1.5');
-    line.setAttribute('stroke-dasharray', '4 3'); line.setAttribute('opacity', '0.65');
-    line.setAttribute('class', 'mn-t'); line.style.animationDelay = delay;
-    gLines.appendChild(line); lineEls.push(line);
-
-    const g = document.createElementNS(NS, 'g');
-    g.setAttribute('class', 'map-node-g'); g.dataset.idx = i;
-
-    const circle = document.createElementNS(NS, 'circle');
-    circle.setAttribute('cx', 0); circle.setAttribute('cy', 0); circle.setAttribute('r', nodeR);
-    circle.setAttribute('fill', col + '22'); circle.setAttribute('stroke', col); circle.setAttribute('stroke-width', '1.5');
-    circle.setAttribute('class', 'mn-c'); circle.style.animationDelay = delay;
-
-    const iniT = document.createElementNS(NS, 'text');
-    iniT.setAttribute('x', 0); iniT.setAttribute('y', 1);
-    iniT.setAttribute('text-anchor', 'middle'); iniT.setAttribute('dominant-baseline', 'middle');
-    iniT.setAttribute('font-size', '11'); iniT.setAttribute('font-family', 'Fraunces,serif');
-    iniT.setAttribute('fill', col); iniT.setAttribute('font-weight', '600');
-    iniT.setAttribute('pointer-events', 'none');
-    iniT.setAttribute('class', 'mn-t'); iniT.style.animationDelay = delay;
-    iniT.textContent = initials(p.name);
-
-    const nameT = document.createElementNS(NS, 'text');
-    nameT.setAttribute('x', 0); nameT.setAttribute('text-anchor', 'middle');
-    nameT.setAttribute('font-size', '9'); nameT.setAttribute('font-family', 'Geist,sans-serif');
-    nameT.setAttribute('fill', 'var(--ink-3)'); nameT.setAttribute('font-weight', '400');
-    nameT.setAttribute('pointer-events', 'none');
-    nameT.setAttribute('class', 'mn-name mn-t'); nameT.style.animationDelay = delay;
-    nameT.textContent = displayName;
-
-    g.append(circle, iniT, nameT);
-    gNodes.appendChild(g); nodeGrps.push(g);
-    applyPos(i);
-  });
-
-  // Drag
-  let drag = null, ox = 0, oy = 0;
-  function svgPt(e) {
-    const pt = svg.createSVGPoint();
-    const src = (e.touches && e.touches[0]) || e;
-    pt.x = src.clientX; pt.y = src.clientY;
-    return pt.matrixTransform(svg.getScreenCTM().inverse());
-  }
-  gNodes.addEventListener('pointerdown', e => {
-    const g = e.target.closest('.map-node-g'); if (!g) return;
-    drag = +g.dataset.idx;
-    const pt = svgPt(e); ox = pt.x - pos[drag].x; oy = pt.y - pos[drag].y;
-    svg.setPointerCapture(e.pointerId); e.preventDefault();
-  });
-  svg.addEventListener('pointermove', e => {
-    if (drag === null) return;
-    const pt = svgPt(e); pos[drag].x = pt.x - ox; pos[drag].y = pt.y - oy;
-    applyPos(drag); e.preventDefault();
-  });
-  svg.addEventListener('pointerup',     () => { drag = null; });
-  svg.addEventListener('pointercancel', () => { drag = null; });
-
-  // Fullscreen overlay
+  // ── Overlay shell (mounted first so we can measure it) ──
   const overlay = document.createElement('div');
   overlay.className = 'connmap-fs';
 
@@ -3018,22 +2885,322 @@ function openConnMapFull() {
   header.className = 'connmap-fs-header';
   header.innerHTML = `
     <button class="connmap-fs-back" id="cmBack" aria-label="Назад">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
     </button>
-    <div>
+    <div style="flex:1;">
       <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:500;letter-spacing:-0.01em;">Карта связей</div>
-      <div style="font-size:12px;color:var(--ink-3);margin-top:1px;">${total} ${plural(total,'связь','связи','связей')} · перемещай узлы</div>
-    </div>`;
+      <div style="font-size:12px;color:var(--ink-3);margin-top:1px;">
+        ${total} ${plural(total,'связь','связи','связей')} · перемещай узлы
+      </div>
+    </div>
+    <button class="connmap-fs-reset" id="cmReset" title="Сбросить" aria-label="Сбросить">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+        <path d="M3 3v5h5"/>
+      </svg>
+    </button>`;
 
   const body = document.createElement('div');
   body.className = 'connmap-fs-body';
-  body.appendChild(svg);
 
   overlay.appendChild(header);
   overlay.appendChild(body);
   document.getElementById('app').appendChild(overlay);
 
-  overlay.querySelector('#cmBack').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#cmBack').addEventListener('click', () => {
+    ro.disconnect();
+    overlay.remove();
+  });
+
+  // ── Build SVG after layout is stable ──
+  let currentSvg = null;
+
+  function buildSVG() {
+    const BW = body.offsetWidth  || 390;
+    const BH = body.offsetHeight || 640;
+    if (currentSvg) currentSvg.svg.remove();
+    currentSvg = _buildConnMapSvg(BW, BH);
+    body.appendChild(currentSvg.svg);
+  }
+
+  // Rebuild on orientation change / resize
+  const ro = new ResizeObserver(() => buildSVG());
+  ro.observe(body);
+
+  // Initial build after two frames so body has real dimensions
+  requestAnimationFrame(() => requestAnimationFrame(buildSVG));
+
+  overlay.querySelector('#cmReset').addEventListener('click', () => {
+    if (currentSvg) currentSvg.reset();
+  });
+}
+
+function _buildConnMapSvg(BW, BH) {
+  const total = state.connections.length;
+  const colMap = {mint:'#4cc9a0',rose:'#f9a8d4',warm:'#fcd34d',cool:'#93c5fd',violet:'#c4b5fd'};
+
+  // ── Adaptive geometry ──────────────────────────────────────────────
+  // Node radius scales down when there are many connections
+  const maxBudget = Math.min(BW, BH) * 0.42;            // max orbit radius
+  const rawNodeR  = Math.floor(maxBudget * Math.sin(Math.PI / Math.max(total, 1)) - 5);
+  const nodeR     = Math.max(16, Math.min(26, rawNodeR)); // clamp 16–26 px
+
+  const minChord  = nodeR * 2 + 8;
+  const R = total <= 1
+    ? maxBudget * 0.5
+    : Math.min(maxBudget, minChord / (2 * Math.sin(Math.PI / total)));
+
+  const cx = BW / 2, cy = BH / 2;
+  const angleOffset = -Math.PI / 2;
+
+  const iniFs   = Math.max(9,  Math.round(nodeR * 0.52));  // initials font-size
+  const labelFs = Math.max(8,  Math.round(nodeR * 0.44));  // name label font-size
+  const labelGap = nodeR + 10;                              // label offset from centre
+
+  // ── Initial positions ──────────────────────────────────────────────
+  const conn = state.connections;
+  const pos  = conn.map((c, i) => ({
+    x:   cx + R * Math.cos(angleOffset + (2 * Math.PI / total) * i),
+    y:   cy + R * Math.sin(angleOffset + (2 * Math.PI / total) * i),
+    ox:  cx + R * Math.cos(angleOffset + (2 * Math.PI / total) * i), // origin (for reset)
+    oy:  cy + R * Math.sin(angleOffset + (2 * Math.PI / total) * i),
+    col: colMap[c.color] || '#4cc9a0',
+  }));
+
+  // ── SVG ────────────────────────────────────────────────────────────
+  const NS  = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${BW} ${BH}`);
+  svg.style.cssText = [
+    'width:100%', 'height:100%', 'display:block',
+    'touch-action:none', '-webkit-user-select:none', 'user-select:none',
+  ].join(';');
+
+  // Defs (clipPaths for photos)
+  const defs = document.createElementNS(NS, 'defs');
+  svg.appendChild(defs);
+
+  // Keyframe animations
+  const styleEl = document.createElementNS(NS, 'style');
+  styleEl.textContent = `
+    @keyframes mnPop  { from{opacity:0;transform:scale(.1)} to{opacity:1;transform:scale(1)} }
+    @keyframes mnFade { from{opacity:0} to{opacity:1} }
+    .mn-c { transform-box:fill-box; transform-origin:center;
+            animation: mnPop .5s cubic-bezier(.34,1.56,.64,1) both; }
+    .mn-t { animation: mnFade .45s ease both; }
+    .map-node-g { cursor:grab; }
+    .map-node-g:active { cursor:grabbing; }
+  `;
+  svg.appendChild(styleEl);
+
+  const gLines  = document.createElementNS(NS, 'g');
+  const gNodes  = document.createElementNS(NS, 'g');
+  const gCenter = document.createElementNS(NS, 'g');
+  svg.appendChild(gLines);
+  svg.appendChild(gNodes);
+  svg.appendChild(gCenter); // center node always on top
+
+  // ── Centre node ────────────────────────────────────────────────────
+  const crOuter = nodeR + 8;
+  const crInner = nodeR;
+
+  [[crOuter, 'var(--mint)', '.10', '0s', true],
+   [crInner, 'var(--mint)', '1',   '0s', false],
+  ].forEach(([r, fill, opacity, delay, isGlow]) => {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', r);
+    c.setAttribute('fill', fill); c.setAttribute('opacity', opacity);
+    if (!isGlow) c.setAttribute('class', 'mn-c');
+    c.style.animationDelay = delay;
+    gCenter.appendChild(c);
+  });
+
+  // Centre photo or initials
+  if (state.user.avatar) {
+    const cClipId = 'cm-c-clip';
+    const cp = document.createElementNS(NS, 'clipPath'); cp.setAttribute('id', cClipId);
+    const cc = document.createElementNS(NS, 'circle');
+    cc.setAttribute('cx', cx); cc.setAttribute('cy', cy); cc.setAttribute('r', crInner);
+    cp.appendChild(cc); defs.appendChild(cp);
+    const img = document.createElementNS(NS, 'image');
+    img.setAttribute('x', cx - crInner); img.setAttribute('y', cy - crInner);
+    img.setAttribute('width', crInner * 2); img.setAttribute('height', crInner * 2);
+    img.setAttribute('href', state.user.avatar);
+    img.setAttribute('clip-path', `url(#${cClipId})`);
+    img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    img.setAttribute('pointer-events', 'none');
+    img.setAttribute('class', 'mn-t'); img.style.animationDelay = '.05s';
+    gCenter.appendChild(img);
+  } else {
+    const cTxt = document.createElementNS(NS, 'text');
+    cTxt.setAttribute('x', cx); cTxt.setAttribute('y', cy + 1);
+    cTxt.setAttribute('text-anchor', 'middle'); cTxt.setAttribute('dominant-baseline', 'middle');
+    cTxt.setAttribute('font-size', iniFs + 2); cTxt.setAttribute('font-family', 'Fraunces,serif');
+    cTxt.setAttribute('fill', 'white'); cTxt.setAttribute('font-weight', '600');
+    cTxt.setAttribute('pointer-events', 'none');
+    cTxt.setAttribute('class', 'mn-t'); cTxt.style.animationDelay = '.1s';
+    cTxt.textContent = initials(state.user.name);
+    gCenter.appendChild(cTxt);
+  }
+
+  // ── Connection nodes ───────────────────────────────────────────────
+  const lineEls  = [];
+  const nodeGrps = [];
+
+  function applyPos(idx) {
+    const {x, y} = pos[idx];
+    nodeGrps[idx].setAttribute('transform', `translate(${x.toFixed(1)},${y.toFixed(1)})`);
+    // Label above if node is in top half, below otherwise
+    nodeGrps[idx].querySelector('.mn-name')
+      .setAttribute('y', y < cy ? -(labelGap) : (labelGap + 4));
+    // Dashed line: from edge of centre circle → edge of node circle
+    const dx = x - cx, dy = y - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 0) {
+      const x1 = cx + dx / dist * (crInner + 3);
+      const y1 = cy + dy / dist * (crInner + 3);
+      const x2 = x  - dx / dist * (nodeR  + 3);
+      const y2 = y  - dy / dist * (nodeR  + 3);
+      const l = lineEls[idx];
+      l.setAttribute('x1', x1.toFixed(1)); l.setAttribute('y1', y1.toFixed(1));
+      l.setAttribute('x2', x2.toFixed(1)); l.setAttribute('y2', y2.toFixed(1));
+    }
+  }
+
+  conn.forEach((c, i) => {
+    const delay      = (i * 0.035).toFixed(2) + 's';
+    const col        = pos[i].col;
+    const photo      = c.photo || null;
+    const dispName   = c.name.length > 9 ? c.name.slice(0, 8) + '…' : c.name;
+
+    // Line
+    const line = document.createElementNS(NS, 'line');
+    line.setAttribute('stroke', 'var(--line-2)');
+    line.setAttribute('stroke-width', '1.5');
+    line.setAttribute('stroke-dasharray', '4 3');
+    line.setAttribute('opacity', '0.6');
+    line.setAttribute('class', 'mn-t');
+    line.style.animationDelay = delay;
+    gLines.appendChild(line);
+    lineEls.push(line);
+
+    // Node group (positioned via transform)
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'map-node-g');
+    g.dataset.idx = i;
+
+    // Outer glow ring
+    const glow = document.createElementNS(NS, 'circle');
+    glow.setAttribute('cx', 0); glow.setAttribute('cy', 0); glow.setAttribute('r', nodeR + 5);
+    glow.setAttribute('fill', col); glow.setAttribute('opacity', '.08');
+    glow.setAttribute('pointer-events', 'none');
+    g.appendChild(glow);
+
+    // Main circle
+    const circle = document.createElementNS(NS, 'circle');
+    circle.setAttribute('cx', 0); circle.setAttribute('cy', 0); circle.setAttribute('r', nodeR);
+    circle.setAttribute('fill', photo ? col + '44' : col + '22');
+    circle.setAttribute('stroke', col); circle.setAttribute('stroke-width', '1.5');
+    circle.setAttribute('class', 'mn-c');
+    circle.style.animationDelay = delay;
+    g.appendChild(circle);
+
+    if (photo) {
+      // Circular photo via clipPath
+      const clipId = `cm-clip-${i}`;
+      const cp = document.createElementNS(NS, 'clipPath'); cp.setAttribute('id', clipId);
+      const cc = document.createElementNS(NS, 'circle');
+      cc.setAttribute('cx', 0); cc.setAttribute('cy', 0); cc.setAttribute('r', nodeR - 1);
+      cp.appendChild(cc); defs.appendChild(cp);
+
+      const img = document.createElementNS(NS, 'image');
+      img.setAttribute('x', -nodeR + 1); img.setAttribute('y', -nodeR + 1);
+      img.setAttribute('width', (nodeR - 1) * 2); img.setAttribute('height', (nodeR - 1) * 2);
+      img.setAttribute('href', photo);
+      img.setAttribute('clip-path', `url(#${clipId})`);
+      img.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+      img.setAttribute('pointer-events', 'none');
+      img.setAttribute('class', 'mn-t');
+      img.style.animationDelay = delay;
+      g.appendChild(img);
+    } else {
+      // Initials text
+      const iniT = document.createElementNS(NS, 'text');
+      iniT.setAttribute('x', 0); iniT.setAttribute('y', 1);
+      iniT.setAttribute('text-anchor', 'middle'); iniT.setAttribute('dominant-baseline', 'middle');
+      iniT.setAttribute('font-size', iniFs); iniT.setAttribute('font-family', 'Fraunces,serif');
+      iniT.setAttribute('fill', col); iniT.setAttribute('font-weight', '600');
+      iniT.setAttribute('pointer-events', 'none');
+      iniT.setAttribute('class', 'mn-t');
+      iniT.style.animationDelay = delay;
+      iniT.textContent = initials(c.name);
+      g.appendChild(iniT);
+    }
+
+    // Name label (y set dynamically in applyPos)
+    const nameT = document.createElementNS(NS, 'text');
+    nameT.setAttribute('x', 0);
+    nameT.setAttribute('text-anchor', 'middle');
+    nameT.setAttribute('font-size', labelFs);
+    nameT.setAttribute('font-family', 'Geist,sans-serif');
+    nameT.setAttribute('fill', 'var(--ink-2)');
+    nameT.setAttribute('font-weight', '500');
+    nameT.setAttribute('pointer-events', 'none');
+    nameT.setAttribute('class', 'mn-name mn-t');
+    nameT.style.animationDelay = delay;
+    nameT.textContent = dispName;
+    g.appendChild(nameT);
+
+    gNodes.appendChild(g);
+    nodeGrps.push(g);
+    applyPos(i);
+  });
+
+  // ── Drag via Pointer Events ────────────────────────────────────────
+  let drag = null, ox = 0, oy = 0;
+
+  function svgPt(e) {
+    const pt  = svg.createSVGPoint();
+    const src = e.touches ? e.touches[0] : e;
+    pt.x = src.clientX; pt.y = src.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  gNodes.addEventListener('pointerdown', e => {
+    const g = e.target.closest('.map-node-g'); if (!g) return;
+    drag = +g.dataset.idx;
+    const pt = svgPt(e);
+    ox = pt.x - pos[drag].x;
+    oy = pt.y - pos[drag].y;
+    svg.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+
+  svg.addEventListener('pointermove', e => {
+    if (drag === null) return;
+    const pt = svgPt(e);
+    pos[drag].x = pt.x - ox;
+    pos[drag].y = pt.y - oy;
+    applyPos(drag);
+    e.preventDefault();
+  });
+
+  svg.addEventListener('pointerup',     () => { drag = null; });
+  svg.addEventListener('pointercancel', () => { drag = null; });
+
+  // ── Reset helper (returned so header button can call it) ──────────
+  function reset() {
+    pos.forEach((p, i) => {
+      p.x = p.ox; p.y = p.oy;
+      applyPos(i);
+    });
+  }
+
+  return { svg, reset };
 }
 
 // ============== DIARY ==============
