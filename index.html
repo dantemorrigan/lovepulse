@@ -1,418 +1,3911 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>LovePulse</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous">
-    <!-- Манифест PWA -->
-    <link rel="manifest" href="/manifest.json">
-    <!-- Мета-теги для iOS -->
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="LovePulse">
-    <link rel="apple-touch-icon" href="icons/icon-180x180.png">
-    <!-- Splash screen для iOS -->
-    <link rel="apple-touch-startup-image" href="icons/splash-1125x2436.png">
-    <!-- Тема для Android -->
-    <meta name="theme-color" content="#ff6f61">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>LovePulse</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='11' cy='16' r='9' stroke='%234cc9a0' stroke-width='2' fill='none'/%3E%3Ccircle cx='21' cy='16' r='9' stroke='%234cc9a0' stroke-width='2' fill='none'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%234cc9a0'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f8f6;
+    --bg-elev: #ffffff;
+    --bg-soft: #eef3ef;
+    --ink: #0f1a14;
+    --ink-2: #3a4a40;
+    --ink-3: #6b7a70;
+    --ink-4: #9aa69e;
+    --line: #e2e8e3;
+    --line-2: #d4dcd5;
+    --mint: #4cc9a0;
+    --mint-2: #2fb389;
+    --mint-soft: #d8f1e6;
+    --mint-deep: #0b3b2a;
+    --emerald: #047857;
+    --warn: #d97706;
+    --rose: #e11d48;
+    --shadow-sm: 0 1px 2px rgba(11,59,42,.04), 0 1px 1px rgba(11,59,42,.02);
+    --shadow-md: 0 4px 16px -4px rgba(11,59,42,.08), 0 2px 6px -2px rgba(11,59,42,.04);
+    --shadow-lg: 0 24px 48px -16px rgba(11,59,42,.12), 0 8px 16px -8px rgba(11,59,42,.06);
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-lg: 22px;
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --ease-spring: cubic-bezier(.34,1.56,.64,1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Geist', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* Phone frame */
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Top status / header */
+  .header {
+    padding: 18px 22px 14px;
+    background: var(--bg);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s var(--ease);
+  }
+  .header.scrolled { border-bottom-color: var(--line); }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .logo-icon {
+    flex-shrink: 0;
+    display: block;
+  }
+  .logo-orbit-dot {
+    animation: orbitPulse 2.2s ease-in-out infinite;
+    transform-origin: 14px 11px;
+  }
+  @keyframes orbitPulse {
+    0%, 100% { opacity: 1; r: 2.2px; }
+    50%       { opacity: .7; r: 3px; }
+  }
+  .header-action {
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    background: var(--bg-soft);
+    display: grid; place-items: center;
+    border: none;
+    cursor: pointer;
+    transition: transform .2s var(--ease), background .2s var(--ease);
+  }
+  .header-action:active { transform: scale(.93); background: var(--mint-soft); }
+
+  /* Main scroll area */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  .main::-webkit-scrollbar { width: 0; }
+
+  .view {
+    padding: 8px 22px 100px;
+    animation: viewIn .4s var(--ease);
+  }
+  @keyframes viewIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Typography */
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--mint-2);
+    font-weight: 300;
+  }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 20px;
+    letter-spacing: -0.015em;
+  }
+  .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    font-weight: 500;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-label a {
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--mint-2);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg-elev);
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    padding: 18px;
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease), border-color .2s var(--ease);
+  }
+  .card:active { transform: scale(.985); }
+
+  /* HOME — hero */
+  .hero {
+    background: linear-gradient(135deg, #1a3d2e 0%, #0b3b2a 50%, #0a4a35 100%);
+    color: white;
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -30%; right: -20%;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(76,201,160,.35), transparent 70%);
+    filter: blur(20px);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,.04) 1px, transparent 0);
+    background-size: 18px 18px;
+    pointer-events: none;
+  }
+  .hero-greeting {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    opacity: .65;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .hero-name {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .hero-name em { font-style: italic; color: var(--mint); font-weight: 300; }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    position: relative;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,.1);
+  }
+  .hero-stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .hero-stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: .6;
+    margin-top: 4px;
+  }
+
+  /* Pulse strip */
+  .pulse-strip {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+  }
+  .pulse-strip::-webkit-scrollbar { display: none; }
+  .pulse-card {
+    flex: 0 0 114px;
+    height: 114px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    scroll-snap-align: start;
+    position: relative;
+    transition: transform .2s var(--ease);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+  }
+  .pulse-card:active { transform: scale(.96); }
+  .pulse-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+    display: grid; place-items: center;
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 8px;
+    font-family: 'Fraunces', serif;
+    flex-shrink: 0;
+  }
+  .pulse-name {
+    font-weight: 500;
+    font-size: 13px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+  }
+  .pulse-meta {
+    font-size: 11px;
+    color: var(--ink-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: auto;
+  }
+
+  /* Feed entries */
+  .feed { display: flex; flex-direction: column; gap: 12px; }
+  .feed-item {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    cursor: pointer;
+    transition: transform .2s var(--ease), border-color .2s var(--ease);
+  }
+  .feed-item:active { transform: scale(.99); }
+  .feed-icon {
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    display: grid; place-items: center;
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+  }
+  .feed-icon.warm { background: #ffe8d4; color: #b85c1a; }
+  .feed-icon.rose { background: #ffe1ea; color: #b91c4e; }
+  .feed-content { flex: 1; min-width: 0; }
+  .feed-title {
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 3px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  .feed-sub {
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .feed-time {
+    font-size: 11px;
+    color: var(--ink-4);
+    flex-shrink: 0;
+  }
+
+  /* CONNECTIONS */
+  .search-bar {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .search-bar input::placeholder { color: var(--ink-4); }
+
+  .filter-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin: 0 -22px 18px;
+    padding: 0 22px;
+    scrollbar-width: none;
+  }
+  .filter-chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: all .2s var(--ease);
+    white-space: nowrap;
+  }
+  .chip.active {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+  }
+  .chip:active { transform: scale(.95); }
+
+  .connection-list { display: flex; flex-direction: column; gap: 10px; }
+  .connection {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: transform .2s var(--ease);
+  }
+  .connection:active { transform: scale(.99); }
+  .avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .avatar.mint { background: var(--mint-soft); color: var(--mint-deep); }
+  .avatar.rose { background: #ffe1ea; color: #b91c4e; }
+  .avatar.warm { background: #ffe8d4; color: #b85c1a; }
+  .avatar.cool { background: #dbeafe; color: #1e40af; }
+  .avatar.violet { background: #ede9fe; color: #6d28d9; }
+  .conn-info { flex: 1; min-width: 0; }
+  .conn-name {
+    font-weight: 500;
+    font-size: 15px;
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .conn-meta {
+    font-size: 12px;
+    color: var(--ink-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--mint);
+  }
+  .role-tag {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    background: var(--bg-soft);
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  /* STATS */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .stat-tile {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .stat-tile.feature {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border-color: #a7f3d0;
+  }
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+  .stat-delta {
+    font-size: 11px;
+    color: var(--mint-2);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .stat-delta.down { color: var(--rose); }
+
+  /* Bar chart (CSS only) */
+  .chart-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .chart-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .chart-sub {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-bottom: 18px;
+  }
+  .bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 120px;
+    padding-top: 10px;
+  }
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .bar {
+    width: 100%;
+    background: linear-gradient(180deg, var(--mint) 0%, var(--mint-2) 100%);
+    border-radius: 6px 6px 2px 2px;
+    transition: height .8s var(--ease-spring);
+    min-height: 4px;
+  }
+  .bar-label {
+    font-size: 10px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Donut */
+  .donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .donut {
+    width: 110px; height: 110px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .donut-center {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    text-align: center;
+  }
+  .donut-center .num {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .donut-center .lbl {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    margin-top: 2px;
+  }
+  .donut-legend {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .legend-swatch {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+  }
+  .legend-row .val {
+    margin-left: auto;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Insight card */
+  .insight {
+    background: var(--ink);
+    color: white;
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .insight::before {
+    content: '✦';
+    position: absolute;
+    top: 14px; right: 16px;
+    font-size: 18px;
+    color: var(--mint);
+  }
+  .insight-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--mint);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .insight-text {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    line-height: 1.35;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .insight-text em {
+    color: var(--mint);
+    font-style: italic;
+  }
+
+  /* DIARY */
+  .diary-list { display: flex; flex-direction: column; gap: 14px; }
+  .diary-day {
+    display: flex;
+    gap: 14px;
+  }
+  .diary-date {
+    flex-shrink: 0;
+    width: 52px;
+    text-align: center;
+    padding-top: 4px;
+  }
+  .diary-date .d {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .diary-date .m {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+  .diary-entry {
+    flex: 1;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: transform .2s var(--ease);
+  }
+  .diary-entry:active { transform: scale(.99); }
+  .diary-text {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    margin-bottom: 10px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  .diary-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag {
+    font-size: 11px;
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  /* PROFILE */
+  .profile-head {
+    text-align: center;
+    padding: 14px 0 24px;
+  }
+  .profile-avatar {
+    width: 84px; height: 84px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--mint), var(--mint-2));
+    color: white;
+    display: grid;
+    place-items: center;
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 500;
+    margin: 0 auto 14px;
+    box-shadow: 0 8px 24px -8px rgba(76,201,160,.4);
+    overflow: hidden;
+    position: relative;
+  }
+  .profile-avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    position: absolute;
+    inset: 0;
+  }
+  .profile-avatar-wrap {
+    position: relative;
+    width: 84px;
+    margin: 0 auto 14px;
+    cursor: pointer;
+  }
+  .avatar-edit-btn {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: white;
+    display: grid; place-items: center;
+    border: 2px solid var(--bg);
+    cursor: pointer;
+    transition: transform .2s var(--ease);
+  }
+  [data-theme="dark"] .avatar-edit-btn {
+    background: var(--mint-2);
+    color: #021a0e;
+  }
+  .profile-avatar-wrap:active .avatar-edit-btn { transform: scale(.9); }
+  .profile-name {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .profile-bio {
+    font-size: 13px;
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+
+  .menu-group {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .menu-item {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--line);
+    transition: background .15s var(--ease);
+  }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item:active { background: var(--bg-soft); }
+  .menu-icon {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    background: var(--bg-soft);
+    display: grid; place-items: center;
+    color: var(--ink-2);
+    flex-shrink: 0;
+  }
+  .menu-icon.danger { background: #fee2e2; color: var(--rose); }
+  .menu-label { flex: 1; font-size: 14px; font-weight: 500; }
+  .menu-value { font-size: 13px; color: var(--ink-3); }
+  .menu-chev { color: var(--ink-4); }
+
+  /* BOTTOM NAV */
+  .nav {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(246,248,246,.85);
+    backdrop-filter: saturate(1.6) blur(18px);
+    -webkit-backdrop-filter: saturate(1.6) blur(18px);
+    border-top: 1px solid var(--line);
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 50;
+  }
+  .nav-btn {
+    background: none;
+    border: none;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 4px;
+    cursor: pointer;
+    color: var(--ink-4);
+    transition: color .2s var(--ease);
+    position: relative;
+  }
+  .nav-btn.active { color: var(--ink); }
+  .nav-btn .nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .nav-btn svg { transition: transform .3s var(--ease-spring); }
+  .nav-btn.active svg { transform: translateY(-2px) scale(1.08); }
+
+  /* FAB */
+  .fab {
+    position: absolute;
+    bottom: 84px;
+    right: 22px;
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--ink), #1a3d2e);
+    color: white;
+    display: grid; place-items: center;
+    box-shadow: 0 12px 28px -6px rgba(11,59,42,.4);
+    cursor: pointer;
+    z-index: 40;
+    transition: transform .25s var(--ease-spring);
+  }
+  .fab:active { transform: scale(.9); }
+  .fab svg { transition: transform .3s var(--ease); }
+
+  /* MODAL */
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(11,59,42,.4);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: none;
+    align-items: flex-end;
+    animation: fadeIn .2s var(--ease);
+  }
+  .modal-backdrop.open { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: var(--bg);
+    width: 100%;
+    border-radius: 24px 24px 0 0;
+    padding: 22px 22px calc(22px + env(safe-area-inset-bottom));
+    max-height: 88vh;
+    overflow-y: auto;
+    animation: slideUp .35s var(--ease-spring);
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .modal-handle {
+    width: 38px; height: 4px;
+    background: var(--line-2);
+    border-radius: 999px;
+    margin: 0 auto 18px;
+  }
+  .modal-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    margin-bottom: 18px;
+  }
+
+  /* FORM */
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    border-radius: 11px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    border-color: var(--mint-2);
+    box-shadow: 0 0 0 3px var(--mint-soft);
+  }
+  .field textarea { resize: none; min-height: 90px; line-height: 1.5; }
+
+  .role-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .role-opt {
+    padding: 10px 8px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    border-radius: 10px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--ink-2);
+    transition: all .2s var(--ease);
+  }
+  .role-opt.selected {
+    border-color: var(--mint-2);
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+  }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--ink);
+    color: white;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform .2s var(--ease), opacity .2s var(--ease);
+    margin-top: 10px;
+  }
+  .btn:active { transform: scale(.985); }
+  .btn.secondary {
+    background: var(--bg-soft);
+    color: var(--ink);
+  }
+  .btn.danger {
+    background: var(--rose);
+  }
+
+  .tag-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    border-radius: 11px;
+    min-height: 48px;
+  }
+  .tag-pickable {
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--ink-2);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all .2s var(--ease);
+  }
+  .tag-pickable.selected {
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+    border-color: var(--mint-2);
+  }
+
+  /* EMPTY */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-3);
+  }
+  .empty .icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    opacity: .4;
+  }
+  .empty h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .empty p { font-size: 13px; }
+
+  /* TOAST */
+  .toast {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--ink);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .3s var(--ease-spring);
+    z-index: 200;
+    box-shadow: var(--shadow-lg);
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Detail page */
+  .back-btn {
+    background: var(--bg-soft);
+    border: none;
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--ink-2);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+    margin-bottom: 16px;
+  }
+
+  /* ── DARK THEME ── */
+  [data-theme="dark"] {
+    --bg: #0d1710;
+    --bg-elev: #141f17;
+    --bg-soft: #1a2a1e;
+    --ink: #e8f0ea;
+    --ink-2: #b8c9bc;
+    --ink-3: #7a9080;
+    --ink-4: #4a6050;
+    --line: #1f2f22;
+    --line-2: #263629;
+    --mint-soft: #0d2d1f;
+    --mint-deep: #7de8bc;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.2);
+    --shadow-md: 0 4px 16px -4px rgba(0,0,0,.35);
+    --shadow-lg: 0 24px 48px -16px rgba(0,0,0,.5);
+  }
+  [data-theme="dark"] .nav {
+    background: rgba(13,23,16,.88);
+  }
+  [data-theme="dark"] .hero {
+    background: linear-gradient(135deg, #0a2416 0%, #061a0f 50%, #092015 100%);
+  }
+  [data-theme="dark"] .field input,
+  [data-theme="dark"] .field textarea,
+  [data-theme="dark"] .field select {
+    background: var(--bg-soft);
+    color: var(--ink);
+  }
+  [data-theme="dark"] .btn.secondary {
+    background: var(--bg-soft);
+    color: var(--ink);
+  }
+  [data-theme="dark"] .modal {
+    background: var(--bg-elev);
+  }
+  [data-theme="dark"] .tag-picker {
+    background: var(--bg-soft);
+  }
+  [data-theme="dark"] .tag-pickable {
+    background: var(--bg);
+    color: var(--ink-2);
+  }
+
+  /* ── WEB LAYOUT ── */
+  @media (min-width: 900px) {
+    html, body { height: 100%; overflow: hidden; background: var(--bg); }
+    .app {
+      max-width: none;
+      width: 100%;
+      height: 100vh;
+      min-height: unset;
+      overflow: hidden;
+      flex-direction: row;
+      border-radius: 0;
+      box-shadow: none;
+      margin: 0;
+    }
+    .header { display: none; }
+    .nav {
+      position: relative;
+      flex-shrink: 0;
+      width: 240px;
+      height: 100vh;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: stretch;
+      gap: 4px;
+      padding: 28px 16px;
+      border-top: none;
+      border-right: 1px solid var(--line);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: var(--bg-elev);
+      z-index: 10;
+      overflow-y: auto;
+    }
+    .web-logo {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px 20px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+    .nav-btn {
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+    .nav-btn .nav-label { font-size: 14px; letter-spacing: 0; }
+    .nav-btn.active { background: var(--mint-soft); color: var(--mint-2); }
+    .nav-btn.active svg { transform: none; color: var(--mint-2); }
+    .nav-btn svg { transition: none; }
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      height: 100vh;
+    }
+    .fab { bottom: 28px; right: 28px; position: fixed; }
+    .view { max-width: 960px; margin: 0 auto; padding: 32px 48px 60px; }
+    .modal-backdrop { position: fixed; }
+    .toast { position: fixed; }
+  }
+
+  /* ── ONBOARDING ── */
+  .onboard {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+  .onboard-slide {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 32px;
+    text-align: center;
+    animation: viewIn .4s var(--ease);
+  }
+  .onboard-icon {
+    font-size: 64px;
+    margin-bottom: 24px;
+  }
+  .onboard h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .onboard h2 em { color: var(--mint-2); font-style: italic; font-weight: 300; }
+  .onboard p {
+    font-size: 15px;
+    color: var(--ink-3);
+    line-height: 1.6;
+    max-width: 300px;
+  }
+  .onboard-dots {
+    display: flex;
+    gap: 6px;
+    padding: 20px 0;
+  }
+  .onboard-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--line-2);
+    transition: all .3s var(--ease);
+  }
+  .onboard-dot.active { background: var(--mint); width: 20px; border-radius: 3px; }
+  .onboard-footer { padding: 16px 24px calc(24px + env(safe-area-inset-bottom)); }
+
+  /* ── CONFIRM DIALOG ── */
+  .confirm-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(11,59,42,.5);
+    backdrop-filter: blur(6px);
+    z-index: 250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: fadeIn .2s var(--ease);
+  }
+  .confirm-box {
+    background: var(--bg-elev);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    width: 100%;
+    max-width: 320px;
+    box-shadow: var(--shadow-lg);
+    animation: scaleIn .3s var(--ease-spring);
+  }
+  @keyframes scaleIn {
+    from { transform: scale(.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .confirm-title {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    letter-spacing: -0.015em;
+  }
+  .confirm-text { font-size: 14px; color: var(--ink-3); margin-bottom: 20px; line-height: 1.5; }
+  .confirm-actions { display: flex; gap: 10px; }
+  .confirm-actions .btn { margin-top: 0; flex: 1; }
+
+  /* ── STREAK / ALERT WIDGET ── */
+  .alert-card {
+    background: linear-gradient(135deg, #fff8e6, #fff3d6);
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    transition: transform .2s var(--ease);
+  }
+  .alert-card:active { transform: scale(.99); }
+  [data-theme="dark"] .alert-card {
+    background: linear-gradient(135deg, #2a1f00, #261c00);
+    border-color: #5a4500;
+  }
+  .alert-icon { font-size: 22px; flex-shrink: 0; }
+  .alert-text { flex: 1; font-size: 13px; color: var(--ink-2); line-height: 1.4; }
+  .alert-text strong { display: block; font-weight: 600; font-size: 14px; color: var(--ink); margin-bottom: 2px; }
+
+  .streak-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  /* ── CONN CARD ENHANCEMENTS ── */
+  .conn-count {
+    font-size: 11px;
+    color: var(--ink-4);
+    background: var(--bg-soft);
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-weight: 500;
+    margin-right: 6px;
+  }
+  .sort-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .sort-btn {
+    background: none;
+    border: none;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--ink-3);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all .15s var(--ease);
+  }
+  .sort-btn.active { background: var(--bg-soft); color: var(--ink); font-weight: 500; }
+
+  /* ── DIARY ENHANCEMENTS ── */
+  .month-group-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    font-weight: 500;
+    padding: 18px 0 10px;
+  }
+  .diary-search {
+    margin-bottom: 16px;
+  }
+  .person-filter-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin: 0 -22px 16px;
+    padding: 0 22px;
+    scrollbar-width: none;
+  }
+  .person-filter-strip::-webkit-scrollbar { display: none; }
+
+  /* ── STATS ENHANCEMENTS ── */
+  .heatmap {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 3px;
+    margin: 8px 0;
+  }
+  .hm-cell {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: var(--line);
+    transition: background .3s var(--ease);
+  }
+  .hm-cell.l1 { background: #a3e4cd; }
+  .hm-cell.l2 { background: #4cc9a0; }
+  .hm-cell.l3 { background: #2fb389; }
+  .hm-cell.l4 { background: #0e7a58; }
+  [data-theme="dark"] .hm-cell { background: #1a2a1e; }
+  [data-theme="dark"] .hm-cell.l1 { background: #0d4530; }
+  [data-theme="dark"] .hm-cell.l2 { background: #1a6b4a; }
+  [data-theme="dark"] .hm-cell.l3 { background: #2fb389; }
+  [data-theme="dark"] .hm-cell.l4 { background: #4cc9a0; }
+
+  /* ── DARK: кнопки ── */
+  [data-theme="dark"] .btn {
+    background: var(--mint-2);
+    color: #021a0e;
+  }
+  [data-theme="dark"] .btn:active { opacity: .85; }
+  [data-theme="dark"] .btn.secondary {
+    background: var(--bg-soft);
+    color: var(--ink);
+    border: 1px solid var(--line-2);
+  }
+  [data-theme="dark"] .btn.danger {
+    background: #c0182e;
+    color: white;
+  }
+
+  /* ── DARK: активные чипы и фильтры ── */
+  [data-theme="dark"] .chip.active {
+    background: var(--mint-2);
+    color: #021a0e;
+    border-color: var(--mint-2);
+  }
+  [data-theme="dark"] .sort-btn.active {
+    background: var(--bg-soft);
+    color: var(--ink);
+  }
+
+  /* ── DARK: FAB ── */
+  [data-theme="dark"] .fab {
+    background: linear-gradient(135deg, var(--mint-2), #0e5c38);
+  }
+
+  /* ── DARK: insight card ── */
+  [data-theme="dark"] .insight {
+    background: linear-gradient(135deg, #0d2d1f, #0a2016);
+    border: 1px solid var(--line-2);
+  }
+
+  /* ── DARK: toast ── */
+  [data-theme="dark"] .toast {
+    background: var(--bg-soft);
+    color: var(--ink);
+    border: 1px solid var(--line-2);
+  }
+
+  /* ── DARK: confirm dialog ── */
+  [data-theme="dark"] .confirm-box {
+    background: var(--bg-soft);
+    border: 1px solid var(--line-2);
+  }
+
+  /* ── DARK: onboarding ── */
+  [data-theme="dark"] .onboard {
+    background: var(--bg);
+  }
+
+  /* ── DARK: nav active state ── */
+  [data-theme="dark"] .nav-btn.active {
+    color: var(--mint);
+  }
+
+  /* ── DARK: header ── */
+  [data-theme="dark"] .header {
+    background: var(--bg);
+  }
+  [data-theme="dark"] .logo-icon circle {
+    stroke: var(--mint);
+  }
+  [data-theme="dark"] .logo-orbit-dot {
+    fill: var(--mint);
+  }
+  [data-theme="dark"] .header-action {
+    background: var(--bg-soft);
+    color: var(--ink-2);
+  }
+
+  /* ── DARK: profile avatar ── */
+  [data-theme="dark"] .profile-avatar {
+    background: linear-gradient(135deg, var(--mint-2), #0e5c38);
+  }
+
+  /* ── DARK: role-opt selected ── */
+  [data-theme="dark"] .role-opt.selected {
+    background: var(--mint-soft);
+    color: var(--mint-deep);
+    border-color: var(--mint-2);
+  }
+
+  /* ── DARK: search bar ── */
+  [data-theme="dark"] .search-bar {
+    background: var(--bg-soft);
+    border-color: var(--line-2);
+  }
+  [data-theme="dark"] .search-bar input {
+    background: transparent;
+    color: var(--ink);
+  }
+
+  /* ── DARK: menu-item hover ── */
+  [data-theme="dark"] .menu-item:active {
+    background: var(--bg-soft);
+  }
+  [data-theme="dark"] .menu-icon {
+    background: var(--bg-soft);
+  }
+  [data-theme="dark"] .menu-icon.danger {
+    background: rgba(192,24,46,.15);
+  }
+
+  /* ── LOVEPLUS SUBSCRIPTION ── */
+  .loveplus-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #1a0a2e, #2d1054, #1a0a2e);
+    background-size: 200% 200%;
+    animation: gradShift 4s ease infinite;
+    border: none;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s var(--ease);
+  }
+  @keyframes gradShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .loveplus-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg,
+      transparent 20%,
+      rgba(255,255,255,.06) 40%,
+      rgba(255,255,255,.12) 50%,
+      rgba(255,255,255,.06) 60%,
+      transparent 80%
+    );
+    animation: shimmer 3s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    60%, 100% { transform: translateX(100%); }
+  }
+  .loveplus-btn:active { transform: scale(.98); }
+  .loveplus-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #9333ea, #c026d3);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(147,51,234,.4);
+  }
+  .loveplus-text { flex: 1; text-align: left; }
+  .loveplus-title {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .loveplus-badge {
+    font-size: 9px;
+    font-family: 'Geist', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #9333ea, #c026d3);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .loveplus-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,.55);
+    margin-top: 2px;
+  }
+  .loveplus-chev {
+    color: rgba(255,255,255,.4);
+    flex-shrink: 0;
+  }
+
+  /* ── LOVEPLUS MODAL ── */
+  .lp-modal-header {
+    background: linear-gradient(160deg, #1a0a2e, #2d1054);
+    margin: -22px -22px 0;
+    padding: 32px 24px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px 24px 0 0;
+  }
+  .lp-modal-header::before {
+    content: '';
+    position: absolute;
+    top: -40%; left: 20%;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(147,51,234,.35), transparent 70%);
+    filter: blur(20px);
+  }
+  .lp-modal-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30%; right: 10%;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, rgba(192,38,211,.3), transparent 70%);
+    filter: blur(20px);
+  }
+  .lp-logo {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: white;
+    position: relative;
+    margin-bottom: 6px;
+  }
+  .lp-logo span {
+    background: linear-gradient(135deg, #c084fc, #e879f9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-style: italic;
+  }
+  .lp-coming {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.7);
+    position: relative;
+  }
+  .lp-coming::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #a855f7;
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+
+  .lp-features {
+    padding: 20px 0 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .lp-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    transition: background .15s var(--ease);
+  }
+  .lp-feature:active { background: var(--bg-soft); }
+  .lp-feature-icon {
+    width: 38px; height: 38px;
+    border-radius: 11px;
+    display: grid; place-items: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .lp-feature-text { flex: 1; }
+  .lp-feature-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+    color: var(--ink);
+  }
+  .lp-feature-desc {
+    font-size: 12px;
+    color: var(--ink-3);
+    line-height: 1.4;
+  }
+  .lp-footer {
+    margin-top: 20px;
+    text-align: center;
+  }
+  .lp-notify-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #7c3aed, #a21caf);
+    color: white;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 24px -6px rgba(124,58,237,.4);
+    transition: transform .2s var(--ease), box-shadow .2s var(--ease);
+    letter-spacing: 0.01em;
+  }
+  .lp-notify-btn:active { transform: scale(.98); box-shadow: none; }
+  .lp-footer-note {
+    font-size: 11px;
+    color: var(--ink-4);
+    margin-top: 10px;
+  }
+
+  .top-person-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .top-person-row:last-child { border-bottom: none; }
+  .top-bar-wrap { flex: 1; }
+  .top-bar-track { height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .top-bar-fill { height: 100%; background: var(--mint); border-radius: 999px; transition: width .8s var(--ease-spring); width: 0%; }
+
+  /* ── THEME TOGGLE ── */
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+  .toggle-track {
+    width: 44px; height: 24px;
+    border-radius: 999px;
+    background: var(--line-2);
+    position: relative;
+    transition: background .25s var(--ease);
+    flex-shrink: 0;
+  }
+  .toggle-track.on { background: var(--mint); }
+  .toggle-thumb {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    transition: transform .25s var(--ease-spring);
+  }
+  .toggle-track.on .toggle-thumb { transform: translateX(20px); }
+
+
+  /* ── HEALTH SCORE ── */
+  [data-theme="dark"]
+  [data-theme="dark"]
+  [data-theme="dark"]
+  [data-theme="dark"]
+
+
+  /* ── PLUS BADGE ── */
+  .plus-active-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: linear-gradient(135deg,#7c3aed,#a21caf);
+    color: white; font-size: 10px; font-weight: 700;
+    letter-spacing: .1em; padding: 3px 9px; border-radius: 999px;
+    text-transform: uppercase;
+  }
+  .plus-gate {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg-soft); border: 1px dashed var(--line-2);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px;
+    font-size: 13px; color: var(--ink-3);
+  }
+  .plus-gate svg { flex-shrink: 0; color: #9333ea; }
+
+  /* ── MAP СВЯЗЕЙ ── */
+  .conn-map-wrap {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 14px;
+  }
+  .conn-map-wrap svg { display: block; width: 100%; }
+
+  /* ── HEALTH ── */
+  .health-ring { position: relative; display: inline-grid; place-items: center; }
+  .health-ring svg { transform: rotate(-90deg); }
+  .health-ring-track { stroke: var(--line-2); }
+  .health-ring-fill { transition: stroke-dashoffset .8s var(--ease-spring); }
+  .health-score-label {
+    position: absolute; font-size: 11px; font-weight: 700;
+    font-variant-numeric: tabular-nums; letter-spacing: -.03em;
+  }
+  .health-badge {
+    display: inline-block; font-size: 12px; font-weight: 600;
+    padding: 4px 10px; border-radius: 6px;
+  }
+  .health-badge.great { background:#d1fae5;color:#065f46; }
+  .health-badge.good  { background:#fef9c3;color:#854d0e; }
+  .health-badge.weak  { background:#ffedd5;color:#9a3412; }
+  [data-theme="dark"] .health-badge.great { background:#052e16;color:#6ee7b7; }
+  [data-theme="dark"] .health-badge.good  { background:#2d1f00;color:#fcd34d; }
+  [data-theme="dark"] .health-badge.weak  { background:#2d1000;color:#fb923c; }
+
+  /* ── MOOD TAGS ── */
+  .mood-picker { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+  .mood-opt {
+    padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line);
+    background: var(--bg-elev); cursor: pointer; font-size: 13px;
+    transition: all .2s var(--ease);
+  }
+  .mood-opt.selected { border-color: var(--mint-2); background: var(--mint-soft); }
+  .mood-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 5px; vertical-align: middle;
+  }
+
+  /* ── ANNIVERSARY / TIMELINE ── */
+  .anniversary-card {
+    background: linear-gradient(135deg,#fff8f0,#fff3e8);
+    border: 1px solid #fcd34d; border-radius: var(--radius);
+    padding: 14px 16px; display: flex; align-items: center;
+    gap: 12px; margin-bottom: 16px; cursor: pointer;
+    transition: transform .2s var(--ease);
+  }
+  .anniversary-card:active { transform: scale(.99); }
+  [data-theme="dark"] .anniversary-card {
+    background: linear-gradient(135deg,#2a1c00,#261800);
+    border-color: #5a4000;
+  }
+  .timeline-wrap {
+    padding: 8px 0; display: flex; flex-direction: column; gap: 0;
+  }
+  .timeline-item {
+    display: flex; gap: 12px; padding: 10px 0;
+    position: relative;
+  }
+  .timeline-line {
+    width: 1px; background: var(--line); position: absolute;
+    left: 15px; top: 30px; bottom: -10px;
+  }
+  .timeline-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--mint); flex-shrink: 0;
+    margin-top: 6px; margin-left: 12px;
+    box-shadow: 0 0 0 3px var(--mint-soft);
+  }
+  .timeline-content { flex: 1; }
+  .timeline-date { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
+  .timeline-text { font-size: 13px; color: var(--ink-2); line-height: 1.4; }
+
+  /* ── DEV PANEL ── */
+  .dev-panel {
+    background: #0d1117; border-radius: var(--radius); padding: 16px;
+    margin-bottom: 14px; border: 1px solid #30363d;
+  }
+  .dev-panel-title {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .14em;
+    color: #58a6ff; font-weight: 600; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .dev-panel-title::before { content: '●'; color: #3fb950; }
+  .dev-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid #21262d; font-size: 13px; color: #e6edf3;
+  }
+  .dev-row:last-child { border-bottom: none; }
+  .dev-val { font-size: 12px; color: #58a6ff; font-family: monospace; }
+
+  /* ── PDF PRINT ── */
+  @media print {
+    .nav, .header, .fab, .modal-backdrop, .toast { display: none !important; }
+    .app { max-width: 100%; height: auto; overflow: visible; }
+    .main { height: auto; overflow: visible; }
+    .view { padding-bottom: 20px; }
+  }
+
+  /* ── AUTH SCREEN ── */
+  .auth-screen {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px 60px;
+  }
+  .auth-logo {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 36px;
+    color: var(--ink);
+  }
+  .auth-tabs {
+    display: flex;
+    background: var(--bg-soft);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 24px;
+    width: 100%;
+    max-width: 340px;
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: var(--ink-3);
+    transition: all .2s var(--ease);
+  }
+  .auth-tab.active {
+    background: var(--bg-elev);
+    color: var(--ink);
+    box-shadow: var(--shadow-sm);
+  }
+  .auth-form { width: 100%; max-width: 340px; }
+  .auth-error {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  [data-theme="dark"] .auth-error { background: rgba(185,28,28,.2); color: #fca5a5; }
+  .auth-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-4);
+    margin-top: 16px;
+    line-height: 1.6;
+  }
+
+  /* ── WELCOME POPUP ── */
+  .welcome-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 500;
+    display: flex;
+    align-items: flex-end;
+    animation: fadeIn .25s var(--ease);
+  }
+  .welcome-sheet {
+    width: 100%;
+    background: var(--bg-elev);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 28px 40px;
+    animation: slideUp .35s var(--ease);
+  }
+  .welcome-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+    text-align: center;
+  }
+  .welcome-sheet h2 {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+  .welcome-sheet p {
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .welcome-sheet .btn { width: 100%; margin-bottom: 10px; }
+  .welcome-skip {
+    display: block;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-4);
+    cursor: pointer;
+    padding: 4px;
+  }
+  @media (min-width: 900px) {
+    .welcome-overlay { align-items: center; justify-content: center; }
+    .welcome-sheet { max-width: 420px; border-radius: 24px; padding: 36px 36px 36px; }
+  }
+
+  /* ── APP LOADER ── */
+  .app-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    opacity: 1;
+    transition: opacity .2s var(--ease);
+  }
+  .app-loader.hidden { opacity: 0; pointer-events: none; }
+  .app-loader-spinner {
+    width: 34px;
+    height: 34px;
+    border: 2.5px solid var(--line-2);
+    border-top-color: var(--mint);
+    border-radius: 50%;
+    animation: loaderSpin .65s linear infinite;
+  }
+  @keyframes loaderSpin { to { transform: rotate(360deg); } }
+  .app-loader-text {
+    font-size: 14px;
+    color: var(--ink-3);
+    font-weight: 500;
+    letter-spacing: .01em;
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Уведомление о состоянии сети -->
-        <div id="network-status" class="network-status hidden" data-ru="Нет подключения к интернету 🌐" data-en="No internet connection 🌐"></div>
+<div id="appLoader" class="app-loader">
+  <div class="app-loader-spinner"></div>
+  <div class="app-loader-text">Загружаем…</div>
+</div>
+<div class="app" id="app">
 
-        <!-- Затемнение фона -->
-        <div id="overlay" class="overlay hidden"></div>
+  <header class="header" id="header">
+    <div class="logo">
+      <svg class="logo-icon" width="28" height="22" viewBox="0 0 28 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Левый круг -->
+        <circle cx="10" cy="11" r="8.5" stroke="#4cc9a0" stroke-width="1.5" fill="none" opacity="0.9"/>
+        <!-- Правый круг -->
+        <circle cx="18" cy="11" r="8.5" stroke="#4cc9a0" stroke-width="1.5" fill="none" opacity="0.9"/>
+        <!-- Точка в центре пересечения -->
+        <circle class="logo-orbit-dot" cx="14" cy="11" r="2.2" fill="#4cc9a0"/>
+      </svg>
+      LovePulse
+    </div>
+    <button class="header-action" id="searchBtn" aria-label="Поиск">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    </button>
+  </header>
 
-        <!-- Название приложения -->
-        <div class="app-title">
-            <h1 class="app-name">LovePulse ❤️</h1>
-        </div>
+  <main class="main" id="main">
+    <!-- views injected here -->
+  </main>
 
-        <!-- Вкладки -->
-<div class="tabs">
-    <button class="tab active" onclick="showTab('dashboard-tab')" aria-label="Перейти на главную" data-ru="Главная" data-en="Dashboard">Главная</button>
-    <button class="tab" onclick="showTab('partners-tab')" aria-label="Перейти к партнерам" data-ru="Партнеры" data-en="Partners">Партнеры</button>
-    <button class="tab" onclick="showTab('activities-tab')" aria-label="Перейти к активностям" data-ru="Активности" data-en="Activities">Активности</button>
-<a href="file:///C:/Users/reich/Desktop/LovePulse/pulsehub/pulsehub.html" class="tab pulsehub-btn" aria-label="Перейти в PulseHub" data-ru="PulseHub data-en="PulseHub>
-    <i class="fas fa-heart"></i> PulseHub
-    <span class="notification-dot"></span>
-</a>
-    <button class="tab" onclick="showTab('profile-tab')" aria-label="Перейти к профилю" data-ru="Профиль" data-en="Profile">Профиль</button>
-    <button class="tab" onclick="showTab('settings-tab')" aria-label="Перейти к настройкам" data-ru="Настройки" data-en="Settings">Настройки</button>
+  <button class="fab" id="fab" aria-label="Добавить">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+
+  <nav class="nav">
+    <div class="web-logo">
+      <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+        <circle cx="9" cy="14" r="8" stroke="var(--mint)" stroke-width="2.2" fill="none"/>
+        <circle cx="19" cy="14" r="8" stroke="var(--mint)" stroke-width="2.2" fill="none"/>
+        <circle cx="14" cy="14" r="3" fill="var(--mint)"/>
+      </svg>
+      LovePulse
+    </div>
+    <button class="nav-btn active" data-view="home">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      <span class="nav-label">Лента</span>
+    </button>
+    <button class="nav-btn" data-view="connections">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="nav-label">Связи</span>
+    </button>
+    <button class="nav-btn" data-view="stats">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 16 4-6 4 3 5-7"/></svg>
+      <span class="nav-label">Статистика</span>
+    </button>
+    <button class="nav-btn" data-view="diary">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span class="nav-label">Дневник</span>
+    </button>
+    <button class="nav-btn" data-view="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+      <span class="nav-label">Профиль</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="modal-backdrop" id="modal">
+    <div class="modal" id="modalContent">
+      <div class="modal-handle"></div>
+      <!-- modal injected -->
+    </div>
+  </div>
+
 </div>
 
-        <!-- Вкладка "Главная" -->
-        <div id="dashboard-tab" class="tab-content">
-            <div class="header">
-                <h1 data-ru="Панель любви ❤️" data-en="Love Dashboard ❤️">Панель любви ❤️</h1>
-                <div class="header-actions">
-                    <button class="add-partner-btn" onclick="showPartnerForm()" aria-label="Добавить нового партнера" data-ru="Добавить партнера" data-en="Add Partner">Добавить партнера</button>
-                    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему"></button>
-                    <button id="welcome-guide-btn" class="welcome-guide-btn" onclick="showWelcomeGuide()" aria-label="Открыть приветственный гайд">
-                        <i class="fas fa-book"></i>
-                    </button>
-                </div>
-            </div>
-            <p class="subtitle" data-ru="Отслеживайте свою романтическую судьбу 💫" data-en="Track your romantic journey 💫">Отслеживайте свою романтическую судьбу 💫</p>
+<script>
+// ============== SUPABASE ==============
+const SUPABASE_URL = 'https://vqletsjfqxnzzzzezpwi.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_jIx55gnCcDJ7xiWQkaD5iQ_g-Xt7Gdo';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            <!-- Панель прогресса -->
-            <div class="progress-panel">
-                <h2><i class="fas fa-heart"></i> <span data-ru="Ваша статистика 📊" data-en="Your Stats 📊">Ваша статистика 📊</span></h2>
-                <p class="panel-subtitle" data-ru="Здесь видно, как обстоят дела в вашей личной жизни" data-en="See how your love life is going">Здесь видно, как обстоят дела в вашей личной жизни</p>
-                <div class="stats">
-                    <div class="stat">
-                        <i class="fas fa-user"></i>
-                        <span id="potential-count">0</span>
-                        <p data-ru="Потенциальные" data-en="Potential">Потенциальные</p>
-                    </div>
-                    <div class="stat">
-                        <i class="fas fa-clock"></i>
-                        <span id="meetings-count">0</span>
-                        <p data-ru="Встречи" data-en="Meetings">Встречи</p>
-                    </div>
-                    <div class="stat">
-                        <i class="fas fa-heart"></i>
-                        <span id="serious-count">0</span>
-                        <p data-ru="Серьезно" data-en="Serious">Серьезно</p>
-                    </div>
-                    <div class="stat">
-                        <i class="fas fa-bolt"></i>
-                        <span id="active-count">0</span>
-                        <p data-ru="Активно" data-en="Active">Активно</p>
-                    </div>
-                </div>
-            </div>
+// Pre-warm: kick off session check immediately so it's ready by the time checkAuth runs
+const _sessionPromise = sb.auth.getSession();
 
-            <!-- Секции -->
-            <div class="dashboard-sections">
-                <div class="section recent-activity">
-                    <h2 data-ru="Недавние активности 📅" data-en="Recent Activities 📅">Недавние активности 📅</h2>
-                    <p id="recent-activity-text" data-ru="Пока нет активностей" data-en="No activities yet">Пока нет активностей</p>
-                    <div class="activity-wrapper">
-                        <ul id="recent-activity-list"></ul>
-                    </div>
-                    <button class="action-btn" onclick="showLogForm('add')" aria-label="Записать новую активность" data-ru="Записать новую активность" data-en="Log New Activity">Записать новую активность</button>
-                </div>
+// Handles email confirmation links — when user clicks the link in their inbox,
+// Supabase fires SIGNED_IN here and we log them in without a manual reload
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session && !currentUserId) {
+    currentUserId = session.user.id;
+    currentUserEmail = session.user.email || null;
+    state = _loadCachedState(currentUserId);
+    if (!state.user.name) {
+      state.user.name = session.user.user_metadata?.name || 'Новый пользователь';
+      localStorage.setItem(DATA_PREFIX + currentUserId, JSON.stringify(state));
+    }
+    applyTheme(state.user.theme || 'light');
+    const authEl = document.getElementById('authScreen');
+    if (authEl) authEl.style.display = 'none';
+    showApp();
+    _syncFromCloud(currentUserId);
+  }
+});
 
-                <div class="section favorites">
-                    <h2 data-ru="Избранное 🌟" data-en="Favorites 🌟">Избранное 🌟</h2>
-                    <p id="favorites-text" data-ru="Пока нет избранных" data-en="No favorites yet">Пока нет избранных</p>
-                    <ul id="favorites-list"></ul>
-                    <button class="action-btn" onclick="showTab('partners-tab')" aria-label="Посмотреть всех партнеров" data-ru="Посмотреть все" data-en="View All">Посмотреть все</button>
-                </div>
+// ============== AUTH ==============
+const DATA_PREFIX = 'lovepulse_cache_';
+let currentUserId = null;
+let currentUserRole = 'user';
+let currentUserEmail = null;
+const ADMIN_EMAIL = 'admin@lovepulse.dev';
 
-                <div class="section manage-partners">
-                    <h2 data-ru="Список партнеров 👥" data-en="Partner List 👥">Список партнеров 👥</h2>
-                    <button class="action-btn" onclick="showTab('partners-tab')" aria-label="Посмотреть всех партнеров" data-ru="Посмотреть все" data-en="View All">Посмотреть все</button>
-                </div>
-            </div>
-        </div>
+function getCurrentUserId() { return currentUserId; }
+function isAdmin() { return currentUserRole === 'admin'; }
 
-        <!-- Вкладка "Партнеры" -->
-<div id="partners-tab" class="tab-content hidden">
-    <div class="header">
-        <h1 data-ru="Партнеры 👥" data-en="Partners 👥">Партнеры 👥</h1>
-        <div class="header-actions">
-            <button class="add-partner-btn" onclick="showPartnerForm()" aria-label="Добавить нового партнера" data-ru="Добавить партнера" data-en="Add Partner">Добавить партнера</button>
-            <button id="theme-toggle-partners" onclick="toggleTheme()" aria-label="Переключить тему"></button>
-        </div>
+// ============== STATE ==============
+const DEFAULT_STATE = {
+  user: { name: '', bio: '', theme: 'light' },
+  connections: [],
+  entries: [],
+  onboarded: false,
+  plus: false
+};
+
+let state = structuredClone(DEFAULT_STATE);
+
+function _mergeWithDefaults(parsed) {
+  const s = { ...structuredClone(DEFAULT_STATE), ...parsed };
+  if (!s.user) s.user = { name: 'Новый пользователь', bio: '', theme: 'light' };
+  if (!s.user.name) s.user.name = 'Новый пользователь';
+  if (!s.user.theme) s.user.theme = 'light';
+  if (s.onboarded === undefined) s.onboarded = false;
+  if (s.plus === undefined) s.plus = false;
+  if (s.entries) s.entries.forEach(e => { if (!Array.isArray(e.tags)) e.tags = []; });
+  return s;
+}
+
+function _loadCachedState(uid) {
+  try {
+    const raw = localStorage.getItem(DATA_PREFIX + uid);
+    if (!raw) return structuredClone(DEFAULT_STATE);
+    return _mergeWithDefaults(JSON.parse(raw));
+  } catch { return structuredClone(DEFAULT_STATE); }
+}
+
+function saveState() {
+  if (!currentUserId) return;
+  localStorage.setItem(DATA_PREFIX + currentUserId, JSON.stringify(state));
+  _pushStateToCloud();
+}
+
+async function _pushStateToCloud() {
+  try {
+    if (!currentUserId) return;
+    await sb.from('user_data').upsert(
+      { user_id: currentUserId, data: state, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' }
+    );
+  } catch (e) { console.warn('Sync error:', e); }
+}
+
+async function _syncFromCloud(userId) {
+  try {
+    const [{ data: userData }, { data: profileData }] = await Promise.all([
+      sb.from('user_data').select('data').eq('user_id', userId).single(),
+      sb.from('profiles').select('role').eq('id', userId).single()
+    ]);
+    const role = profileData?.role || 'user';
+    const cloudState = (userData?.data && Object.keys(userData.data).length > 0)
+      ? _mergeWithDefaults(userData.data)
+      : null;
+    if (cloudState) {
+      state = cloudState;
+      localStorage.setItem(DATA_PREFIX + userId, JSON.stringify(state));
+    }
+    if (role !== currentUserRole) {
+      currentUserRole = role;
+    }
+    applyTheme(state.user.theme || 'light');
+    navigate(currentView); // re-render with fresh data
+  } catch (e) { console.warn('Background sync failed:', e); }
+}
+function uid() { return Math.random().toString(36).slice(2,9); }
+
+const ROLES = {
+  partner: 'Партнёр',
+  friend: 'Друг',
+  family: 'Семья',
+  buddy: 'Приятель',
+  colleague: 'Коллега',
+  ex: 'Бывшие',
+};
+const COLORS = ['mint','rose','warm','cool','violet'];
+const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const MONTHS_SHORT = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+
+// ============== THEME ==============
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+}
+
+// ============== ROUTING ==============
+let currentView = 'home';
+const mainEl = document.getElementById('main');
+const fab = document.getElementById('fab');
+
+const views = { home: renderHome, connections: renderConnections, stats: renderStats, diary: renderDiary, profile: renderProfile };
+
+function navigate(view) {
+  currentView = view;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  mainEl.scrollTo({ top: 0 });
+  mainEl.innerHTML = '';
+  views[view]();
+  fab.style.display = (view === 'connections' || view === 'diary') ? 'grid' : 'none';
+}
+
+document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => navigate(b.dataset.view)));
+mainEl.addEventListener('scroll', () => {
+  document.getElementById('header').classList.toggle('scrolled', mainEl.scrollTop > 4);
+});
+
+// Search button — global search modal
+document.getElementById('searchBtn').addEventListener('click', () => {
+  openModal(`
+    <div class="modal-handle"></div>
+    <div class="modal-title">Поиск</div>
+    <div class="search-bar" style="margin-bottom:16px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--ink-4)"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="globalSearchInput" placeholder="Имя, запись, статус..." autofocus>
     </div>
-    <p class="subtitle" data-ru="Управляйте вашими романтическими связями 💞" data-en="Manage your romantic connections 💞">Управляйте вашими романтическими связями 💞</p>
+    <div id="globalSearchResults"><p style="color:var(--ink-4);font-size:13px;text-align:center;padding:20px 0;">Начни вводить...</p></div>
+  `);
+  setTimeout(() => {
+    const input = document.getElementById('globalSearchInput');
+    if (!input) return;
+    input.focus();
+    input.addEventListener('input', renderGlobalSearch);
+  }, 100);
+});
 
-    <!-- Фильтры -->
-    <div class="partner-filters">
-        <button class="filter-btn active" onclick="filterPartners('all')" data-ru="Все" data-en="All">Все</button>
-        <button class="filter-btn" onclick="filterPartners('potential')" data-ru="Потенциальные" data-en="Potential">Потенциальные</button>
-        <button class="filter-btn" onclick="filterPartners('all-serious')" data-ru="Все серьезно" data-en="All Serious">Все серьезно</button>
-        <button class="filter-btn" onclick="filterPartners('friend')" data-ru="Друзья" data-en="Friends">Друзья</button>
-        <button class="filter-btn" onclick="filterPartners('past')" data-ru="В прошлом" data-en="Past">В прошлом</button>
-    </div>
+function renderGlobalSearch() {
+  const input = document.getElementById('globalSearchInput');
+  const res = document.getElementById('globalSearchResults');
+  if (!input || !res) return;
+  const q = input.value.trim().toLowerCase();
+  if (!q) {
+    res.innerHTML = '<p style="color:var(--ink-4);font-size:13px;text-align:center;padding:20px 0;">Начни вводить...</p>';
+    return;
+  }
+  const connHits = state.connections.filter(c =>
+    c.name.toLowerCase().includes(q) ||
+    (c.statusLabel||'').toLowerCase().includes(q) ||
+    (c.note||'').toLowerCase().includes(q)
+  );
+  const entryHits = state.entries.filter(e => e.text.toLowerCase().includes(q)).slice(0, 5);
 
-    <!-- Поле поиска -->
-    <div class="search-bar">
-        <i class="fas fa-search"></i>
-        <input type="text" id="partner-search" placeholder="Поиск партнеров..." oninput="renderPartnersListTab()" aria-label="Поиск по партнерам" data-ru-placeholder="Поиск партнеров..." data-en-placeholder="Search partners...">
-    </div>
+  res.innerHTML = '';
 
-    <!-- Список партнеров -->
-    <div id="partners-list-tab" class="partners-grid">
-        <!-- Partner cards will be added via JavaScript -->
-    </div>
+  if (connHits.length) {
+    const lbl = document.createElement('div');
+    lbl.className = 'section-label';
+    lbl.style.marginBottom = '8px';
+    lbl.textContent = 'Связи';
+    res.appendChild(lbl);
+    connHits.forEach(c => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;';
+      row.innerHTML = '<div class="avatar ' + c.color + '" style="width:36px;height:36px;font-size:13px;">' + initials(c.name) + '</div>'
+        + '<div><div style="font-weight:500;font-size:14px;">' + c.name + '</div>'
+        + '<div style="font-size:12px;color:var(--ink-3);">' + (c.statusLabel || ROLES[c.role]) + '</div></div>';
+      row.addEventListener('click', () => { closeModal(); openConnection(c.id); });
+      res.appendChild(row);
+    });
+  }
 
-    <!-- Сообщение, если партнеров нет -->
-    <div id="no-partners-message" class="no-partners hidden">
-        <h2 data-ru="Партнеры не найдены 😔" data-en="No partners found 😔">Партнеры не найдены 😔</h2>
-        <p data-ru="Добавьте своего первого партнера, чтобы начать" data-en="Add your first partner to get started">Добавьте своего первого партнера, чтобы начать</p>
-    </div>
+  if (entryHits.length) {
+    const lbl2 = document.createElement('div');
+    lbl2.className = 'section-label';
+    lbl2.style.cssText = 'margin:14px 0 8px;';
+    lbl2.textContent = 'Записи';
+    res.appendChild(lbl2);
+    entryHits.forEach(e => {
+      const d = fmtDate(e.date);
+      const row = document.createElement('div');
+      row.style.cssText = 'padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;';
+      row.innerHTML = '<div style="font-size:11px;color:var(--ink-3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.08em;">' + d.day + ' ' + d.month + '</div>'
+        + '<div style="font-size:13px;color:var(--ink-2);line-height:1.4;">' + (e.text.length > 80 ? e.text.slice(0,80) + '…' : e.text) + '</div>';
+      row.addEventListener('click', () => { closeModal(); openEntry(e.id); });
+      res.appendChild(row);
+    });
+  }
 
-    <!-- Пагинация -->
-    <div class="pagination">
-        <button id="prev-partners-page" onclick="changePartnersPage(-1)" disabled aria-label="Предыдущая страница">«</button>
-        <span id="partners-page-info"></span>
-        <button id="next-partners-page" onclick="changePartnersPage(1)" disabled aria-label="Следующая страница">»</button>
-    </div>
-</div>
-        <!-- Вкладка "Активности" -->
-        <div id="activities-tab" class="tab-content hidden">
-            <div class="header">
-                <h1 data-ru="Активности 📅" data-en="Activities 📅">Активности 📅</h1>
-                <div class="header-actions">
-                    <button class="add-partner-btn" onclick="showLogForm('add')" aria-label="Добавить новую активность" data-ru="Добавить активность" data-en="Add Activity">Добавить активность</button>
-                    <button id="theme-toggle-activities" onclick="toggleTheme()" aria-label="Переключить тему"></button>
-                </div>
-            </div>
-            <p class="subtitle" data-ru="Отслеживайте свои романтические активности 💬" data-en="Track your romantic activities 💬">Отслеживайте свои романтические активности 💬</p>
-            <div class="filters">
-                <div class="form-group">
-                    <input type="text" id="activity-search" placeholder="Поиск активностей..." oninput="filterActivities()" aria-label="Поиск по активностям" data-ru-placeholder="Поиск активностей..." data-en-placeholder="Search activities...">
-                </div>
-                <div class="form-group">
-                    <input type="date" id="activity-date-filter" onchange="filterActivities()" aria-label="Фильтр по дате">
-                </div>
-            </div>
-            <ul id="activities-list"></ul>
-            <!-- Пагинация для активностей -->
-            <div class="pagination">
-                <button id="prev-activities-page" onclick="changeActivitiesPage(-1)" disabled aria-label="Предыдущая страница">«</button>
-                <span id="activities-page-info"></span>
-                <button id="next-activities-page" onclick="changeActivitiesPage(1)" disabled aria-label="Следующая страница">»</button>
-            </div>
+  if (!connHits.length && !entryHits.length) {
+    res.innerHTML = '<p style="color:var(--ink-4);font-size:13px;text-align:center;padding:20px 0;">Ничего не найдено</p>';
+  }
+}
+
+// ============== HELPERS ==============
+function initials(name) {
+  return name.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
+}
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return { day: d.getDate(), month: MONTHS_SHORT[d.getMonth()], monthFull: MONTHS_RU[d.getMonth()], year: d.getFullYear() };
+}
+function daysAgo(iso) {
+  const diff = Math.floor((Date.now() - new Date(iso)) / 86400000);
+  if (diff === 0) return 'сегодня';
+  if (diff === 1) return 'вчера';
+  if (diff < 7) return diff + ' дн. назад';
+  if (diff < 30) return Math.floor(diff/7) + ' нед. назад';
+  return Math.floor(diff/30) + ' мес. назад';
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+function el(html) {
+  const d = document.createElement('div');
+  d.innerHTML = html.trim();
+  return d.firstChild;
+}
+function plural(n, one, few, many) {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return one;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+  return many;
+}
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 6) return 'Доброй ночи';
+  if (h < 12) return 'Доброе утро';
+  if (h < 18) return 'Добрый день';
+  return 'Добрый вечер';
+}
+function lastEntryDate(connId) {
+  const entries = state.entries.filter(e => e.tags.includes(connId));
+  if (!entries.length) return null;
+  return entries.sort((a,b) => b.date.localeCompare(a.date))[0].date;
+}
+function calcStreak() {
+  if (!state.entries.length) return 0;
+  const dates = [...new Set(state.entries.map(e => e.date))].sort((a,b) => b.localeCompare(a));
+  let streak = 0, prev = null;
+  const today = new Date().toISOString().slice(0,10);
+  for (const d of dates) {
+    if (!prev) {
+      if (d === today || daysAgo(d) === 'вчера') { streak = 1; prev = d; continue; }
+      else break;
+    }
+    const diff = Math.floor((new Date(prev) - new Date(d)) / 86400000);
+    if (diff === 1) { streak++; prev = d; }
+    else break;
+  }
+  return streak;
+}
+
+
+// ============== HEALTH SCORE ==============
+// Возвращает { score: 0-100, label, cls, color, breakdown }
+
+// ============== LOVEPLUS ==============
+function isPlus() { return !!state.plus; }
+
+function plusGate(featureName) {
+  return '<div class="plus-gate"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span><b>LovePlus+</b> — ' + featureName + '. Включи подписку в профиле.</span></div>';
+}
+
+// Health Score
+function calcHealthScore(connId, role) {
+  const now = Date.now(), DAY = 86400000;
+  const freq = { partner:3,family:7,friend:14,buddy:30,colleague:21,ex:60 }[role] || 21;
+  const entries = state.entries.filter(e=>e.tags.includes(connId))
+    .map(e=>({d:Math.floor((now-new Date(e.date))/DAY)})).filter(e=>e.d<=90);
+  const ws = entries.reduce((s,e)=>s+Math.exp(-e.d/30),0);
+  const ews = Array.from({length:Math.round(90/freq)},(_,i)=>Math.exp(-(i+.5)*freq/30)).reduce((a,b)=>a+b,0)||.01;
+  let score = Math.min(100,Math.round(ws/ews*100));
+  const last = state.entries.filter(e=>e.tags.includes(connId)).map(e=>e.date).sort((a,b)=>b.localeCompare(a))[0];
+  const dsl = last ? Math.floor((now-new Date(last))/DAY) : 999;
+  if (dsl>freq*2) score=Math.max(0,score-Math.min(40,Math.floor((dsl-freq*2)/freq)*15));
+  const weeks=new Set(entries.map(e=>Math.floor(e.d/7)));
+  if(weeks.size>=4) score=Math.min(100,score+8);
+  if(score>=80) return {score,label:'Отлично',cls:'great',color:'#10b981',dsl,freq};
+  if(score>=55) return {score,label:'Хорошо', cls:'good', color:'#f59e0b',dsl,freq};
+  return       {score,label:'Слабеет',cls:'weak', color:'#f97316',dsl,freq};
+}
+
+function healthRingSVG(score,color,size=44) {
+  const r=(size/2)-4,circ=2*Math.PI*r,offset=circ-(score/100)*circ,cx=size/2,cy=size/2;
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'"><circle class="health-ring-track" cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke-width="3.5"/><circle class="health-ring-fill" cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="3.5" stroke-dasharray="'+circ+'" stroke-dashoffset="'+offset+'"/></svg>';
+}
+
+// Mood
+const MOODS = [
+  {id:'joy',   emoji:'😊', label:'Радость',   color:'#f59e0b'},
+  {id:'warm',  emoji:'🥰', label:'Теплота',   color:'#ec4899'},
+  {id:'calm',  emoji:'😌', label:'Спокойствие',color:'#06b6d4'},
+  {id:'sad',   emoji:'😔', label:'Грусть',    color:'#6366f1'},
+  {id:'worry', emoji:'😟', label:'Тревога',   color:'#8b5cf6'},
+  {id:'fun',   emoji:'😄', label:'Веселье',   color:'#10b981'},
+];
+function moodById(id) { return MOODS.find(m=>m.id===id); }
+
+// Anniversaries
+function getAnniversaries() {
+  const today = new Date();
+  const results = [];
+  state.connections.forEach(c => {
+    if (!c.anniversary) return;
+    const a = new Date(c.anniversary);
+    const thisYear = new Date(today.getFullYear(), a.getMonth(), a.getDate());
+    const diff = Math.round((thisYear - today) / 86400000);
+    const years = today.getFullYear() - a.getFullYear();
+    if (diff >= 0 && diff <= 30) {
+      results.push({ conn: c, diff, years: diff===0?years:years, date: thisYear, label: c.anniversaryLabel||'Знакомство' });
+    }
+  });
+  return results.sort((a,b)=>a.diff-b.diff);
+}
+
+// Notifications
+async function requestNotifications() {
+  if (!('Notification' in window)) { toast('Браузер не поддерживает уведомления'); return false; }
+  const perm = await Notification.requestPermission();
+  return perm === 'granted';
+}
+function scheduleReminders() {
+  if (!isPlus()) return;
+  state.connections.forEach(c => {
+    const threshold = c.reminderDays || 14;
+    const last = lastEntryDate(c.id);
+    const diff = last ? Math.floor((Date.now()-new Date(last))/86400000) : 999;
+    if (diff >= threshold && Notification.permission === 'granted') {
+      new Notification('LovePulse', {
+        body: 'Давно не писал про ' + c.name + ' — уже ' + diff + ' дней',
+        icon: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="11" cy="16" r="9" stroke="#4cc9a0" stroke-width="2" fill="none"/><circle cx="21" cy="16" r="9" stroke="#4cc9a0" stroke-width="2" fill="none"/><circle cx="16" cy="16" r="3" fill="#4cc9a0"/></svg>')
+      });
+    }
+  });
+}
+
+// ============== CONFIRM DIALOG ==============
+function confirm2(title, text, onOk, danger = true) {
+  const overlay = el(`
+    <div class="confirm-overlay">
+      <div class="confirm-box">
+        <div class="confirm-title">${title}</div>
+        <div class="confirm-text">${text}</div>
+        <div class="confirm-actions">
+          <button class="btn secondary" id="c2cancel">Отмена</button>
+          <button id="c2ok" class="btn">Подтвердить</button>
         </div>
-
-        <!-- Вкладка "Профиль" -->
-        <div id="profile-tab" class="tab-content hidden">
-            <div class="header">
-                <h1 data-ru="Профиль 👤" data-en="Profile 👤">Профиль 👤</h1>
-                <div class="header-actions">
-                    <button id="theme-toggle-profile" onclick="toggleTheme()" aria-label="Переключить тему"></button>
-                </div>
-            </div>
-            <p class="subtitle" data-ru="Управление личной информацией ✏️" data-en="Manage personal information ✏️">Управление личной информацией ✏️</p>
-
-            <!-- Форма профиля -->
-            <div class="profile-section">
-                <div class="profile-photo">
-                    <div class="photo-container">
-                        <img id="profile-photo-preview" src="" alt="Profile photo" class="hidden">
-                        <div id="photo-placeholder" class="photo-placeholder">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                    </div>
-                    <button class="action-btn upload-photo-btn" id="upload-photo-btn" onclick="document.getElementById('profile-photo').click()" aria-label="Загрузить фото" data-ru="Загрузить фото" data-en="Upload Photo">
-                        <i class="fas fa-upload"></i> <span data-ru="Загрузить фото" data-en="Upload Photo">Загрузить фото</span>
-                    </button>
-                    <input type="file" id="profile-photo" accept="image/*" onchange="handlePhotoUpload(event)" class="hidden">
-                </div>
-
-                <form class="profile-form">
-                    <div class="form-group">
-                        <label for="profile-name"><i class="fas fa-user"></i> <span data-ru="Имя" data-en="Name">Имя</span></label>
-                        <input type="text" id="profile-name" placeholder="Введите ваше имя" maxlength="100" aria-label="Введите ваше имя (максимум 100 символов)" data-ru-placeholder="Введите ваше имя" data-en-placeholder="Enter your name">
-                    </div>
-                    <div class="form-group">
-                        <label for="profile-status"><i class="fas fa-heart"></i> <span data-ru="Текущий статус" data-en="Current Status">Текущий статус</span></label>
-                        <input type="text" id="profile-status" placeholder="Как у вас дела?" maxlength="100" aria-label="Введите ваш статус (максимум 100 символов)" data-ru-placeholder="Как у вас дела?" data-en-placeholder="How are you?">
-                    </div>
-                    <div class="form-group">
-                        <label for="profile-location"><i class="fas fa-map-marker-alt"></i> <span data-ru="Местоположение" data-en="Location">Местоположение</span></label>
-                        <input type="text" id="profile-location" placeholder="Где вы находитесь?" maxlength="100" aria-label="Введите ваше местоположение (максимум 100 символов)" data-ru-placeholder="Где вы находитесь?" data-en-placeholder="Where are you?">
-                    </div>
-                    <div class="form-group">
-                        <label for="profile-birthdate"><i class="fas fa-calendar-alt"></i> <span data-ru="Дата рождения" data-en="Birthdate">Дата рождения</span></label>
-                        <input type="date" id="profile-birthdate" aria-label="Выберите дату рождения">
-                    </div>
-                    <div class="form-group">
-                        <label for="profile-bio"><i class="fas fa-sticky-note"></i> <span data-ru="Обо мне" data-en="About Me">Обо мне</span></label>
-                        <textarea id="profile-bio" placeholder="Расскажите немного о себе..." maxlength="100" aria-label="Введите информацию о себе (максимум 100 символов)" data-ru-placeholder="Расскажите немного о себе..." data-en-placeholder="Tell a bit about yourself..."></textarea>
-                    </div>
-                    <div class="form-buttons">
-                        <button type="button" class="save-btn" onclick="saveProfile()" aria-label="Сохранить изменения профиля" data-ru="Сохранить изменения" data-en="Save Changes">Сохранить изменения</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Вкладка "Настройки" -->
-        <div id="settings-tab" class="tab-content hidden">
-            <div class="header">
-                <h1 data-ru="Настройки ⚙️" data-en="Settings ⚙️">Настройки ⚙️</h1>
-            </div>
-            <p class="subtitle" data-ru="Управляйте настройками приложения" data-en="Manage app settings">Управляйте настройками приложения</p>
-
-            <!-- Секция настроек -->
-            <div class="section">
-                <h2><i class="fas fa-info-circle"></i> <span data-ru="Информация о приложении" data-en="App Information">Информация о приложении</span></h2>
-                <p data-ru="Версия: 1.0 (Стабильная)" data-en="Version: 1.0 (Stable)">Версия: 1.0 (Стабильная)</p>
-                <p data-ru="Последнее обновление: 23.03.2025" data-en="Last Update: 03/23/2025">Последнее обновление: 23.03.2025</p>
-            </div>
-
-            <div class="section">
-                <h2><i class="fas fa-user"></i> <span data-ru="Разработчик" data-en="Developer">Разработчик</span></h2>
-                <p data-ru="Имя: Dante Morrigan" data-en="Name: Dante Morrigan">Имя: Dante Morrigan</p>
-                <p data-ru="Почта: kukispuki1209@gmail.com " data-en="Email: kukispuki1209@gmail.com ">Почта: <a href="/cdn-cgi/l/email-protection#fbd0ced0d2c8cbced0d28a898b82fbdcd6dad2d795d8d4d6"><span class="__cf_email__" data-cfemail="517a647a786261647a782023212851767c70787d3f727e7c">[email&#160;protected]</span></a></p>
-            </div>
-
-            <div class="section">
-                <h2><i class="fas fa-language"></i> <span data-ru="Язык" data-en="Language">Язык</span></h2>
-                <button id="language-toggle" class="action-btn" onclick="toggleLanguage()" aria-label="Сменить язык" data-ru="Сменить на английский" data-en="Switch to Russian">Сменить на английский</button>
-            </div>
-
-            <div class="section">
-                <h2><i class="fab fa-github"></i> <span data-ru="Техническая информация" data-en="Technical Information">Техническая информация</span></h2>
-                <p data-ru="Языки: JavaScript, CSS, HTML" data-en="Languages: JavaScript, CSS, HTML">Языки: JavaScript, CSS, HTML</p>
-                <p data-ru="Хранилище: LocalStorage" data-en="Storage: LocalStorage">Хранилище: LocalStorage</p>
-                <p data-ru="Стили: Custom CSS с поддержкой тем" data-en="Styles: Custom CSS with theme support">Стили: Custom CSS с поддержкой тем</p>
-            </div>
-
-            <div class="section">
-                <h2><i class="fas fa-code"></i> <span data-ru="Посмотреть на GitHub" data-en="View on GitHub">Посмотреть на GitHub</span></h2>
-                <a href="https://github.com/dantemorrigan/lovepulse" target="_blank" class="action-btn" aria-label="Перейти на GitHub проекта" data-ru="github.com/dantemorrigan/lovepulse" data-en="github.com/dantemorrigan/lovepulse">
-                    <i class="fab fa-github"></i> github.com/dantemorrigan/lovepulse
-                </a>
-            </div>
-        </div>
-
-        <!-- Форма добавления партнера -->
-        <div id="add-partner-form" class="hidden">
-            <h3><i class="fas fa-heart"></i> <span id="partner-form-title" data-ru="Добавить нового партнера" data-en="Add a New Partner">Добавить нового партнера</span></h3>
-            <div class="form-group">
-                <label for="partner-name"><i class="fas fa-user"></i> <span data-ru="Имя" data-en="Name">Имя</span></label>
-                <input type="text" id="partner-name" placeholder="Имя партнера" maxlength="50" title="Максимум 50 символов" aria-label="Введите имя партнера (максимум 50 символов)" data-ru-placeholder="Имя партнера" data-en-placeholder="Partner's name">
-            </div>
-            <div class="form-group">
-                <label for="partner-met"><i class="fas fa-map-marker-alt"></i> <span data-ru="Местоположение (необязательно)" data-en="Location (optional)">Местоположение (необязательно)</span></label>
-                <input type="text" id="partner-met" placeholder="Город, страна" maxlength="100" title="Максимум 100 символов" aria-label="Введите место знакомства (максимум 100 символов)" data-ru-placeholder="Город, страна" data-en-placeholder="City, country">
-            </div>
-            <div class="form-group">
-                <label for="partner-met-date"><i class="fas fa-calendar-alt"></i> <span data-ru="Дата встречи (необязательно)" data-en="Meeting Date (optional)">Дата встречи (необязательно)</span></label>
-                <input type="date" id="partner-met-date" aria-label="Выберите дату встречи">
-            </div>
-            <div class="form-group">
-                <label data-ru="Статус отношений" data-en="Relationship Status">Статус отношений</label>
-                <div class="status-options">
-                    <label class="status-label">
-                        <input type="radio" name="status" value="potential" checked aria-label="Потенциальный партнер">
-                        <span class="status-icon"><i class="fas fa-heartbeat"></i></span> <span data-ru="Потенциальные" data-en="Potential">Потенциальные</span>
-                    </label>
-                    <label class="status-label">
-                        <input type="radio" name="status" value="serious" aria-label="Серьезные отношения">
-                        <span class="status-icon"><i class="fas fa-heart"></i></span> <span data-ru="Серьезные" data-en="Serious">Серьезные</span>
-                    </label>
-                    <label class="status-label">
-                        <input type="radio" name="status" value="friend" aria-label="Друзья">
-                        <span class="status-icon"><i class="fas fa-handshake"></i></span> <span data-ru="Друзья" data-en="Friends">Друзья</span>
-                    </label>
-                    <label class="status-label">
-                        <input type="radio" name="status" value="past" aria-label="В прошлом">
-                        <span class="status-icon"><i class="fas fa-check-circle"></i></span> <span data-ru="В прошлом" data-en="Past">В прошлом</span>
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <input type="checkbox" id="partner-favorite" aria-label="Добавить партнера в избранное">
-                <label for="partner-favorite"><i class="fas fa-star"></i> <span data-ru="Добавить в избранное" data-en="Add to Favorites">Добавить в избранное</span></label>
-            </div>
-            <div class="form-group">
-                <label for="partner-notes"><i class="fas fa-sticky-note"></i> <span data-ru="Заметки (необязательно)" data-en="Notes (optional)">Заметки (необязательно)</span></label>
-                <textarea id="partner-notes" placeholder="Добавьте побольше деталей или мыслей об этом человеке..." maxlength="300" aria-label="Введите заметки о партнере (максимум 300 символов)" data-ru-placeholder="Добавьте побольше деталей или мыслей об этом человеке..." data-en-placeholder="Add more details or thoughts about this person..."></textarea>
-            </div>
-            <div class="form-buttons">
-                <button class="cancel-btn" onclick="hidePartnerForm()" aria-label="Отменить добавление партнера" data-ru="Отмена" data-en="Cancel">Отмена</button>
-                <button class="save-btn" onclick="savePartner()" aria-label="Добавить нового партнера в список" data-ru="Добавить партнера" data-en="Add Partner">Добавить партнера</button>
-            </div>
-        </div>
-
-        <!-- Форма добавления активности -->
-        <div id="log-form" class="hidden">
-            <h3><i class="fas fa-book"></i> <span id="log-form-title" data-ru="Записать новую активность" data-en="Log a New Activity">Записать новую активность</span></h3>
-            <div class="form-group">
-                <label for="log-entry"><i class="fas fa-pen"></i> <span data-ru="Активность" data-en="Activity">Активность</span></label>
-                <input type="text" id="log-entry" placeholder="Что вы сделали сегодня?" maxlength="200" title="Максимум 200 символов" aria-label="Введите, что вы сделали сегодня для поиска любви (максимум 200 символов)" data-ru-placeholder="Что вы сделали сегодня?" data-en-placeholder="What did you do today?">
-            </div>
-            <div class="form-group">
-                <input type="checkbox" id="is-meeting" aria-label="Отметить как встречу">
-                <label for="is-meeting"><i class="fas fa-handshake"></i> <span data-ru="Встреча" data-en="Meeting">Встреча</span></label>
-            </div>
-            <div class="form-group" id="partner-select-group" style="display: none;">
-                <label for="partner-select"><i class="fas fa-user"></i> <span data-ru="С кем была встреча?" data-en="Who was the meeting with?">С кем была встреча?</span></label>
-                <select id="partner-select" aria-label="Выберите партнера для встречи">
-                    <option value="" disabled selected data-ru="Выберите партнера" data-en="Select a partner">Выберите партнера</option>
-                    <!-- Options will be added via JavaScript -->
-                </select>
-            </div>
-            <div class="form-buttons">
-                <button class="cancel-btn" onclick="hideLogForm()" aria-label="Отменить добавление или редактирование активности" data-ru="Отмена" data-en="Cancel">Отмена</button>
-                <button class="save-btn" id="log-form-submit" onclick="saveLog()" aria-label="Сохранить активность" data-ru="Сохранить" data-en="Save">Сохранить</button>
-            </div>
-        </div>
-
-        <!-- Звуковые эффекты -->
-        <audio id="add-sound" src="sounds/ding.mp3" preload="auto"></audio>
-        <audio id="delete-sound" src="sounds/whoosh.mp3" preload="auto"></audio>
-        <audio id="toggle-sound" src="sounds/click.mp3" preload="auto"></audio>
-        <audio id="theme-sound" src="sounds/pop.mp3" preload="auto"></audio>
+      </div>
     </div>
+  `);
+  document.getElementById('app').appendChild(overlay);
+  const c2ok = overlay.querySelector('#c2ok');
+  if (danger) { c2ok.classList.add('danger'); c2ok.textContent = 'Удалить'; } else { c2ok.textContent = 'Ок'; }
+  overlay.querySelector('#c2cancel').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#c2ok').addEventListener('click', () => { overlay.remove(); onOk(); });
+}
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
-    <script src="script.js"></script>
-    <!-- Регистрация Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.error('Service Worker registration failed:', error);
-                    });
-            });
+// ============== HOME ==============
+function renderHome() {
+  const total = state.connections.length;
+  const now = new Date();
+  const entriesThisMonth = state.entries.filter(e => {
+    const d = new Date(e.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+  const recentEntries = [...state.entries].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 5);
+  const anniversaries = isPlus() ? getAnniversaries() : [];
+  if (isPlus()) scheduleReminders();
+  const streak = calcStreak();
+
+  // Люди которым давно не писал (> 30 дней или вообще никогда)
+  const neglected = state.connections.filter(c => {
+    const last = lastEntryDate(c.id);
+    if (!last) return true;
+    return Math.floor((Date.now() - new Date(last)) / 86400000) > 30;
+  }).slice(0, 3);
+
+  const v = el(`
+    <div class="view">
+      <div class="hero">
+        <div class="hero-greeting">${greeting()}, ${state.user.name}</div>
+        <div class="hero-name">Твой <em>пульс</em><br>на сегодня</div>
+        <div class="hero-stats">
+          <div><div class="hero-stat-num">${total}</div><div class="hero-stat-label">связей</div></div>
+          <div><div class="hero-stat-num">${entriesThisMonth}</div><div class="hero-stat-label">в этом мес.</div></div>
+          <div><div class="hero-stat-num">${streak || '—'}</div><div class="hero-stat-label">${streak ? 'дн. подряд' : 'streak'}</div></div>
+        </div>
+      </div>
+
+      ${anniversaries.length ? `
+        <div class="anniversary-card" onclick="navigate('connections')">
+          <div style="font-size:24px;">📅</div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:14px;margin-bottom:2px;">${anniversaries[0].diff===0?'Сегодня!':('Через '+anniversaries[0].diff+' дн.')} · ${anniversaries[0].label}</div>
+            <div style="font-size:13px;color:var(--ink-3);">${anniversaries[0].conn.name} — ${anniversaries[0].years} ${plural(anniversaries[0].years,'год','года','лет')}</div>
+          </div>
+        </div>
+      ` : ''}
+      ${neglected.length ? `
+        <div class="alert-card" id="neglectedCard">
+          <div class="alert-icon">💬</div>
+          <div class="alert-text">
+            <strong>Давно не писал</strong>
+            ${neglected.map(c => c.name).join(', ')} — больше месяца без записей
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--ink-4);flex-shrink:0"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+      ` : ''}
+
+      <div class="section-label">
+        <span>Все связи</span>
+        <a href="#" data-go="connections">смотреть →</a>
+      </div>
+      <div class="pulse-strip" style="margin-bottom: 28px;">
+        ${state.connections.map(c => {
+          const last = lastEntryDate(c.id);
+          return `
+            <div class="pulse-card" data-conn="${c.id}">
+              <div class="pulse-avatar">${initials(c.name)}</div>
+              <div class="pulse-name">${c.name}</div>
+              <div class="pulse-meta">${last ? daysAgo(last) : 'нет записей'}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="section-label">
+        <span>Последние записи</span>
+        <a href="#" data-go="diary">дневник →</a>
+      </div>
+      <div class="feed">
+        ${recentEntries.length ? recentEntries.map(e => {
+          const taggedNames = e.tags.map(t => state.connections.find(c => c.id === t)?.name).filter(Boolean);
+          return `
+            <div class="feed-item" data-entry="${e.id}">
+              <div class="feed-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              </div>
+              <div class="feed-content">
+                <div class="feed-title">${e.text.length > 70 ? e.text.slice(0,70)+'…' : e.text}</div>
+                <div class="feed-sub">${taggedNames.length ? '@' + taggedNames.join(', @') : 'без тегов'}</div>
+              </div>
+              <div class="feed-time">${daysAgo(e.date)}</div>
+            </div>
+          `;
+        }).join('') : `<div class="empty"><div class="icon">✦</div><h3>Пусто</h3><p>Открой дневник и напиши первую заметку</p></div>`}
+      </div>
+    </div>
+  `);
+
+  mainEl.appendChild(v);
+  v.querySelectorAll('[data-go]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); navigate(a.dataset.go); }));
+  v.querySelectorAll('[data-conn]').forEach(c => c.addEventListener('click', () => openConnection(c.dataset.conn)));
+  v.querySelectorAll('[data-entry]').forEach(it => it.addEventListener('click', () => openEntry(it.dataset.entry)));
+  const nc = v.querySelector('#neglectedCard');
+  if (nc) nc.addEventListener('click', () => navigate('connections'));
+
+  if (total === 0) showWelcomePopup();
+}
+
+function showWelcomePopup() {
+  if (document.getElementById('welcomeOverlay')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'welcomeOverlay';
+  overlay.className = 'welcome-overlay';
+  overlay.innerHTML = `
+    <div class="welcome-sheet">
+      <span class="welcome-icon">🫂</span>
+      <h2>Добавь первую связь</h2>
+      <p>LovePulse помогает не терять людей, которые важны.<br>
+         Начни с добавления партнёра, друга или близкого человека — и отслеживай ваш пульс.</p>
+      <button class="btn" id="welcomeAdd">Добавить связь</button>
+      <span class="welcome-skip" id="welcomeSkip">Позже</span>
+    </div>
+  `;
+  document.getElementById('app').appendChild(overlay);
+  overlay.querySelector('#welcomeAdd').addEventListener('click', () => {
+    overlay.remove();
+    navigate('connections');
+    setTimeout(() => document.getElementById('fab')?.click(), 200);
+  });
+  overlay.querySelector('#welcomeSkip').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
+// ============== CONNECTIONS ==============
+let connFilter = 'all';
+let connSearch = '';
+let connSort = 'activity'; // 'activity' | 'alpha' | 'created'
+
+function renderConnections() {
+  const v = el(`
+    <div class="view">
+      <h1 style="margin-bottom: 18px;">Связи <em>·</em> ${state.connections.length}</h1>
+      <div class="search-bar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--ink-4)"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="connSearch" placeholder="Найти человека..." value="${connSearch}">
+      </div>
+      <div class="filter-chips" id="filterChips">
+        <div class="chip ${connFilter==='all'?'active':''}" data-f="all">Все</div>
+        ${Object.entries(ROLES).map(([k,lbl]) => `<div class="chip ${connFilter===k?'active':''}" data-f="${k}">${lbl}</div>`).join('')}
+      </div>
+      <div class="sort-bar">
+        <span>Сортировка:</span>
+        <button class="sort-btn ${connSort==='activity'?'active':''}" data-s="activity">Активность</button>
+        <button class="sort-btn ${connSort==='alpha'?'active':''}" data-s="alpha">А–Я</button>
+        <button class="sort-btn ${connSort==='created'?'active':''}" data-s="created">Дата</button>
+      </div>
+      <div class="connection-list" id="connList"></div>
+    </div>
+  `);
+  mainEl.innerHTML = '';
+  mainEl.appendChild(v);
+
+  v.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
+    connFilter = chip.dataset.f;
+    v.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.f === connFilter));
+    renderConnList();
+  }));
+  v.querySelectorAll('.sort-btn').forEach(btn => btn.addEventListener('click', () => {
+    connSort = btn.dataset.s;
+    v.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.s === connSort));
+    renderConnList();
+  }));
+  v.querySelector('#connSearch').addEventListener('input', e => { connSearch = e.target.value; renderConnList(); });
+  renderConnList();
+}
+
+function renderConnList() {
+  const list = document.getElementById('connList');
+  if (!list) return;
+  let items = [...state.connections];
+  if (connFilter !== 'all') items = items.filter(c => c.role === connFilter);
+  if (connSearch.trim()) {
+    const q = connSearch.trim().toLowerCase();
+    items = items.filter(c => c.name.toLowerCase().includes(q) || (c.note||'').toLowerCase().includes(q) || (c.statusLabel||'').toLowerCase().includes(q));
+  }
+  // Sort
+  if (connSort === 'alpha') {
+    items.sort((a,b) => a.name.localeCompare(b.name, 'ru'));
+  } else if (connSort === 'created') {
+    items.sort((a,b) => b.created.localeCompare(a.created));
+  } else { // activity
+    items.sort((a,b) => {
+      const la = lastEntryDate(a.id) || '0000';
+      const lb = lastEntryDate(b.id) || '0000';
+      return lb.localeCompare(la);
+    });
+  }
+  if (!items.length) {
+    list.innerHTML = '<div class="empty"><div class="icon">·</div><h3>Никого</h3><p>Попробуй другие фильтры</p></div>';
+    return;
+  }
+  list.innerHTML = items.map(c => {
+    const last = lastEntryDate(c.id);
+    const entryCount = state.entries.filter(e => e.tags.includes(c.id)).length;
+    return `
+      <div class="connection" data-conn="${c.id}">
+        <div class="avatar ${c.color}">${initials(c.name)}</div>
+        <div class="conn-info">
+          <div class="conn-name">${c.name}</div>
+          <div class="conn-meta">${c.statusLabel || ROLES[c.role] || c.role}${last ? ' · ' + daysAgo(last) : ''}</div>
+        </div>
+        ${isPlus() ? (() => { const hs=calcHealthScore(c.id,c.role); return '<div class="health-ring" style="width:38px;height:38px;" title="'+hs.label+'">'+healthRingSVG(hs.score,hs.color,38)+'<div class="health-score-label" style="color:'+hs.color+';">'+hs.score+'</div></div>'; })() : (entryCount ? '<span class="conn-count">'+entryCount+'</span>' : '')}
+        <span class="role-tag">${ROLES[c.role] || c.role}</span>
+      </div>
+    `;
+  }).join('');
+  list.querySelectorAll('[data-conn]').forEach(it => it.addEventListener('click', () => openConnection(it.dataset.conn)));
+}
+
+function openConnection(id) {
+  const c = state.connections.find(x => x.id === id);
+  if (!c) return;
+  const relatedEntries = state.entries.filter(e => e.tags.includes(id)).sort((a,b) => b.date.localeCompare(a.date));
+  openModal(`
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:22px;">
+      <div class="avatar ${c.color}" style="width:62px;height:62px;font-size:22px;">${initials(c.name)}</div>
+      <div style="flex:1">
+        <div style="font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-0.02em;">${c.name}</div>
+        <div style="font-size:13px;color:var(--ink-3);margin-top:3px;">${c.statusLabel || ROLES[c.role]} · ${ROLES[c.role]}</div>
+      </div>
+    </div>
+    ${c.note ? `<div style="background:var(--bg-elev);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;font-size:14px;color:var(--ink-2);line-height:1.5;">${c.note}</div>` : ''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">
+      <div class="stat-tile"><div class="stat-num">${relatedEntries.length}</div><div class="stat-label">заметок</div></div>
+      <div class="stat-tile"><div class="stat-num" style="font-size:16px;line-height:1.2;">${relatedEntries[0] ? daysAgo(relatedEntries[0].date) : '—'}</div><div class="stat-label">последняя</div></div>
+    </div>
+    ${relatedEntries.length ? `
+      <div class="section-label" style="margin-bottom:10px;">История</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;">
+        ${relatedEntries.slice(0,5).map(e => `
+          <div style="background:var(--bg-elev);border:1px solid var(--line);border-radius:11px;padding:12px 14px;cursor:pointer;" onclick="closeModal();openEntry('${e.id}')">
+            <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em;">${fmtDate(e.date).day} ${fmtDate(e.date).month} ${fmtDate(e.date).year}</div>
+            <div style="font-size:13px;color:var(--ink-2);line-height:1.45;">${e.text.length > 100 ? e.text.slice(0,100)+'…' : e.text}</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : `<div style="text-align:center;padding:20px 0 10px;color:var(--ink-3);font-size:13px;">Записей пока нет — напиши первую</div>`}
+    <button class="btn secondary" id="connEditBtn">Редактировать</button>
+    <button class="btn danger" style="margin-top:8px;" id="connDeleteBtn">Удалить связь</button>
+  `);
+  // Wire buttons in connection modal
+  setTimeout(() => {
+    const editBtn = document.getElementById('connEditBtn');
+    const delBtn = document.getElementById('connDeleteBtn');
+    if (editBtn) editBtn.addEventListener('click', () => { closeModal(); setTimeout(() => openConnectionForm(state.connections.find(x => x.id === id)), 50); });
+    if (delBtn) delBtn.addEventListener('click', () => { closeModal(); setTimeout(() => deleteConnection(id), 50); });
+  }, 50);
+}
+
+function deleteConnection(id) {
+  confirm2('Удалить связь?', 'Все заметки с упоминанием этого человека сохранятся, но тег пропадёт.', () => {
+    state.connections = state.connections.filter(c => c.id !== id);
+    state.entries.forEach(e => { e.tags = e.tags.filter(t => t !== id); });
+    saveState();
+    toast('Связь удалена');
+    navigate(currentView);
+  });
+}
+
+function openConnectionForm(existing) {
+  const c = existing || { name: '', role: 'friend', statusLabel: '', note: '', color: COLORS[Math.floor(Math.random()*COLORS.length)] };
+  let role = c.role;
+  openModal(`
+    <div class="modal-handle"></div>
+    <div class="modal-title">${existing ? 'Редактировать' : 'Новая связь'}</div>
+    <div class="field"><label>Имя</label><input id="fName" value="${c.name}" maxlength="50" placeholder="Как зовут?"></div>
+    <div class="field">
+      <label>Роль</label>
+      <div class="role-grid" id="roleGrid">
+        ${Object.entries(ROLES).map(([k,lbl]) => `<div class="role-opt ${c.role===k?'selected':''}" data-role="${k}">${lbl}</div>`).join('')}
+      </div>
+    </div>
+    <div class="field"><label>Статус (своими словами)</label><input id="fStatus" value="${c.statusLabel ? c.statusLabel : ''}" maxlength="60" placeholder="Моя девушка, старый друг..."></div>
+    <div class="field"><label>Заметка</label><textarea id="fNote" maxlength="300" placeholder="Что важно помнить об этом человеке">${c.note||''}</textarea></div>
+    ${isPlus() ? `
+      <div class="field"><label>📅 Важная дата (годовщина)</label><input type="date" id="fAnniv" value="${c.anniversary||''}"></div>
+      <div class="field"><label>📅 Название даты</label><input id="fAnnivLabel" value="${c.anniversaryLabel||''}" placeholder="Знакомство, день рождения..."></div>
+      <div class="field"><label>🔔 Напомнить если нет записей (дней)</label><input type="number" id="fReminder" value="${c.reminderDays||14}" min="1" max="365"></div>
+    ` : ''}
+    <button class="btn" id="saveConn">${existing ? 'Сохранить' : 'Создать'}</button>
+  `);
+
+  document.querySelectorAll('#roleGrid .role-opt').forEach(o => o.addEventListener('click', () => {
+    document.querySelectorAll('#roleGrid .role-opt').forEach(x => x.classList.remove('selected'));
+    o.classList.add('selected');
+    role = o.dataset.role;
+  }));
+
+  document.getElementById('saveConn').addEventListener('click', () => {
+    const name = document.getElementById('fName').value.trim();
+    if (!name) { toast('Введи имя'); return; }
+    const note = document.getElementById('fNote').value.trim();
+    const statusLabel = document.getElementById('fStatus').value.trim();
+    const anniversary = isPlus() && document.getElementById('fAnniv') ? document.getElementById('fAnniv').value : (existing?.anniversary||'');
+    const anniversaryLabel = isPlus() && document.getElementById('fAnnivLabel') ? document.getElementById('fAnnivLabel').value.trim() : (existing?.anniversaryLabel||'');
+    const reminderDays = isPlus() && document.getElementById('fReminder') ? parseInt(document.getElementById('fReminder').value)||14 : (existing?.reminderDays||14);
+    if (existing) {
+      Object.assign(existing, { name, role, note, statusLabel, anniversary, anniversaryLabel, reminderDays });
+      toast('Сохранено ✓');
+    } else {
+      state.connections.unshift({ id: uid(), name, role, statusLabel, note, anniversary, anniversaryLabel, reminderDays, color: c.color, created: new Date().toISOString().slice(0,10) });
+      toast('Связь добавлена');
+    }
+    saveState();
+    closeModal();
+    navigate(currentView);
+  });
+}
+
+// ============== STATS ==============
+function renderStats() {
+  const total = state.connections.length;
+  const totalEntries = state.entries.length;
+
+  // Weekly activity (last 8 weeks)
+  const weeks = Array(8).fill(0);
+  state.entries.forEach(e => {
+    const diff = Math.floor((Date.now() - new Date(e.date)) / (7*86400000));
+    if (diff >= 0 && diff < 8) weeks[7-diff]++;
+  });
+  const maxW = Math.max(...weeks, 1);
+
+  // Monthly heatmap (last 12 months, grouped by month)
+  const monthCounts = Array(12).fill(0);
+  const nowDate = new Date();
+  state.entries.forEach(e => {
+    const d = new Date(e.date);
+    const monthsAgo = (nowDate.getFullYear() - d.getFullYear()) * 12 + (nowDate.getMonth() - d.getMonth());
+    if (monthsAgo >= 0 && monthsAgo < 12) monthCounts[11 - monthsAgo]++;
+  });
+  const maxM = Math.max(...monthCounts, 1);
+
+  // Top 5 by mentions
+  const personCounts = {};
+  state.entries.forEach(e => e.tags.forEach(t => { personCounts[t] = (personCounts[t]||0)+1; }));
+  const topPeople = Object.entries(personCounts).sort((a,b)=>b[1]-a[1]).slice(0,5)
+    .map(([id, cnt]) => ({ conn: state.connections.find(c=>c.id===id), cnt }))
+    .filter(x => x.conn);
+  const maxCnt = topPeople[0]?.cnt || 1;
+
+  // Role donut
+  const roleCounts = {};
+  state.connections.forEach(c => { roleCounts[c.role] = (roleCounts[c.role]||0)+1; });
+  const roleEntries = Object.entries(roleCounts).sort((a,b)=>b[1]-a[1]);
+  const roleColors = ['#2fb389','#4cc9a0','#a3e4cd','#ffd7a3','#fcb1c4','#c5b8f0'];
+  const safeTotal = total || 1;
+  let cumul = 0;
+  const donutSegs = roleEntries.map(([k,v],i) => {
+    const pct = v/safeTotal, start = cumul;
+    cumul += pct;
+    return { k, v, pct, start, end: cumul, color: roleColors[i % roleColors.length] };
+  });
+
+  // Weekday distribution
+  const weekdays = Array(7).fill(0);
+  const wdLabels = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  state.entries.forEach(e => { weekdays[new Date(e.date).getDay()]++; });
+  const maxWd = Math.max(...weekdays, 1);
+
+  // Insight
+  const topInsight = topPeople[0];
+  const streak = calcStreak();
+
+  const v = el(`
+    <div class="view">
+      <h1 style="margin-bottom: 20px;">Статистика</h1>
+
+      ${topInsight ? `
+        <div class="insight">
+          <div class="insight-label">↑ Инсайт</div>
+          <div class="insight-text">Чаще всего ты пишешь про <em>${topInsight.conn.name}</em> — ${topInsight.cnt} ${plural(topInsight.cnt,'раз','раза','раз')} за всё время.</div>
+        </div>
+      ` : ''}
+
+      <div class="stat-grid">
+        <div class="stat-tile feature">
+          <div class="stat-label" style="color:var(--mint-deep);margin-bottom:10px;">Связей</div>
+          <div class="stat-num" style="font-size:44px;color:var(--mint-deep);">${total}</div>
+          <div class="stat-delta">${state.connections.filter(c=>c.role==='partner'||c.role==='friend').length} близких</div>
+        </div>
+        <div class="stat-tile"><div class="stat-num">${totalEntries}</div><div class="stat-label">заметок</div></div>
+        <div class="stat-tile"><div class="stat-num">${streak || 0}</div><div class="stat-label">streak дней</div></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">Активность по неделям</div>
+        <div class="chart-sub">Записей за последние 8 недель</div>
+        <div class="bars" id="barsWeek">
+          ${weeks.map((w,i) => `
+            <div class="bar-col">
+              <div class="bar" style="height:0%" data-h="${(w/maxW)*100}"></div>
+              <div class="bar-label">${i===7?'сейч':'-'+(7-i)+'н'}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">По месяцам</div>
+        <div class="chart-sub">Активность за год</div>
+        <div class="heatmap" id="heatmap">
+          ${monthCounts.map((cnt,i) => {
+            const lvl = cnt === 0 ? '' : cnt <= maxM*0.25 ? 'l1' : cnt <= maxM*0.5 ? 'l2' : cnt <= maxM*0.75 ? 'l3' : 'l4';
+            const monthIdx = (nowDate.getMonth() - 11 + i + 12) % 12;
+            return `<div class="hm-cell ${lvl}" title="${MONTHS_SHORT[monthIdx]}: ${cnt} записей"></div>`;
+          }).join('')}
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;">
+          ${Array(12).fill(0).map((_,i) => {
+            const monthIdx = (nowDate.getMonth() - 11 + i + 12) % 12;
+            return `<div style="font-size:9px;color:var(--ink-4);text-align:center;flex:1;">${i%3===0?MONTHS_SHORT[monthIdx]:''}</div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      ${topPeople.length ? `
+        <div class="chart-card">
+          <div class="chart-title">Топ по упоминаниям</div>
+          <div class="chart-sub">Кто чаще всего в твоих записях</div>
+          ${topPeople.map(({conn,cnt}) => `
+            <div class="top-person-row">
+              <div class="avatar ${conn.color}" style="width:32px;height:32px;font-size:12px;">${initials(conn.name)}</div>
+              <div class="top-bar-wrap">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-size:13px;font-weight:500;">${conn.name}</span>
+                  <span style="font-size:12px;color:var(--ink-3);">${cnt}</span>
+                </div>
+                <div class="top-bar-track"><div class="top-bar-fill" data-pct="${(cnt/maxCnt)*100}"></div></div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+
+      <div class="chart-card">
+        <div class="chart-title">По дням недели</div>
+        <div class="chart-sub">Когда ты чаще всего пишешь</div>
+        <div class="bars" id="barsWd">
+          ${weekdays.map((w,i) => `
+            <div class="bar-col">
+              <div class="bar" style="height:0%;${i===0||i===6?'background:linear-gradient(180deg,var(--mint-2),var(--emerald))':''}" data-h="${(w/maxWd)*100}"></div>
+              <div class="bar-label">${wdLabels[i]}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">По ролям</div>
+        <div class="chart-sub">Структура твоего окружения</div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg viewBox="0 0 36 36" width="110" height="110" style="transform:rotate(-90deg)">
+              ${donutSegs.map(s => {
+                const len = s.pct*100, offset = s.start*100;
+                return `<circle cx="18" cy="18" r="15.915" fill="none" stroke="${s.color}" stroke-width="4.2" stroke-dasharray="${len} ${100-len}" stroke-dashoffset="${-offset}"/>`;
+              }).join('')}
+            </svg>
+            <div class="donut-center"><div><div class="num">${total}</div><div class="lbl">людей</div></div></div>
+          </div>
+          <div class="donut-legend">
+            ${donutSegs.map(s => `
+              <div class="legend-row">
+                <div class="legend-swatch" style="background:${s.color}"></div>
+                <span>${ROLES[s.k]||s.k}</span>
+                <span class="val">${s.v}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    <div id="statsExtraBlock"></div>
+
+    </div>
+  `);
+
+  mainEl.appendChild(v);
+  requestAnimationFrame(() => {
+    v.querySelectorAll('.bar').forEach((b,i) => setTimeout(() => { b.style.height = b.dataset.h+'%'; }, 50*i));
+    v.querySelectorAll('.top-bar-fill').forEach((b,i) => setTimeout(() => { b.style.width = b.dataset.pct+'%'; }, 100+50*i));
+    // Render plus extras into placeholder
+    const extra = v.querySelector('#statsExtraBlock');
+    if (extra) {
+      if (isPlus()) {
+        const moodCard = document.createElement('div');
+        moodCard.className = 'chart-card';
+        moodCard.style.marginBottom = '14px';
+        moodCard.innerHTML = '<div class="chart-title">🎭 Настроение по людям</div><div class="chart-sub">Какие эмоции чаще всего с кем</div><div id="moodStatsBlock"></div>';
+        extra.appendChild(moodCard);
+        renderMoodStats();
+        renderConnMap();
+      } else {
+        extra.innerHTML = '<div class="plus-gate"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span><b>LovePlus+</b> — карта связей и mood-статистика. Включи в профиле.</span></div>';
+      }
+    }
+  });
+}
+
+function renderMoodStats() {
+  const block = document.getElementById('moodStatsBlock');
+  if (!block) return;
+  const moodByConn = {};
+  state.entries.forEach(e => {
+    if (!e.mood) return;
+    e.tags.forEach(t => {
+      if (!moodByConn[t]) moodByConn[t] = {};
+      moodByConn[t][e.mood] = (moodByConn[t][e.mood]||0)+1;
+    });
+  });
+  if (!Object.keys(moodByConn).length) {
+    block.innerHTML = '<p style="color:var(--ink-4);font-size:13px;padding:8px 0;">Пока нет записей с настроением</p>';
+    return;
+  }
+  block.innerHTML = '';
+  Object.entries(moodByConn).forEach(([cid, moods]) => {
+    const conn = state.connections.find(c=>c.id===cid);
+    if (!conn) return;
+    const topMood = Object.entries(moods).sort((a,b)=>b[1]-a[1])[0];
+    const m = moodById(topMood[0]);
+    if (!m) return;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);';
+    row.innerHTML = '<div class="avatar '+conn.color+'" style="width:30px;height:30px;font-size:11px;">'+initials(conn.name)+'</div>'
+      +'<span style="flex:1;font-size:13px;font-weight:500;">'+conn.name+'</span>'
+      +'<span style="font-size:18px;">'+m.emoji+'</span>'
+      +'<span style="font-size:11px;color:var(--ink-3);">'+m.label+'</span>';
+    block.appendChild(row);
+  });
+}
+
+function renderConnMap() {
+  const existing = document.querySelector('.conn-map-wrap');
+  if (existing) return;
+  const total = state.connections.length;
+  if (!total) return;
+
+  const W = 320, H = 280, cx = W/2, cy = H/2;
+  // Радиус орбиты зависит от числа связей
+  const R = total === 1 ? 90 : total <= 3 ? 85 : 95;
+  const colMap = {mint:'#4cc9a0',rose:'#f9a8d4',warm:'#fcd34d',cool:'#93c5fd',violet:'#c4b5fd'};
+
+  // Вычисляем позиции — отступ угла чтобы при 1 связи узел был справа, а не сверху
+  const angleOffset = total === 1 ? 0 : -Math.PI/2;
+
+  // Рендерим слоями: сначала линии, потом узлы, потом центр поверх всего
+  let lines = '', nodes = '';
+
+  state.connections.forEach((c, i) => {
+    const angle = (2 * Math.PI / total) * i + angleOffset;
+    const nx = cx + R * Math.cos(angle);
+    const ny = cy + R * Math.sin(angle);
+    const col = colMap[c.color] || '#4cc9a0';
+
+    // Линия — укорачиваем: заканчивается у края центрального круга (r=20) и узлового (r=20)
+    const dx = nx - cx, dy = ny - cy;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    const centerR = 20, nodeR = 20;
+    const x1 = cx + (dx / dist) * (centerR + 2);
+    const y1 = cy + (dy / dist) * (centerR + 2);
+    const x2 = nx - (dx / dist) * (nodeR + 2);
+    const y2 = ny - (dy / dist) * (nodeR + 2);
+    lines += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="var(--line-2)" stroke-width="1.5" stroke-dasharray="4 3"/>';
+
+    // Имя — над или под узлом в зависимости от позиции
+    const nameOffset = ny < cy ? -28 : 28;
+    const nameY = ny + nameOffset;
+
+    nodes += '<circle cx="'+nx+'" cy="'+ny+'" r="20" fill="'+col+'18" stroke="'+col+'" stroke-width="1.5"/>';
+    nodes += '<text x="'+nx+'" y="'+(ny+1)+'" text-anchor="middle" dominant-baseline="middle" font-size="10" font-family="Fraunces,serif" fill="'+col+'" font-weight="600">'+initials(c.name)+'</text>';
+    // Имя — обрезаем если длинное
+    const displayName = c.name.length > 10 ? c.name.slice(0,9)+'…' : c.name;
+    nodes += '<text x="'+nx+'" y="'+nameY+'" text-anchor="middle" font-size="9" font-family="Geist,sans-serif" fill="var(--ink-3)" font-weight="400">'+displayName+'</text>';
+  });
+
+  // Центр — рисуется последним, поверх всего
+  const center =
+    '<circle cx="'+cx+'" cy="'+cy+'" r="26" fill="var(--mint)" opacity=".12"/>' +
+    '<circle cx="'+cx+'" cy="'+cy+'" r="20" fill="var(--mint)"/>' +
+    '<text x="'+cx+'" y="'+(cy+1)+'" text-anchor="middle" dominant-baseline="middle" font-size="11" font-family="Fraunces,serif" fill="white" font-weight="600">'+initials(state.user.name)+'</text>';
+
+  const svg = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">'
+    + lines + nodes + center + '</svg>';
+
+  const chartArea = document.querySelector('.view');
+  if (!chartArea) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'conn-map-wrap chart-card';
+  wrap.innerHTML = '<div class="chart-title">🗺️ Карта связей</div><div class="chart-sub" style="margin-bottom:12px;">Твоё окружение</div>' + svg;
+  chartArea.insertBefore(wrap, chartArea.firstChild);
+}
+
+// ============== DIARY ==============
+let diarySearch = '';
+let diaryPerson = 'all';
+
+function renderDiary() {
+  const v = el(`
+    <div class="view">
+      <h1 style="margin-bottom:6px;">Дневник</h1>
+      <p style="color:var(--ink-3);font-size:13px;margin-bottom:16px;">${state.entries.length} ${plural(state.entries.length,'запись','записи','записей')}</p>
+      <div class="search-bar diary-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--ink-4)"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="diarySearch" placeholder="Поиск по записям..." value="${diarySearch}">
+      </div>
+      <div class="person-filter-strip" id="personStrip">
+        <div class="chip ${diaryPerson==='all'?'active':''}" data-p="all">Все</div>
+        ${state.connections.map(c => `<div class="chip ${diaryPerson===c.id?'active':''}" data-p="${c.id}">@${c.name}</div>`).join('')}
+      </div>
+      <div id="diaryList"></div>
+    </div>
+  `);
+  mainEl.innerHTML = '';
+  mainEl.appendChild(v);
+  v.querySelector('#diarySearch').addEventListener('input', e => { diarySearch = e.target.value; renderDiaryList(); });
+  v.querySelectorAll('[data-p]').forEach(chip => chip.addEventListener('click', () => {
+    diaryPerson = chip.dataset.p;
+    v.querySelectorAll('[data-p]').forEach(c => c.classList.toggle('active', c.dataset.p === diaryPerson));
+    renderDiaryList();
+  }));
+  renderDiaryList();
+}
+
+function renderDiaryList() {
+  const listEl = document.getElementById('diaryList');
+  if (!listEl) return;
+  let items = [...state.entries].sort((a,b) => b.date.localeCompare(a.date));
+  if (diaryPerson !== 'all') items = items.filter(e => e.tags.includes(diaryPerson));
+  if (diarySearch.trim()) {
+    const q = diarySearch.trim().toLowerCase();
+    items = items.filter(e => e.text.toLowerCase().includes(q));
+  }
+  if (!items.length) {
+    listEl.innerHTML = '<div class="empty"><div class="icon">✎</div><h3>Ничего не найдено</h3><p>Попробуй другой запрос</p></div>';
+    return;
+  }
+
+  // Group by month
+  const groups = {};
+  items.forEach(e => {
+    const d = new Date(e.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;
+    const label = MONTHS_RU[d.getMonth()] + ' ' + d.getFullYear();
+    if (!groups[key]) groups[key] = { label, entries: [] };
+    groups[key].entries.push(e);
+  });
+
+  listEl.innerHTML = '';
+  Object.values(groups).forEach(g => {
+    // Month label
+    const monthLbl = document.createElement('div');
+    monthLbl.className = 'month-group-label';
+    monthLbl.textContent = g.label;
+    listEl.appendChild(monthLbl);
+
+    const groupWrap = document.createElement('div');
+    groupWrap.className = 'diary-list';
+
+    g.entries.forEach(e => {
+      const d = fmtDate(e.date);
+
+      const day = document.createElement('div');
+      day.className = 'diary-day';
+
+      const dateEl = document.createElement('div');
+      dateEl.className = 'diary-date';
+      dateEl.innerHTML = '<div class="d">' + d.day + '</div><div class="m">' + d.month + '</div>';
+
+      const entry = document.createElement('div');
+      entry.className = 'diary-entry';
+      entry.dataset.entry = e.id;
+
+      // Mood (Plus only)
+      if (e.mood && isPlus()) {
+        const m = moodById(e.mood);
+        if (m) {
+          const moodEl = document.createElement('div');
+          moodEl.style.cssText = 'font-size:14px;margin-bottom:4px;';
+          moodEl.innerHTML = m.emoji + ' <span style="font-size:11px;color:var(--ink-3);vertical-align:middle;">' + m.label + '</span>';
+          entry.appendChild(moodEl);
         }
-    </script>
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'924e00e81ee46734',t:'MTc0MjczMzY5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+      }
 
-    <!-- Модальное окно приветственного гайда -->
-    <div id="welcome-guide" class="welcome-guide hidden">
-        <div class="guide-step" data-step="1">
-            <h3 data-ru="Добро пожаловать в LovePulse! ❤️" data-en="Welcome to LovePulse! ❤️">Добро пожаловать в LovePulse! ❤️</h3>
-            <p data-ru="LovePulse — это ваше личное приложение для отслеживания романтических связей. Добавляйте партнеров, записывайте активности и следите за своей любовной статистикой!" data-en="LovePulse is your personal app for tracking romantic connections. Add partners, log activities, and monitor your love stats!">LovePulse — это ваше личное приложение для отслеживания романтических связей. Добавляйте партнеров, записывайте активности и следите за своей любовной статистикой!</p>
-            <button class="guide-next-btn" onclick="nextGuideStep()" data-ru="Далее" data-en="Next">Далее</button>
-        </div>
-        <div class="guide-step hidden" data-step="2">
-            <h3 data-ru="Что здесь есть? 📖" data-en="What's here? 📖">Что здесь есть? 📖</h3>
-            <ul>
-                <li><strong data-ru="Главная:" data-en="Dashboard:">Главная:</strong> <span data-ru="Обзор вашей статистики и активности." data-en="Overview of your stats and activities.">Обзор вашей статистики и активности.</span></li>
-                <li><strong data-ru="Партнеры:" data-en="Partners:">Партнеры:</strong> <span data-ru="Управление списком ваших связей." data-en="Manage your list of connections.">Управление списком ваших связей.</span></li>
-                <li><strong data-ru="Активности:" data-en="Activities:">Активности:</strong> <span data-ru="Запись встреч и событий." data-en="Log meetings and events.">Запись встреч и событий.</span></li>
-                <li><strong data-ru="Профиль:" data-en="Profile:">Профиль:</strong> <span data-ru="Ваша личная информация." data-en="Your personal information.">Ваша личная информация.</span></li>
-                <li><strong data-ru="Настройки:" data-en="Settings:">Настройки:</strong> <span data-ru="Темы и информация." data-en="Themes and information.">Темы и информация.</span></li>
-            </ul>
-            <div class="guide-buttons">
-                <button class="guide-prev-btn" onclick="prevGuideStep()" data-ru="Назад" data-en="Back">Назад</button>
-                <button class="guide-next-btn" onclick="nextGuideStep()" data-ru="Далее" data-en="Next">Далее</button>
-            </div>
-        </div>
-        <div class="guide-step hidden" data-step="3">
-            <h3 data-ru="Удачи в любви! 🌟" data-en="Good luck in love! 🌟">Удачи в любви! 🌟</h3>
-            <p data-ru="Пусть LovePulse поможет вам найти свою судьбу! Начните прямо сейчас и наслаждайтесь процессом! 😊" data-en="May LovePulse help you find your destiny! Start now and enjoy the process! 😊">Пусть LovePulse поможет вам найти свою судьбу! Начните прямо сейчас и наслаждайтесь процессом! 😊</p>
-            <button class="guide-close-btn" onclick="closeWelcomeGuide()" data-ru="Начать" data-en="Start">Начать</button>
-        </div>
-        <div class="guide-progress">
-            <span class="guide-dot active" data-step="1"></span>
-            <span class="guide-dot" data-step="2"></span>
-            <span class="guide-dot" data-step="3"></span>
-        </div>
+      // Text
+      const textEl = document.createElement('div');
+      textEl.className = 'diary-text';
+      textEl.textContent = e.text;
+      entry.appendChild(textEl);
+
+      // Tags
+      const tags = e.tags || [];
+      if (tags.length) {
+        const tagsEl = document.createElement('div');
+        tagsEl.className = 'diary-tags';
+        tags.forEach(t => {
+          const conn = state.connections.find(x => x.id === t);
+          if (conn) {
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.textContent = '@' + conn.name;
+            tagsEl.appendChild(tag);
+          }
+        });
+        if (tagsEl.children.length) entry.appendChild(tagsEl);
+      }
+
+      entry.addEventListener('click', () => openEntry(e.id));
+      day.appendChild(dateEl);
+      day.appendChild(entry);
+      groupWrap.appendChild(day);
+    });
+
+    listEl.appendChild(groupWrap);
+  });
+}
+
+function openEntry(id) {
+  const e = state.entries.find(x=>x.id===id);
+  if (!e) return;
+  const d = fmtDate(e.date);
+  openModal(`
+    <div class="modal-handle"></div>
+    <div style="margin-bottom:18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);">${d.day} ${d.month} ${d.year}</div>
+        ${e.mood && isPlus() ? (() => { const m=moodById(e.mood); return m ? '<span style="font-size:14px;">'+m.emoji+'</span><span style="font-size:11px;color:var(--ink-3);">'+m.label+'</span>' : ''; })() : ''}
+      </div>
+      <div style="font-family:'Fraunces',serif;font-size:18px;line-height:1.6;font-weight:400;color:var(--ink);">${e.text}</div>
     </div>
-	
+    ${(e.tags||[]).length ? `
+      <div class="section-label" style="margin-bottom:8px;">Люди</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;">
+        ${e.tags.map(t => { const c=state.connections.find(x=>x.id===t); return c?`<span class="tag" style="padding:5px 10px;font-size:12px;cursor:pointer;" onclick="closeModal();openConnection('${c.id}')">@${c.name}</span>`:''}).join('')}
+      </div>
+    ` : ''}
+    <button class="btn secondary" id="entryEditBtn">Редактировать</button>
+    <button class="btn danger" style="margin-top:8px;" id="entryDeleteBtn">Удалить</button>
+  `);
+  // Wire buttons in entry modal
+  setTimeout(() => {
+    const editBtn = document.getElementById('entryEditBtn');
+    const delBtn = document.getElementById('entryDeleteBtn');
+    if (editBtn) editBtn.addEventListener('click', () => { closeModal(); setTimeout(() => openEntryForm(state.entries.find(x => x.id === id)), 50); });
+    if (delBtn) delBtn.addEventListener('click', () => { closeModal(); setTimeout(() => deleteEntry(id), 50); });
+  }, 50);
+}
 
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92507df04e9e6734',t:'MTc0Mjc1OTc4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-	
-	
+function deleteEntry(id) {
+  confirm2('Удалить запись?', 'Это действие нельзя отменить.', () => {
+    state.entries = state.entries.filter(e=>e.id!==id);
+    saveState();
+    toast('Запись удалена');
+    navigate(currentView);
+  });
+}
 
+function openEntryForm(existing) {
+  const e = existing || { text: '', date: new Date().toISOString().slice(0,10), tags: [] };
+  const tags = [...e.tags];
+  openModal(`
+    <div class="modal-handle"></div>
+    <div class="modal-title">${existing ? 'Редактировать' : 'Новая запись'}</div>
+    <div class="field"><label>Дата</label><input type="date" id="fDate" value="${e.date}"></div>
+    <div class="field"><label>Что произошло</label><textarea id="fText" style="min-height:120px;" maxlength="2000" placeholder="Опиши момент...">${e.text}</textarea></div>
+    <div class="field">
+      <label>Кто был рядом</label>
+      <div class="tag-picker" id="tagPicker">
+        ${state.connections.length ? state.connections.map(c => `
+          <div class="tag-pickable ${tags.includes(c.id)?'selected':''}" data-id="${c.id}">@${c.name}</div>
+        `).join('') : '<span style="color:var(--ink-4);font-size:13px;">Сначала добавь связи</span>'}
+      </div>
+    </div>
+    <div id="moodFieldSlot"></div>
+    <button class="btn" id="saveEntry">${existing ? 'Сохранить' : 'Записать'}</button>
+  `);
+  // Inject mood picker if Plus
+  if (isPlus()) {
+    const slot = document.getElementById('moodFieldSlot');
+    if (slot) {
+      const wrap = document.createElement('div');
+      wrap.className = 'field';
+      wrap.innerHTML = '<label>🎭 Настроение</label><div class="mood-picker" id="moodPicker"></div>';
+      slot.appendChild(wrap);
+      const picker = document.getElementById('moodPicker');
+      MOODS.forEach(m => {
+        const opt = document.createElement('div');
+        opt.className = 'mood-opt' + (e.mood===m.id ? ' selected' : '');
+        opt.dataset.mood = m.id;
+        opt.textContent = m.emoji + ' ' + m.label;
+        picker.appendChild(opt);
+      });
+    }
+  }
+  document.querySelectorAll('#tagPicker .tag-pickable').forEach(t => t.addEventListener('click', () => {
+    const tid = t.dataset.id;
+    if (tags.includes(tid)) { tags.splice(tags.indexOf(tid),1); t.classList.remove('selected'); }
+    else { tags.push(tid); t.classList.add('selected'); }
+  }));
+  let selectedMood = e.mood || null;
+  if (isPlus()) {
+    document.querySelectorAll('#moodPicker .mood-opt').forEach(opt => opt.addEventListener('click', () => {
+      document.querySelectorAll('#moodPicker .mood-opt').forEach(o=>o.classList.remove('selected'));
+      opt.classList.add('selected');
+      selectedMood = opt.dataset.mood;
+    }));
+  }
+  document.getElementById('saveEntry').addEventListener('click', () => {
+    const text = document.getElementById('fText').value.trim();
+    const date = document.getElementById('fDate').value;
+    if (!text) { toast('Напиши хоть что-нибудь'); return; }
+    if (existing) {
+      Object.assign(existing, { text, date, tags: [...tags], mood: selectedMood });
+      toast('Сохранено ✓');
+    } else {
+      state.entries.unshift({ id: uid(), text, date, tags: [...tags], mood: selectedMood });
+      toast('Записано ✓');
+    }
+    saveState();
+    closeModal();
+    navigate(currentView);
+  });
+}
+
+// ============== PROFILE ==============
+function renderProfile() {
+  const isDark = state.user.theme === 'dark';
+  const v = el(`
+    <div class="view">
+      <div class="profile-head">
+        <div class="profile-avatar-wrap" id="avatarWrap">
+          <div class="profile-avatar" id="profileAvatarEl">
+            ${state.user.avatar ? '' : initials(state.user.name)}
+          </div>
+          <div class="avatar-edit-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+          </div>
+          <input type="file" id="avatarFile" accept="image/*" style="display:none">
+        </div>
+        <div class="profile-name" style="display:flex;align-items:center;gap:8px;justify-content:center;">
+          ${state.user.name}
+          ${isPlus() ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="#a855f7" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' : ''}
+        </div>
+        <div class="profile-bio">${state.user.bio || ''}</div>
+      </div>
+
+      <button class="loveplus-btn" id="loveplusBtn">
+        <div class="loveplus-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div class="loveplus-text">
+          <div class="loveplus-title">Love<span style="font-style:italic;opacity:.9">Plus</span> <span class="loveplus-badge">+</span></div>
+          <div class="loveplus-sub">Расширенные возможности</div>
+        </div>
+        <svg class="loveplus-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <div class="section-label">Аккаунт</div>
+      <div class="menu-group">
+        <div class="menu-item" id="editProfileBtn">
+          <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.5 2.5 3 3L12 15l-4 1 1-4z"/></svg></div>
+          <div class="menu-label">Редактировать профиль</div>
+          <svg class="menu-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+          <div class="menu-label">Тёмная тема</div>
+          <div class="theme-toggle" id="themeToggle">
+            <div class="toggle-track ${isDark?'on':''}"><div class="toggle-thumb"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label">Данные</div>
+      <div class="menu-group">
+        <div class="menu-item" id="exportBtn">
+          <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></div>
+          <div class="menu-label">Экспорт данных</div>
+          <div class="menu-value">JSON</div>
+        </div>
+        <div class="menu-item" id="importBtn">
+          <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10" style="transform:scaleY(-1);transform-origin:50% 50%"/><line x1="12" x2="12" y1="3" y2="15"/></svg></div>
+          <div class="menu-label">Импорт данных</div>
+          <div class="menu-value">JSON</div>
+        </div>
+        <div class="menu-item" id="resetBtn">
+          <div class="menu-icon danger"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
+          <div class="menu-label" style="color:var(--rose);">Удалить все данные</div>
+        </div>
+      </div>
+
+      <div class="section-label">Аккаунт</div>
+      <div class="menu-group">
+        <div class="menu-item" id="logoutBtn">
+          <div class="menu-icon danger"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></div>
+          <div class="menu-label" style="color:var(--rose);">Выйти из аккаунта</div>
+        </div>
+      </div>
+
+      <div class="section-label">О приложении</div>
+      <div class="menu-group">
+        <div class="menu-item">
+          <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>
+          <div class="menu-label">Версия</div>
+          <div class="menu-value" id="versionTap" ${currentUserEmail === ADMIN_EMAIL ? 'style="cursor:pointer;"' : ''}>2.7.0</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+          <div class="menu-label">Связей</div>
+          <div class="menu-value">${state.connections.length}</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+          <div class="menu-label">Записей в дневнике</div>
+          <div class="menu-value">${state.entries.length}</div>
+        </div>
+      </div>
+
+      <div id="devSection" style="display:none;margin-bottom:14px;">
+        <div class="dev-panel">
+          <div class="dev-panel-title">Developer Mode</div>
+          ${isAdmin() ? `<div class="dev-row"><span>LovePlus+</span><div id="plusToggleWrap"></div></div>
+          <div class="dev-row"><span>state.plus</span><span class="dev-val" id="devPlusVal">${state.plus}</span></div>` : ''}
+          <div class="dev-row"><span>Role</span><span class="dev-val">${currentUserRole}</span></div>
+          <div class="dev-row"><span>Connections</span><span class="dev-val">${state.connections.length}</span></div>
+          <div class="dev-row"><span>Entries</span><span class="dev-val">${state.entries.length}</span></div>
+          <div class="dev-row"><span>Notifications</span><span class="dev-val" id="devNotifVal">${typeof Notification !== 'undefined' ? Notification.permission : 'n/a'}</span></div>
+        </div>
+      </div>
+      <div style="text-align:center;padding:28px 0 14px;color:var(--ink-4);font-size:11px;letter-spacing:.05em;line-height:1.8;">
+        LovePulse · v2.7.0
+      </div>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+    </div>
+  `);
+  mainEl.appendChild(v);
+
+  // Avatar setup
+  const avatarEl = v.querySelector('#profileAvatarEl');
+  if (state.user.avatar) {
+    const img = document.createElement('img');
+    img.src = state.user.avatar;
+    avatarEl.textContent = '';
+    avatarEl.appendChild(img);
+  }
+  v.querySelector('#avatarWrap').addEventListener('click', () => v.querySelector('#avatarFile').click());
+  v.querySelector('#avatarFile').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast('Файл слишком большой (макс. 2 МБ)'); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      state.user.avatar = ev.target.result;
+      saveState();
+      // Обновляем аватар без перерендера страницы
+      const img = document.createElement('img');
+      img.src = state.user.avatar;
+      avatarEl.textContent = '';
+      avatarEl.appendChild(img);
+      toast('Фото обновлено ✓');
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Dev mode: только для admin@lovepulse.dev
+  let versionTaps = 0, versionTimer;
+  v.querySelector('#versionTap').addEventListener('click', () => {
+    if (currentUserEmail !== ADMIN_EMAIL) return;
+    versionTaps++;
+    clearTimeout(versionTimer);
+    versionTimer = setTimeout(() => { versionTaps = 0; }, 1500);
+    if (versionTaps >= 5) {
+      versionTaps = 0;
+      const devSec = v.querySelector('#devSection');
+      const isVisible = devSec.style.display !== 'none';
+      devSec.style.display = isVisible ? 'none' : 'block';
+      toast(isVisible ? 'Dev mode скрыт' : '🛠 Dev mode активирован');
+
+      if (!isVisible) {
+        // Plus toggle — admins only
+        if (isAdmin()) {
+          const tw = v.querySelector('#plusToggleWrap');
+          const track = document.createElement('div');
+          track.className = 'toggle-track' + (state.plus ? ' on' : '');
+          track.innerHTML = '<div class="toggle-thumb"></div>';
+          track.style.cursor = 'pointer';
+          tw.appendChild(track);
+          track.addEventListener('click', () => {
+            state.plus = !state.plus;
+            saveState();
+            track.classList.toggle('on', state.plus);
+            v.querySelector('#devPlusVal').textContent = state.plus;
+            toast(state.plus ? '✅ LovePlus+ включён' : '❌ LovePlus+ выключен');
+            setTimeout(() => navigate('profile'), 400);
+          });
+        }
+        // Notifications
+        v.querySelector('#devNotifVal').addEventListener('click', async () => {
+          const ok = await requestNotifications();
+          v.querySelector('#devNotifVal').textContent = Notification.permission;
+          toast(ok ? '🔔 Уведомления разрешены' : 'Уведомления запрещены');
+        });
+      }
+    }
+  });
+
+  v.querySelector('#loveplusBtn').addEventListener('click', openLovePlus);
+  v.querySelector('#editProfileBtn').addEventListener('click', editProfile);
+  v.querySelector('#exportBtn').addEventListener('click', exportData);
+  v.querySelector('#importBtn').addEventListener('click', () => v.querySelector('#importFile').click());
+  v.querySelector('#resetBtn').addEventListener('click', resetData);
+  v.querySelector('#logoutBtn').addEventListener('click', logout);
+
+  v.querySelector('#importFile').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        if (!imported.connections || !imported.entries) { toast('Неверный формат файла'); return; }
+        confirm2('Импортировать данные?', `${imported.connections.length} связей и ${imported.entries.length} записей. Текущие данные будут заменены.`, () => {
+          state = { ...imported, user: { ...DEFAULT_STATE.user, ...imported.user } };
+          saveState();
+          applyTheme(state.user.theme || 'light');
+          toast('Данные импортированы ✓');
+          navigate('home');
+        }, false);
+      } catch { toast('Ошибка чтения файла'); }
+    };
+    reader.readAsText(file);
+  });
+
+  v.querySelector('#themeToggle').addEventListener('click', () => {
+    state.user.theme = state.user.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(state.user.theme);
+    saveState();
+    navigate('profile');
+  });
+}
+
+function editProfile() {
+  openModal(`
+    <div class="modal-handle"></div>
+    <div class="modal-title">Профиль</div>
+    <div class="field"><label>Имя</label><input id="pName" value="${state.user.name}"></div>
+    <div class="field"><label>Подпись</label><input id="pBio" value="${state.user.bio||''}"></div>
+    ${state.user.avatar ? '<button class="btn secondary" id="removeAvatar" style="margin-bottom:6px;">Удалить фото</button>' : ''}
+    <button class="btn" id="saveProfile">Сохранить</button>
+  `);
+  const removeBtn = document.getElementById('removeAvatar');
+  if (removeBtn) {
+    removeBtn.addEventListener('click', () => {
+      state.user.avatar = null;
+      saveState();
+      closeModal();
+      toast('Фото удалено');
+      navigate('profile');
+    });
+  }
+  document.getElementById('saveProfile').addEventListener('click', () => {
+    state.user.name = document.getElementById('pName').value.trim() || 'Я';
+    state.user.bio = document.getElementById('pBio').value.trim();
+    saveState();
+    closeModal();
+    toast('Сохранено ✓');
+    navigate('profile');
+  });
+}
+
+function openLovePlus() {
+  const features = [
+    { icon: '🔔', bg: '#fef3c7', title: 'Умные напоминалки', desc: 'Уведомления когда давно не писал кому-то важному' },
+    { icon: '🗺️', bg: '#ede9fe', title: 'Карта связей', desc: 'Интерактивный граф твоего окружения' },
+    { icon: '💜', bg: '#fce7f3', title: 'Health score', desc: 'Автоматический пульс каждой связи в реальном времени' },
+    { icon: '📅', bg: '#d1fae5', title: 'Годовщины и даты', desc: 'Памятные даты и timeline отношений' },
+    { icon: '🎭', bg: '#fee2e2', title: 'Mood-теги', desc: 'Настроение к каждой записи и статистика по людям' },
+    { icon: '📄', bg: '#dbeafe', title: 'Экспорт в PDF', desc: 'Красивая история отношений с человеком' },
+  ];
+
+  openModal(`
+    <div class="lp-modal-header">
+      <div class="modal-handle" style="background:rgba(255,255,255,.2);margin-bottom:20px;"></div>
+      <div class="lp-logo">Love<span>Plus</span> +</div>
+      <div style="margin-top:10px;position:relative;">
+        ${isPlus() ? '<span class="plus-active-badge">✓ Активна</span>' : '<span class="lp-coming">СКОРО</span>'}
+      </div>
+    </div>
+    <div class="lp-features" id="lpFeatures"></div>
+    <div class="lp-footer">
+      <button class="lp-notify-btn" id="lpNotifyBtn">Уведомить о запуске</button>
+      <div class="lp-footer-note">Бесплатный ранний доступ для первых пользователей</div>
+    </div>
+  `);
+
+  // Рендерим фичи через DOM (без кавычек в шаблоне)
+  const container = document.getElementById('lpFeatures');
+  features.forEach(f => {
+    const row = document.createElement('div');
+    row.className = 'lp-feature';
+    const iconEl = document.createElement('div');
+    iconEl.className = 'lp-feature-icon';
+    iconEl.style.background = f.bg;
+    iconEl.textContent = f.icon;
+    const textEl = document.createElement('div');
+    textEl.className = 'lp-feature-text';
+    const title = document.createElement('div');
+    title.className = 'lp-feature-title';
+    title.textContent = f.title;
+    const desc = document.createElement('div');
+    desc.className = 'lp-feature-desc';
+    desc.textContent = f.desc;
+    textEl.appendChild(title);
+    textEl.appendChild(desc);
+    row.appendChild(iconEl);
+    row.appendChild(textEl);
+    container.appendChild(row);
+  });
+
+  document.getElementById('lpNotifyBtn').addEventListener('click', () => {
+    toast('Запомнили! Уведомим о запуске 🚀');
+    closeModal();
+  });
+}
+
+function exportData() {
+  openModal(`
+    <div class="modal-handle"></div>
+    <div class="modal-title">Экспорт</div>
+    <button class="btn secondary" id="exportJson" style="margin-bottom:8px;">📦 JSON — резервная копия</button>
+    ${isPlus() ? '<button class="btn" id="exportPdf">📄 PDF — история отношений</button>' : '<div class="plus-gate" style="margin-top:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span><b>LovePlus+</b> — PDF-экспорт</span></div>'}
+  `);
+  setTimeout(() => {
+    document.getElementById('exportJson').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'lovepulse-export.json'; a.click();
+      URL.revokeObjectURL(url);
+      closeModal(); toast('Экспортировано ✓');
+    });
+    const pdfBtn = document.getElementById('exportPdf');
+    if (pdfBtn) pdfBtn.addEventListener('click', () => {
+      closeModal();
+      setTimeout(() => { window.print(); toast('Открыт диалог печати'); }, 100);
+    });
+  }, 50);
+}
+
+function resetData() {
+  confirm2('Удалить все данные?', 'Все связи и записи будут удалены. Действие необратимо.', async () => {
+    if (currentUserId) {
+      localStorage.removeItem(DATA_PREFIX + currentUserId);
+      state = structuredClone(DEFAULT_STATE);
+      await _pushStateToCloud(); // wipe cloud data too
+    }
+    toast('Данные сброшены');
+    navigate('home');
+  });
+}
+
+// ============== MODAL ==============
+const modal = document.getElementById('modal');
+const modalContent = document.getElementById('modalContent');
+function openModal(html) { modalContent.innerHTML = html; modal.classList.add('open'); }
+function closeModal() { modal.classList.remove('open'); }
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+// ============== FAB ==============
+fab.addEventListener('click', () => {
+  if (currentView === 'connections') openConnectionForm();
+  else if (currentView === 'diary') openEntryForm();
+});
+
+// ============== ONBOARDING ==============
+function showOnboarding() {
+  const slides = [
+    { icon: '💚', title: 'Добро пожаловать в <em>LovePulse</em>', text: 'Приложение для отслеживания твоих связей — романтических, дружеских, семейных.' },
+    { icon: '👥', title: 'Добавляй <em>людей</em>', text: 'Создавай карточки для близких. Указывай роль, статус своими словами и заметки о человеке.' },
+    { icon: '📓', title: 'Веди <em>дневник</em>', text: 'Записывай моменты и тегай людей. Так формируется история каждой связи.' },
+    { icon: '📊', title: 'Смотри <em>статистику</em>', text: 'Графики активности, топ людей, streak записей — всё чтобы замечать паттерны.' },
+  ];
+  let current = 0;
+  const ob = el(`
+    <div class="onboard" id="onboard">
+      <div class="onboard-slide" id="obSlide">
+        <div class="onboard-icon">${slides[0].icon}</div>
+        <h2>${slides[0].title}</h2>
+        <p>${slides[0].text}</p>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="onboard-dots">${slides.map((_,i) => `<div class="onboard-dot ${i===0?'active':''}" id="dot${i}"></div>`).join('')}</div>
+      </div>
+      <div class="onboard-footer">
+        <button class="btn" id="obNext">Далее</button>
+      </div>
+    </div>
+  `);
+  document.getElementById('app').appendChild(ob);
+
+  function goTo(idx) {
+    current = idx;
+    const s = slides[idx];
+    const slide = ob.querySelector('#obSlide');
+    slide.style.opacity = '0';
+    setTimeout(() => {
+      slide.querySelector('.onboard-icon').textContent = s.icon;
+      slide.querySelector('h2').innerHTML = s.title;
+      slide.querySelector('p').textContent = s.text;
+      slide.style.opacity = '1';
+    }, 150);
+    ob.querySelectorAll('.onboard-dot').forEach((d,i) => d.classList.toggle('active', i===idx));
+    ob.querySelector('#obNext').textContent = idx === slides.length-1 ? 'Начать' : 'Далее';
+  }
+  ob.querySelector('#obSlide').style.transition = 'opacity .2s';
+  ob.querySelector('#obNext').addEventListener('click', () => {
+    if (current < slides.length-1) { goTo(current+1); }
+    else { state.onboarded = true; saveState(); ob.remove(); }
+  });
+}
+
+// ============== LOADER ==============
+function showLoader(msg) {
+  let el = document.getElementById('appLoader');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'appLoader';
+    el.className = 'app-loader';
+    el.innerHTML = `<div class="app-loader-spinner"></div><div class="app-loader-text"></div>`;
+    document.body.appendChild(el);
+  }
+  el.querySelector('.app-loader-text').textContent = msg || '';
+  el.classList.remove('hidden');
+}
+function hideLoader() {
+  const el = document.getElementById('appLoader');
+  if (!el) return;
+  el.classList.add('hidden');
+  setTimeout(() => { if (el.classList.contains('hidden')) el.remove(); }, 250);
+}
+
+// ============== AUTH UI ==============
+async function checkAuth() {
+  showLoader('Загружаем…');
+  document.getElementById('header').style.display = 'none';
+  document.querySelector('.nav').style.display = 'none';
+  document.getElementById('fab').style.display = 'none';
+
+  let session = null;
+  try {
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000));
+    const result = await Promise.race([_sessionPromise, timeout]);
+    session = result.data?.session ?? null;
+  } catch {
+    session = null;
+  }
+  if (!session) { showAuthScreen(); return; }
+
+  currentUserId = session.user.id;
+  currentUserEmail = session.user.email || null;
+  state = _loadCachedState(currentUserId);
+  applyTheme(state.user.theme || 'light');
+  showApp();
+  _syncFromCloud(currentUserId);
+}
+
+function showAuthScreen() {
+  hideLoader();
+  document.getElementById('header').style.display = 'none';
+  document.querySelector('.nav').style.display = 'none';
+  document.getElementById('fab').style.display = 'none';
+
+  const appEl = document.getElementById('app');
+  let authEl = document.getElementById('authScreen');
+  if (!authEl) {
+    authEl = document.createElement('div');
+    authEl.id = 'authScreen';
+    authEl.style.cssText = 'position:absolute;inset:0;background:var(--bg);z-index:200;overflow-y:auto;';
+    appEl.appendChild(authEl);
+  }
+  authEl.style.display = '';
+
+  let authTab = 'login';
+
+  function renderAuthScreen() {
+    authEl.innerHTML = `
+      <div class="auth-screen">
+        <div class="auth-logo">
+          <svg class="logo-icon" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="9" cy="14" r="8" stroke="var(--mint)" stroke-width="2.2" fill="none"/>
+            <circle cx="19" cy="14" r="8" stroke="var(--mint)" stroke-width="2.2" fill="none"/>
+            <circle cx="14" cy="14" r="3" fill="var(--mint)"/>
+          </svg>
+          LovePulse
+        </div>
+        <div class="auth-tabs">
+          <button class="auth-tab ${authTab==='login'?'active':''}" id="authTabLogin">Войти</button>
+          <button class="auth-tab ${authTab==='register'?'active':''}" id="authTabReg">Регистрация</button>
+        </div>
+        <div class="auth-form" id="authFormWrap"></div>
+      </div>
+    `;
+    authEl.querySelector('#authTabLogin').addEventListener('click', () => { authTab = 'login'; renderAuthScreen(); });
+    authEl.querySelector('#authTabReg').addEventListener('click', () => { authTab = 'register'; renderAuthScreen(); });
+    if (authTab === 'login') renderLoginForm(authEl.querySelector('#authFormWrap'));
+    else renderRegisterForm(authEl.querySelector('#authFormWrap'));
+  }
+
+  function renderLoginForm(container) {
+    container.innerHTML = `
+      <div id="authErr" class="auth-error" style="display:none;"></div>
+      <div class="field"><label>Email</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>
+      <div class="field"><label>Пароль</label><input type="password" id="authPass" autocomplete="current-password" placeholder="••••••••"></div>
+      <button class="btn" id="authLoginBtn" style="margin-top:8px;">Войти</button>
+      <div class="auth-hint">Нет аккаунта? Нажмите «Регистрация» выше.</div>
+    `;
+    const doLogin = async () => {
+      const email = container.querySelector('#authEmail').value.trim().toLowerCase();
+      const pass = container.querySelector('#authPass').value;
+      const errEl = container.querySelector('#authErr');
+      const btn = container.querySelector('#authLoginBtn');
+      if (!email || !pass) { errEl.textContent = 'Заполните все поля'; errEl.style.display = ''; return; }
+      errEl.style.display = 'none';
+      btn.disabled = true; btn.textContent = 'Входим…';
+      showLoader('Входим…');
+      let data, error;
+      try {
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
+        ({ data, error } = await Promise.race([
+          sb.auth.signInWithPassword({ email, password: pass }),
+          timeout.then(() => { throw new Error('timeout'); })
+        ]));
+      } catch (e) {
+        hideLoader();
+        btn.disabled = false; btn.textContent = 'Войти';
+        errEl.textContent = e.message === 'timeout' ? 'Превышено время ожидания. Проверьте соединение.' : e.message;
+        errEl.style.display = '';
+        return;
+      }
+      if (error) {
+        hideLoader();
+        btn.disabled = false; btn.textContent = 'Войти';
+        errEl.textContent = error.message === 'Invalid login credentials' ? 'Неверный email или пароль' : error.message;
+        errEl.style.display = '';
+        return;
+      }
+      // onAuthStateChange may have already handled the session — skip if so
+      if (currentUserId) { hideLoader(); return; }
+      currentUserId = data.user.id;
+      currentUserEmail = data.user.email || null;
+      state = _loadCachedState(currentUserId);
+      applyTheme(state.user.theme || 'light');
+      authEl.style.display = 'none';
+      hideLoader();
+      showApp();
+      _syncFromCloud(currentUserId);
+    };
+    container.querySelector('#authLoginBtn').addEventListener('click', doLogin);
+    container.querySelector('#authPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  }
+
+  function renderRegisterForm(container) {
+    container.innerHTML = `
+      <div id="authErr" class="auth-error" style="display:none;"></div>
+      <div class="field"><label>Имя</label><input type="text" id="authName" maxlength="40" autocomplete="name" placeholder="Как тебя зовут?"></div>
+      <div class="field"><label>Email</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>
+      <div class="field"><label>Пароль</label><input type="password" id="authPass" autocomplete="new-password" placeholder="Минимум 6 символов"></div>
+      <button class="btn" id="authRegBtn" style="margin-top:8px;">Создать аккаунт</button>
+      <div class="auth-hint">Данные синхронизируются между устройствами через облако.</div>
+    `;
+    const doRegister = async () => {
+      const name = container.querySelector('#authName').value.trim();
+      const email = container.querySelector('#authEmail').value.trim().toLowerCase();
+      const pass = container.querySelector('#authPass').value;
+      const errEl = container.querySelector('#authErr');
+      const btn = container.querySelector('#authRegBtn');
+      if (!name || !email || !pass) { errEl.textContent = 'Заполните все поля'; errEl.style.display = ''; return; }
+      if (pass.length < 6) { errEl.textContent = 'Пароль должен быть не менее 6 символов'; errEl.style.display = ''; return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'Введите корректный email'; errEl.style.display = ''; return; }
+      errEl.style.display = 'none';
+      btn.disabled = true; btn.textContent = 'Создаём…';
+      showLoader('Создаём аккаунт…');
+      let data, error;
+      try {
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
+        ({ data, error } = await Promise.race([
+          sb.auth.signUp({ email, password: pass, options: { data: { name }, emailRedirectTo: 'https://dantemorrigan.github.io/lovepulse/' } }),
+          timeout.then(() => { throw new Error('timeout'); })
+        ]));
+      } catch (e) {
+        hideLoader();
+        btn.disabled = false; btn.textContent = 'Создать аккаунт';
+        errEl.textContent = e.message === 'timeout' ? 'Превышено время ожидания. Проверьте соединение.' : e.message;
+        errEl.style.display = '';
+        return;
+      }
+      if (error) {
+        hideLoader();
+        btn.disabled = false; btn.textContent = 'Создать аккаунт';
+        errEl.textContent = error.message;
+        errEl.style.display = '';
+        return;
+      }
+      if (!data.session) {
+        hideLoader();
+        container.innerHTML = `<div class="auth-hint" style="text-align:center;padding:32px 0;">
+          📬 Проверьте почту — мы отправили письмо для подтверждения аккаунта.
+        </div>`;
+        return;
+      }
+      // onAuthStateChange may have already handled the session — skip if so
+      if (currentUserId) { hideLoader(); return; }
+      currentUserId = data.user.id;
+      currentUserRole = 'user';
+      state = structuredClone(DEFAULT_STATE);
+      state.user.name = name;
+      localStorage.setItem(DATA_PREFIX + currentUserId, JSON.stringify(state));
+      await _pushStateToCloud();
+      authEl.style.display = 'none';
+      hideLoader();
+      showApp();
+    };
+    container.querySelector('#authRegBtn').addEventListener('click', doRegister);
+    container.querySelector('#authPass').addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+  }
+
+  renderAuthScreen();
+}
+
+function showApp() {
+  hideLoader();
+  document.getElementById('header').style.display = '';
+  document.querySelector('.nav').style.display = '';
+  document.getElementById('fab').style.display = '';
+  if (!state.onboarded) showOnboarding();
+  else navigate('home');
+}
+
+function logout() {
+  confirm2('Выйти из аккаунта?', 'Вы будете перенаправлены на экран входа. Данные сохранятся в облаке.', async () => {
+    showLoader('Выходим…');
+    try {
+      const timeout = new Promise(res => setTimeout(res, 5000));
+      await Promise.race([sb.auth.signOut({ scope: 'local' }), timeout]);
+    } catch(e) { /* очищаем локальное состояние в любом случае */ }
+    currentUserId = null;
+    currentUserRole = 'user';
+    currentUserEmail = null;
+    state = structuredClone(DEFAULT_STATE);
+    applyTheme('light');
+    document.getElementById('header').style.display = 'none';
+    document.querySelector('.nav').style.display = 'none';
+    document.getElementById('fab').style.display = 'none';
+    hideLoader();
+    showAuthScreen();
+  }, false);
+}
+
+// ============== INIT ==============
+checkAuth();
+</script>
 </body>
 </html>
