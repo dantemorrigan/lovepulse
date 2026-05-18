@@ -1954,6 +1954,23 @@ const SUPABASE_URL = 'https://vqletsjfqxnzzzzezpwi.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_jIx55gnCcDJ7xiWQkaD5iQ_g-Xt7Gdo';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Pre-warm: kick off session check immediately so it's ready by the time checkAuth runs
+const _sessionPromise = sb.auth.getSession();
+
+// Handles email confirmation links — when user clicks the link in their inbox,
+// Supabase fires SIGNED_IN here and we log them in without a manual reload
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session && !currentUserId) {
+    currentUserId = session.user.id;
+    state = _loadCachedState(currentUserId);
+    applyTheme(state.user.theme || 'light');
+    const authEl = document.getElementById('authScreen');
+    if (authEl) authEl.style.display = 'none';
+    showApp();
+    _syncFromCloud(currentUserId); // load real data in background
+  }
+});
+
 // ============== AUTH ==============
 const DATA_PREFIX = 'lovepulse_cache_';
 let currentUserId = null;
@@ -2006,6 +2023,28 @@ async function _pushStateToCloud() {
       { onConflict: 'user_id' }
     );
   } catch (e) { console.warn('Sync error:', e); }
+}
+
+async function _syncFromCloud(userId) {
+  try {
+    const [{ data: userData }, { data: profileData }] = await Promise.all([
+      sb.from('user_data').select('data').eq('user_id', userId).single(),
+      sb.from('profiles').select('role').eq('id', userId).single()
+    ]);
+    const role = profileData?.role || 'user';
+    const cloudState = (userData?.data && Object.keys(userData.data).length > 0)
+      ? _mergeWithDefaults(userData.data)
+      : null;
+    if (cloudState) {
+      state = cloudState;
+      localStorage.setItem(DATA_PREFIX + userId, JSON.stringify(state));
+    }
+    if (role !== currentUserRole) {
+      currentUserRole = role;
+    }
+    applyTheme(state.user.theme || 'light');
+    navigate(currentView); // re-render with fresh data
+  } catch (e) { console.warn('Background sync failed:', e); }
 }
 function uid() { return Math.random().toString(36).slice(2,9); }
 
@@ -3492,27 +3531,16 @@ async function checkAuth() {
   document.querySelector('.nav').style.display = 'none';
   document.getElementById('fab').style.display = 'none';
 
-  const { data: { session } } = await sb.auth.getSession();
+  const { data: { session } } = await _sessionPromise; // pre-warmed, no extra RTT
   if (!session) { showAuthScreen(); return; }
 
   currentUserId = session.user.id;
-
-  try {
-    const [{ data: userData }, { data: profileData }] = await Promise.all([
-      sb.from('user_data').select('data').eq('user_id', currentUserId).single(),
-      sb.from('profiles').select('role').eq('id', currentUserId).single()
-    ]);
-    state = (userData?.data && Object.keys(userData.data).length > 0)
-      ? _mergeWithDefaults(userData.data)
-      : _loadCachedState(currentUserId);
-    currentUserRole = profileData?.role || 'user';
-  } catch {
-    state = _loadCachedState(currentUserId);
-    currentUserRole = 'user';
-  }
-
+  // Show app immediately from local cache — feels instant
+  state = _loadCachedState(currentUserId);
   applyTheme(state.user.theme || 'light');
   showApp();
+  // Sync real data from Supabase in the background
+  _syncFromCloud(currentUserId);
 }
 
 function showAuthScreen() {
@@ -3579,22 +3607,13 @@ function showAuthScreen() {
         return;
       }
       currentUserId = data.user.id;
-      try {
-        const [{ data: userData }, { data: profileData }] = await Promise.all([
-          sb.from('user_data').select('data').eq('user_id', currentUserId).single(),
-          sb.from('profiles').select('role').eq('id', currentUserId).single()
-        ]);
-        state = (userData?.data && Object.keys(userData.data).length > 0)
-          ? _mergeWithDefaults(userData.data)
-          : _loadCachedState(currentUserId);
-        currentUserRole = profileData?.role || 'user';
-      } catch {
-        state = _loadCachedState(currentUserId);
-        currentUserRole = 'user';
-      }
+      // Show app immediately from local cache — feels instant
+      state = _loadCachedState(currentUserId);
       applyTheme(state.user.theme || 'light');
       authEl.style.display = 'none';
       showApp();
+      // Sync real data (connections, role, etc.) from Supabase in background
+      _syncFromCloud(currentUserId);
     };
     container.querySelector('#authLoginBtn').addEventListener('click', doLogin);
     container.querySelector('#authPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
@@ -3620,7 +3639,11 @@ function showAuthScreen() {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'Введите корректный email'; errEl.style.display = ''; return; }
       btn.disabled = true; btn.textContent = 'Создаём…';
       const { data, error } = await sb.auth.signUp({
-        email, password: pass, options: { data: { name } }
+        email, password: pass,
+        options: {
+          data: { name },
+          emailRedirectTo: 'https://dantemorrigan.github.io/lovepulse/'
+        }
       });
       if (error) {
         btn.disabled = false; btn.textContent = 'Создать аккаунт';
