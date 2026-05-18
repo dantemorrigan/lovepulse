@@ -2131,10 +2131,9 @@ function saveState() {
 
 async function _pushStateToCloud() {
   try {
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return;
+    if (!currentUserId) return;
     await sb.from('user_data').upsert(
-      { user_id: user.id, data: state, updated_at: new Date().toISOString() },
+      { user_id: currentUserId, data: state, updated_at: new Date().toISOString() },
       { onConflict: 'user_id' }
     );
   } catch (e) { console.warn('Sync error:', e); }
@@ -3690,11 +3689,19 @@ function hideLoader() {
 
 // ============== AUTH UI ==============
 async function checkAuth() {
+  showLoader('Загружаем…');
   document.getElementById('header').style.display = 'none';
   document.querySelector('.nav').style.display = 'none';
   document.getElementById('fab').style.display = 'none';
 
-  const { data: { session } } = await _sessionPromise;
+  let session = null;
+  try {
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000));
+    const result = await Promise.race([_sessionPromise, timeout]);
+    session = result.data?.session ?? null;
+  } catch {
+    session = null;
+  }
   if (!session) { showAuthScreen(); return; }
 
   currentUserId = session.user.id;
@@ -3761,9 +3768,23 @@ function showAuthScreen() {
       const errEl = container.querySelector('#authErr');
       const btn = container.querySelector('#authLoginBtn');
       if (!email || !pass) { errEl.textContent = 'Заполните все поля'; errEl.style.display = ''; return; }
+      errEl.style.display = 'none';
       btn.disabled = true; btn.textContent = 'Входим…';
       showLoader('Входим…');
-      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+      let data, error;
+      try {
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
+        ({ data, error } = await Promise.race([
+          sb.auth.signInWithPassword({ email, password: pass }),
+          timeout.then(() => { throw new Error('timeout'); })
+        ]));
+      } catch (e) {
+        hideLoader();
+        btn.disabled = false; btn.textContent = 'Войти';
+        errEl.textContent = e.message === 'timeout' ? 'Превышено время ожидания. Проверьте соединение.' : e.message;
+        errEl.style.display = '';
+        return;
+      }
       if (error) {
         hideLoader();
         btn.disabled = false; btn.textContent = 'Войти';
@@ -3771,6 +3792,8 @@ function showAuthScreen() {
         errEl.style.display = '';
         return;
       }
+      // onAuthStateChange may have already handled the session — skip if so
+      if (currentUserId) { hideLoader(); return; }
       currentUserId = data.user.id;
       currentUserEmail = data.user.email || null;
       state = _loadCachedState(currentUserId);
@@ -3802,35 +3825,47 @@ function showAuthScreen() {
       if (!name || !email || !pass) { errEl.textContent = 'Заполните все поля'; errEl.style.display = ''; return; }
       if (pass.length < 6) { errEl.textContent = 'Пароль должен быть не менее 6 символов'; errEl.style.display = ''; return; }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'Введите корректный email'; errEl.style.display = ''; return; }
+      errEl.style.display = 'none';
       btn.disabled = true; btn.textContent = 'Создаём…';
-      const { data, error } = await sb.auth.signUp({
-        email, password: pass,
-        options: {
-          data: { name },
-          emailRedirectTo: 'https://dantemorrigan.github.io/lovepulse/'
-        }
-      });
+      showLoader('Создаём аккаунт…');
+      let data, error;
+      try {
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
+        ({ data, error } = await Promise.race([
+          sb.auth.signUp({ email, password: pass, options: { data: { name }, emailRedirectTo: 'https://dantemorrigan.github.io/lovepulse/' } }),
+          timeout.then(() => { throw new Error('timeout'); })
+        ]));
+      } catch (e) {
+        hideLoader();
+        btn.disabled = false; btn.textContent = 'Создать аккаунт';
+        errEl.textContent = e.message === 'timeout' ? 'Превышено время ожидания. Проверьте соединение.' : e.message;
+        errEl.style.display = '';
+        return;
+      }
       if (error) {
+        hideLoader();
         btn.disabled = false; btn.textContent = 'Создать аккаунт';
         errEl.textContent = error.message;
         errEl.style.display = '';
         return;
       }
       if (!data.session) {
-        // Email confirmation required
+        hideLoader();
         container.innerHTML = `<div class="auth-hint" style="text-align:center;padding:32px 0;">
           📬 Проверьте почту — мы отправили письмо для подтверждения аккаунта.
         </div>`;
         return;
       }
+      // onAuthStateChange may have already handled the session — skip if so
+      if (currentUserId) { hideLoader(); return; }
       currentUserId = data.user.id;
       currentUserRole = 'user';
       state = structuredClone(DEFAULT_STATE);
       state.user.name = name;
-      // Trigger already created profiles + user_data rows; push initial state
       localStorage.setItem(DATA_PREFIX + currentUserId, JSON.stringify(state));
       await _pushStateToCloud();
       authEl.style.display = 'none';
+      hideLoader();
       showApp();
     };
     container.querySelector('#authRegBtn').addEventListener('click', doRegister);
@@ -3852,7 +3887,10 @@ function showApp() {
 function logout() {
   confirm2('Выйти из аккаунта?', 'Вы будете перенаправлены на экран входа. Данные сохранятся в облаке.', async () => {
     showLoader('Выходим…');
-    try { await sb.auth.signOut({ scope: 'local' }); } catch(e) { /* игнорируем — чистим локальное состояние */ }
+    try {
+      const timeout = new Promise(res => setTimeout(res, 5000));
+      await Promise.race([sb.auth.signOut({ scope: 'local' }), timeout]);
+    } catch(e) { /* очищаем локальное состояние в любом случае */ }
     currentUserId = null;
     currentUserRole = 'user';
     currentUserEmail = null;
